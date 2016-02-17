@@ -1,4 +1,4 @@
-package fi.vm.sade.generic.rest;
+package fi.vm.sade.properties;
 
 import org.junit.Before;
 import org.junit.Test;
