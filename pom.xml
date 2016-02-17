@@ -5,7 +5,7 @@
     <groupId>fi.vm.sade</groupId>
     <artifactId>java-utils</artifactId>
     <description>java-utils</description>
-    <version>0.1.0</version>
+    <version>0.1.0-SNAPSHOT</version>
     <name>java-utils</name>
     <packaging>pom</packaging>
     <organization>
