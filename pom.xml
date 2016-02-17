@@ -31,6 +31,7 @@
                                 <requireJavaVersion>
                                     <version>[1.7,1.8)</version>
                                 </requireJavaVersion>
+                                <dependencyConvergence/>
                             </rules>
                         </configuration>
                     </execution>
