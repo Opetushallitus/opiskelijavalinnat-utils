@@ -17,6 +17,7 @@ public class OphProperties {
 
     public final Properties defaults = new Properties();
     public final Properties defaultOverrides = new Properties();
+    private final ParamReplacer replacer = new ParamReplacer();
 
     class PropertyLoadingConfig {
         public List<String> classpathPaths = new ArrayList<String>();
@@ -109,37 +110,15 @@ public class OphProperties {
         if (value == null) {
             throw new RuntimeException("'" + key + "' not defined.");
         }
-        return replaceParams(value, params);
+        return replacer.replaceParams(value, params);
     }
 
     public String getProperty(String key, Object... params) {
         String value = ophProperties.getProperty(key);
         if (value != null) {
-            return replaceParams(value, params);
+            return replacer.replaceParams(value, params);
         }
         return null;
-    }
-
-    private String replaceParams(String url, Object... params) {
-        for (int i = params.length; i > 0; i--) {
-            Object param = params[i - 1];
-            if (param instanceof Map) {
-                Map paramMap = (Map) param;
-                for (Object key : paramMap.keySet()) {
-                    Object o = paramMap.get(key);
-                    String value = enc(o);
-                    String keyString = enc(key);
-                    url = url.replace("$" + keyString, value);
-                }
-            } else {
-                url = url.replace("$" + i, enc(param));
-            }
-        }
-        return url;
-    }
-
-    private String enc(Object param) {
-        return param == null ? "" : param.toString();
     }
 
     public String url(String key, Object... params) {
@@ -167,7 +146,40 @@ public class OphProperties {
         return dest;
     }
 
-    public class UrlResolver {
+    class ParamReplacer {
+        String replaceParams(String url, Object... params) {
+            String queryString = "";
+            for (int i = params.length; i > 0; i--) {
+                Object param = params[i - 1];
+                if (param instanceof Map) {
+                    Map paramMap = (Map) param;
+                    for (Object key : paramMap.keySet()) {
+                        Object o = paramMap.get(key);
+                        String value = enc(o);
+                        String keyString = enc(key);
+                        String tmpUrl = url.replace("$" + keyString, value);
+                        if (tmpUrl.equals(url)) {
+                            queryString = extraParam(queryString, keyString, value);
+                        }
+                        url = tmpUrl;
+                    }
+                } else {
+                    url = url.replace("$" + i, enc(param));
+                }
+            }
+            return url + queryString;
+        }
+
+        String extraParam(String queryString, String keyString, String value) {
+            return "";
+        }
+
+        String enc(Object param) {
+            return param == null ? "" : param.toString();
+        }
+    }
+
+    public class UrlResolver extends ParamReplacer {
         private final Properties urlsConfig = new Properties();
         private boolean encode = true;
 
@@ -219,35 +231,18 @@ public class OphProperties {
             return url;
         }
 
-        private String replaceParams(String url, Object... params) {
-            String queryString = "";
-            for (int i = params.length; i > 0; i--) {
-                Object param = params[i - 1];
-                if (param instanceof Map) {
-                    Map paramMap = (Map) param;
-                    for (Object key : paramMap.keySet()) {
-                        Object o = paramMap.get(key);
-                        String value = enc(o);
-                        String keyString = enc(key);
-                        String tmpUrl = url.replace("$" + keyString, value);
-                        if (tmpUrl.equals(url)) {
-                            if (queryString.length() > 0) {
-                                queryString = queryString + "&";
-                            } else {
-                                queryString = "?";
-                            }
-                            queryString = queryString + keyString + "=" + value;
-                        }
-                        url = tmpUrl;
-                    }
-                } else {
-                    url = url.replace("$" + i, enc(param));
-                }
+        @Override
+        String extraParam(String queryString, String keyString, String value) {
+            if (queryString.length() > 0) {
+                queryString = queryString + "&";
+            } else {
+                queryString = "?";
             }
-            return url + queryString;
+            return queryString + keyString + "=" + value;
         }
 
-        private String enc(Object key) {
+        @Override
+        String enc(Object key) {
             String s = key == null ? "" : key.toString();
             if (encode) {
                 try {
