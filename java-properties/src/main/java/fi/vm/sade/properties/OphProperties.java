@@ -110,13 +110,13 @@ public class OphProperties {
         if (value == null) {
             throw new RuntimeException("'" + key + "' not defined.");
         }
-        return replacer.replaceParams(value, params);
+        return replacer.replaceParams(value, convertParams(params));
     }
 
     public String getProperty(String key, Object... params) {
         String value = ophProperties.getProperty(key);
         if (value != null) {
-            return replacer.replaceParams(value, params);
+            return replacer.replaceParams(value, convertParams(params));
         }
         return null;
     }
@@ -146,6 +146,11 @@ public class OphProperties {
         return dest;
     }
 
+    // extension point for other programming languages. Insert code which converts Maps, case classes etc to Java Maps
+    public Object[] convertParams(Object... params) {
+        return params;
+    }
+
     class ParamReplacer {
         String replaceParams(String url, Object... params) {
             String queryString = "";
@@ -158,7 +163,7 @@ public class OphProperties {
                         String value = enc(o);
                         String keyString = enc(key);
                         String tmpUrl = url.replace("$" + keyString, value);
-                        if (tmpUrl.equals(url)) {
+                        if (o != null && tmpUrl.equals(url)) {
                             queryString = extraParam(queryString, keyString, value);
                         }
                         url = tmpUrl;
@@ -220,7 +225,7 @@ public class OphProperties {
             if (o == null) {
                 throw new RuntimeException("'" + key + "' not defined.");
             }
-            String url = replaceParams(o.toString(), params);
+            String url = replaceParams(o.toString(), convertParams(params));
             Object baseUrl = resolveConfig(parseService(key) + ".baseUrl");
             if (baseUrl == null) {
                 baseUrl = resolveConfig("baseUrl");
