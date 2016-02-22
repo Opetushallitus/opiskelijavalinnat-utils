@@ -21,8 +21,8 @@ public class OphPropertiesTest {
 
     @Test
     public void require() {
-        ctx.ophProperties.setProperty("a.b", "1");
-        ctx.ophProperties.setProperty("b.b", "$1 $param");
+        props.setProperty("a.b", "1");
+        props.setProperty("b.b", "$1 $param");
         assertEquals("1", ctx.require("a.b"));
         assertEquals("A pow!", ctx.require("b.b", "A", new LinkedHashMap() {{
             put("param", "pow!");
@@ -37,14 +37,14 @@ public class OphPropertiesTest {
 
     @Test
     public void getProperty() {
-        ctx.ophProperties.setProperty("a.b", "1");
+        props.setProperty("a.b", "1");
         assertEquals("1", ctx.getProperty("a.b"));
         assertEquals(null, ctx.getProperty("b.b"));
     }
 
     @Test
     public void resolveUrlAndThrowErrorOnUnknown() {
-        ctx.ophProperties.setProperty("a.b", "1");
+        props.setProperty("a.b", "1");
         assertEquals("1", ctx.url("a.b"));
         try {
             ctx.url("b.b");

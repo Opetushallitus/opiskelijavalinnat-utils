@@ -10,8 +10,8 @@ import java.util.*;
  * Collects configuration to be used at front (application code can configure separately which files are loaded and which system properties prefixes are used for front).
  */
 public class OphProperties {
-    public final PropertyLoadingConfig config = new PropertyLoadingConfig();
-    public final PropertyLoadingConfig frontConfig = new PropertyLoadingConfig();
+    public final PropertyConfig config = new PropertyConfig();
+    public final PropertyConfig frontConfig = new PropertyConfig();
     public Properties ophProperties = null;
     public Properties frontProperties = null;
 
@@ -19,34 +19,9 @@ public class OphProperties {
     public final Properties defaultOverrides = new Properties();
     private final ParamReplacer replacer = new ParamReplacer();
 
-    class PropertyLoadingConfig {
-        public List<String> classpathPaths = new ArrayList<String>();
-        public List<String> filePaths = new ArrayList<String>();
-        public List<String> systemPropertyFileKeys = new ArrayList<String>();
-
-        public Properties load() {
-            Properties dest = new Properties();
-            for (String path : classpathPaths) {
-                merge(dest, loadPropertiesFromResource(path));
-            }
-            for (String path : filePaths) {
-                merge(dest, loadPropertiesFromPath(path));
-            }
-            Properties system = System.getProperties();
-            for (String key : systemPropertyFileKeys) {
-                if (system.containsKey(key)) {
-                    for (String path : system.getProperty(key).split(".")) {
-                        merge(dest, loadPropertiesFromPath(path));
-                    }
-                }
-            }
-            return dest;
-        }
-    }
-
     public OphProperties() {
-        config.systemPropertyFileKeys.add("oph-properties");
-        frontConfig.systemPropertyFileKeys.add("front-properties");
+        config.addSystemKeyForFiles("oph-properties");
+        frontConfig.addSystemKeyForFiles("front-properties");
     }
 
     public OphProperties reload() {
@@ -75,34 +50,6 @@ public class OphProperties {
             }
         }
         return dest;
-    }
-
-    private Properties loadPropertiesFromResource(String file) {
-        return loadProperties(this.getClass().getResourceAsStream(file));
-    }
-
-    private static Properties loadPropertiesFromPath(String path) {
-        try {
-            return loadProperties(new FileInputStream(path));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static Properties loadProperties(InputStream inputStream) {
-        try {
-            final Properties properties = new Properties();
-            try {
-                properties.load(inputStream);
-                return properties;
-            } finally {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public String require(String key, Object... params) {
@@ -137,7 +84,7 @@ public class OphProperties {
         return new UrlResolver(urlsConfig);
     }
 
-    private static <D extends Map> D merge(D dest, Map... maps) {
+    public static <D extends Map> D merge(D dest, Map... maps) {
         for (Map map : maps) {
             for (Object key : map.keySet()) {
                 dest.put(key, map.get(key));
@@ -149,39 +96,6 @@ public class OphProperties {
     // extension point for other programming languages. Insert code which converts Maps, case classes etc to Java Maps
     public Object[] convertParams(Object... params) {
         return params;
-    }
-
-    class ParamReplacer {
-        String replaceParams(String url, Object... params) {
-            String queryString = "";
-            for (int i = params.length; i > 0; i--) {
-                Object param = params[i - 1];
-                if (param instanceof Map) {
-                    Map paramMap = (Map) param;
-                    for (Object key : paramMap.keySet()) {
-                        Object o = paramMap.get(key);
-                        String value = enc(o);
-                        String keyString = enc(key);
-                        String tmpUrl = url.replace("$" + keyString, value);
-                        if (o != null && tmpUrl.equals(url)) {
-                            queryString = extraParam(queryString, keyString, value);
-                        }
-                        url = tmpUrl;
-                    }
-                } else {
-                    url = url.replace("$" + i, enc(param));
-                }
-            }
-            return url + queryString;
-        }
-
-        String extraParam(String queryString, String keyString, String value) {
-            return "";
-        }
-
-        String enc(Object param) {
-            return param == null ? "" : param.toString();
-        }
     }
 
     public class UrlResolver extends ParamReplacer {
