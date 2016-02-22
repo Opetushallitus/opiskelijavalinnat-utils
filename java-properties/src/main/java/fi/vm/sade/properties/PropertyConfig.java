@@ -49,7 +49,11 @@ public class PropertyConfig {
     }
 
     public Properties loadPropertiesFromResource(String file) {
-        return loadProperties(this.getClass().getResourceAsStream(file));
+        InputStream resourceAsStream = this.getClass().getResourceAsStream(file);
+        if(resourceAsStream == null) {
+            throw new RuntimeException("Resource file not found: "+ file);
+        }
+        return loadProperties(resourceAsStream);
     }
 
     private static Properties loadPropertiesFromPath(String path) {
