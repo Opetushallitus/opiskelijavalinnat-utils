@@ -1,5 +1,7 @@
 package fi.vm.sade.properties;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class ParamReplacer {
@@ -10,14 +12,16 @@ public class ParamReplacer {
             if (param instanceof Map) {
                 Map paramMap = (Map) param;
                 for (Object key : paramMap.keySet()) {
-                    Object o = paramMap.get(key);
-                    String value = enc(o);
-                    String keyString = enc(key);
-                    String tmpUrl = url.replace("$" + keyString, value);
-                    if (o != null && tmpUrl.equals(url)) {
-                        queryString = extraParam(queryString, keyString, value);
+                    Object value = paramMap.get(key);
+                    for(Object o: value instanceof List ? (List)value: Arrays.asList(value) ) {
+                        String str = enc(o);
+                        String keyString = enc(key);
+                        String tmpUrl = url.replace("$" + keyString, str);
+                        if (o != null && tmpUrl.equals(url)) {
+                            queryString = extraParam(queryString, keyString, str);
+                        }
+                        url = tmpUrl;
                     }
-                    url = tmpUrl;
                 }
             } else {
                 url = url.replace("$" + i, enc(param));

@@ -3,6 +3,7 @@ package fi.vm.sade.properties;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Properties;
@@ -94,6 +95,14 @@ public class OphPropertiesTest {
                             put("queryParameter2", "123");
                         }})
         );
+        // extra named parameters go to queryString
+        assertEquals("/b/pow?queryParameter=123&queryParameter=34&queryParameter2=123", ctx.url("b.b",
+                        new LinkedHashMap() {{
+                            put("param", "pow");
+                            put("queryParameter", Arrays.asList("123", "34"));
+                            put("queryParameter2", "123");
+                        }})
+        );
     }
 
     @Test
@@ -109,6 +118,12 @@ public class OphPropertiesTest {
             put("query Parameter", "1:23");
             put("query Parameter2", "1:23");
         }}));
+        assertEquals("/b/pow?query%20Parameter=1%3A23&query%20Parameter=34&query%20Parameter2=1%3A23", ctx.url("b.b", new LinkedHashMap() {{
+                    put("param", "pow");
+                    put("query Parameter", Arrays.asList("1:23", "34"));
+                    put("query Parameter2", "1:23");
+                }}
+        ));
         OphProperties.UrlResolver ctx2 = ctx.urls().noEncoding();
         assertEquals("/a/1:", ctx2.url("a.a", "1:"));
         assertEquals("/b/pow:", ctx2.url("b.b", new HashMap() {{
@@ -117,6 +132,12 @@ public class OphPropertiesTest {
         assertEquals("/b/pow?query Parameter=1:23&query Parameter2=1:23", ctx2.url("b.b", new LinkedHashMap() {{
                     put("param", "pow");
                     put("query Parameter", "1:23");
+                    put("query Parameter2", "1:23");
+                }}
+        ));
+        assertEquals("/b/pow?query Parameter=1:23&query Parameter=34&query Parameter2=1:23", ctx2.url("b.b", new LinkedHashMap() {{
+                    put("param", "pow");
+                    put("query Parameter", Arrays.asList("1:23", "34"));
                     put("query Parameter2", "1:23");
                 }}
         ));
