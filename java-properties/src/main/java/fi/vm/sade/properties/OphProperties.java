@@ -20,6 +20,7 @@ public class OphProperties {
     public final Properties defaults = new Properties();
     public final Properties defaultOverrides = new Properties();
     private final ParamReplacer replacer = new ParamReplacer();
+    private boolean debug = false;
 
     public OphProperties() {
         config.addSystemKeyForFiles("oph-properties");
@@ -57,17 +58,24 @@ public class OphProperties {
     public String require(String key, Object... params) {
         String value = ophProperties.getProperty(key);
         if (value == null) {
+            debug(key, "not found. Throw exception");
             throw new RuntimeException("'" + key + "' not defined.");
+        } else {
+            value = replacer.replaceParams(value, convertParams(params));
+            debug(key, "->", value);
         }
-        return replacer.replaceParams(value, convertParams(params));
+        return value;
     }
 
     public String getProperty(String key, Object... params) {
         String value = ophProperties.getProperty(key);
-        if (value != null) {
-            return replacer.replaceParams(value, convertParams(params));
+        if (value == null) {
+            debug(key, "not found. Returning null");
+        } else {
+            value = replacer.replaceParams(value, convertParams(params));
+            debug(key, "->", value);
         }
-        return null;
+        return value;
     }
 
     public String url(String key, Object... params) {
@@ -149,6 +157,7 @@ public class OphProperties {
             if (baseUrl != null) {
                 url = joinUrl(baseUrl.toString(), url);
             }
+            debug("url:", key, "->", url);
             return url;
         }
 
@@ -173,6 +182,21 @@ public class OphProperties {
 
         private String parseService(String key) {
             return key.substring(0, key.indexOf("."));
+        }
+    }
+
+    public OphProperties debugMode() {
+        debug = true;
+        return this;
+    }
+
+    private void debug(String... args) {
+        if(debug) {
+            String s = "OphProperties";
+            for(String arg: args) {
+                s = s + " " + arg;
+            }
+            System.out.println(s);
         }
     }
 }
