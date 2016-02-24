@@ -11,15 +11,17 @@ public class OIDGenerator {
     private static final String root = "1.2.246.562";
 
     private static final int HENKILÖ_OID_NODE = 24;
+    static long min = 1000000000L;
+    static long max = 10000000000L;
+    private static Random r = new Random();
 
     public static String generateOID(int node) {
-        long min = 1000000000L;
-        long max = 10000000000L;
-
-        Random r = new Random();
         long number = min + ((long) (r.nextDouble() * (max - min)));
-        final int checkDigit = checksum(number, node);
+        return makeOID(node, number);
+    }
 
+    static String makeOID(final int node, final long number) {
+        final int checkDigit = checksum(number, node);
         return root + "." + node + "." + number + checkDigit;
     }
 
@@ -31,7 +33,7 @@ public class OIDGenerator {
         }
     }
 
-    public static int ibmChecksum(long oid) {
+    static int ibmChecksum(long oid) {
         String oidStr = String.valueOf(oid);
 
         int sum = 0;
@@ -51,7 +53,7 @@ public class OIDGenerator {
         }
     }
 
-    public static int luhnChecksum(long oid) {
+    static int luhnChecksum(long oid) {
         String oidStr = String.valueOf(oid);
 
         int sum = 0;
@@ -69,6 +71,11 @@ public class OIDGenerator {
             alternate = !alternate;
         }
 
-        return 10 - sum % 10;
+        int checksum = 10 - sum % 10;
+        if(checksum == 10) {
+            return 0;
+        }  else {
+            return checksum;
+        }
     }
 }
