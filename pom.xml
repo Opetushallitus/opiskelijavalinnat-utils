@@ -13,6 +13,7 @@
     </organization>
     <modules>
         <module>java-properties</module>
+        <module>oid-generator</module>
     </modules>
     <build>
         <plugins>
