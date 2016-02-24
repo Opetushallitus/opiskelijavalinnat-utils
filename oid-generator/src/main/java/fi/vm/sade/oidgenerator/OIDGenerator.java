@@ -23,7 +23,7 @@ public class OIDGenerator {
         return makeOID(node, number);
     }
 
-    static String makeOID(final int node, final long number) {
+    public static String makeOID(final int node, final long number) {
         final int checkDigit = checksum(number, node);
         return root + "." + node + "." + number + checkDigit;
     }
