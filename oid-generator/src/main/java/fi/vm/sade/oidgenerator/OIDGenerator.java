@@ -5,7 +5,10 @@ import java.util.Random;
 /**
  *  OIDGenerator for generating OIDs for different node under the 1.2.246.562 root node.
  *
- *  Uses two "ibm" checksum algorithm for person oids (node 24) and "luhn" for other oids.
+ *  Last digit is always a checksum. Two distinct checksum algorithms are used.
+ *
+ *  - "IBM 1 3 7" checksum algorithm for person oids (node 24). This is the same algorithm that's used in "viitenumero". See http://tarkistusmerkit.teppovuori.fi/tarkmerk.htm#viitenumero
+ *  - "Luhn algorithm" for other oids. See http://tarkistusmerkit.teppovuori.fi/tarkmerk.htm#luhn, or https://en.wikipedia.org/wiki/Luhn_algorithm
  */
 public class OIDGenerator {
     private static final String root = "1.2.246.562";
@@ -45,14 +48,8 @@ public class OIDGenerator {
             sum += n * alternate[j % 3];
         }
 
-        int checksum =  10 - sum % 10;
-        if(checksum == 10) {
-            return 0;
-        }  else {
-            return checksum;
-        }
+        return (10 - sum % 10) % 10;
     }
-
     static int luhnChecksum(long oid) {
         String oidStr = String.valueOf(oid);
 
@@ -71,11 +68,6 @@ public class OIDGenerator {
             alternate = !alternate;
         }
 
-        int checksum = 10 - sum % 10;
-        if(checksum == 10) {
-            return 0;
-        }  else {
-            return checksum;
-        }
+        return (10 - sum % 10) % 10;
     }
 }
