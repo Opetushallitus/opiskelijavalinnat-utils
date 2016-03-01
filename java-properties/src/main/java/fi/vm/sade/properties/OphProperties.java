@@ -1,7 +1,5 @@
 package fi.vm.sade.properties;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.*;
 
 import static fi.vm.sade.properties.UrlUtils.joinUrl;
@@ -18,7 +16,7 @@ public class OphProperties {
     public Properties frontProperties = null;
 
     public final Properties defaults = new Properties();
-    public final Properties defaultOverrides = new Properties();
+    public final Properties overrides = new Properties();
     private final ParamReplacer replacer = new ParamReplacer();
     private boolean debug = false;
 
@@ -28,13 +26,18 @@ public class OphProperties {
     }
 
     public OphProperties reload() {
-        ophProperties = merge(new Properties(), config.load(), System.getProperties());
-        merge(ophProperties, getPropertiesWithPrefix(ophProperties, "url."));
-        frontProperties = merge(new Properties(),
-                getPropertiesWithPrefix(ophProperties, "url.", "front."),
-                frontConfig.load(),
-                getPropertiesWithPrefix(System.getProperties(), "url.", "front."));
-        return this;
+        try {
+            ophProperties = merge(new Properties(), config.load(), System.getProperties());
+            merge(ophProperties, getPropertiesWithPrefix(ophProperties, "url."));
+            frontProperties = merge(new Properties(),
+                    getPropertiesWithPrefix(ophProperties, "url.", "front."),
+                    frontConfig.load(),
+                    getPropertiesWithPrefix(System.getProperties(), "url.", "front."));
+            return this;
+        } catch(Exception e) {
+            debug("reload threw exception:", e.getMessage());
+            throw e;
+        }
     }
 
     synchronized public void ensureLoad() {
@@ -126,7 +129,7 @@ public class OphProperties {
         }
 
         private Object resolveConfig(String key, String defaultValue) {
-            for (Properties props : new Properties[]{urlsConfig, defaultOverrides, ophProperties, defaults}) {
+            for (Properties props : new Properties[]{urlsConfig, overrides, ophProperties, defaults}) {
                 if (props.containsKey(key)) {
                     return props.get(key);
                 }

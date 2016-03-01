@@ -66,8 +66,8 @@ public class OphPropertiesTest {
         assertEquals("http://pow/1", ctx.url("a.a"));
         assertEquals("http://bar/2", ctx.url("b.b"));
 
-        // ctx.defaultOverrides overrides baseUrl
-        ctx.defaultOverrides.setProperty("baseUrl", "http://foo");
+        // ctx.overrides overrides baseUrl
+        ctx.overrides.setProperty("baseUrl", "http://foo");
         assertEquals("http://pow/1", ctx.url("a.a"));
         assertEquals("http://foo/2", ctx.url("b.b"));
 
@@ -151,7 +151,7 @@ public class OphPropertiesTest {
         props.setProperty("a.a", "c");
         assertEquals("c", ctx.url("a.a"));
 
-        ctx.defaultOverrides.setProperty("a.a", "d");
+        ctx.overrides.setProperty("a.a", "d");
         assertEquals("d", ctx.url("a.a"));
 
         OphProperties.UrlResolver ctx2 = ctx.urls(new HashMap() {{
