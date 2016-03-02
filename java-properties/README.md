@@ -29,7 +29,7 @@ project_info_server takes "suoritusrekisteri" from the filename and adds depende
 
 See implementation and usage in following projects
 * [Java](https://github.com/Opetushallitus/java-utils/tree/master/java-properties)
-* [Javascript](https://github.com/Opetushallitus/java-utils/tree/master/java-properties/src/main/javascript)
+* [Javascript](https://github.com/Opetushallitus/java-utils/tree/master/java-properties/javascript)
 * [Scala](https://github.com/Opetushallitus/scala-utils/tree/master/scala-properties_2.11)
 * [project_info_server](https://github.com/Opetushallitus/dokumentaatio/tree/master/project_info)
 * [suoritusrekisteri](https://github.com/Opetushallitus/hakurekisteri) - uses scala-properties and oph_urls.js

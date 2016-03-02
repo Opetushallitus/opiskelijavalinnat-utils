@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test": "npm install -s && cd src/main/javascript/ && mocha oph_urls_spec.js"
+    "test": "npm install -s && cd javascript && mocha oph_urls_spec.js"
   },
   "name": "oph_urls",
   "description": "oph_urls",
