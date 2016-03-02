@@ -20,9 +20,11 @@ public class OphProperties {
     private final ParamReplacer replacer = new ParamReplacer();
     private boolean debug = false;
 
-    public OphProperties() {
+    public OphProperties(String... files) {
+        config.addFile(files);
         config.addSystemKeyForFiles("oph-properties");
         frontConfig.addSystemKeyForFiles("front-properties");
+        reload();
     }
 
     public OphProperties reload() {
@@ -40,7 +42,7 @@ public class OphProperties {
         }
     }
 
-    synchronized public void ensureLoad() {
+    private synchronized void ensureLoad() {
         if (ophProperties == null) {
             reload();
         }

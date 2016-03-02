@@ -10,32 +10,23 @@ import java.util.List;
 import java.util.Properties;
 
 public class PropertyConfig {
-    private List<String> classpathPaths = new ArrayList<String>();
     private List<String> filePaths = new ArrayList<String>();
     private List<String> systemPropertyFileKeys = new ArrayList<String>();
 
     public Properties load() {
         Properties dest = new Properties();
-        for (String path : classpathPaths) {
-            OphProperties.merge(dest, loadPropertiesFromResource(path));
-        }
         for (String path : filePaths) {
             OphProperties.merge(dest, loadPropertiesFromPath(path));
         }
         Properties system = System.getProperties();
         for (String key : systemPropertyFileKeys) {
             if (system.containsKey(key)) {
-                for (String path : system.getProperty(key).split(".")) {
+                for (String path : system.getProperty(key).split(",")) {
                     OphProperties.merge(dest, loadPropertiesFromPath(path));
                 }
             }
         }
         return dest;
-    }
-
-    public PropertyConfig addClassPathFile(String... files) {
-        Collections.addAll(classpathPaths, files);
-        return this;
     }
 
     public PropertyConfig addFile(String... files) {
@@ -48,20 +39,16 @@ public class PropertyConfig {
         return this;
     }
 
-    public Properties loadPropertiesFromResource(String file) {
-        InputStream resourceAsStream = this.getClass().getResourceAsStream(file);
+    private Properties loadPropertiesFromPath(String path) {
+        InputStream resourceAsStream = this.getClass().getResourceAsStream(path);
         if(resourceAsStream == null) {
-            throw new RuntimeException("Resource file not found: "+ file);
+            try {
+                resourceAsStream = new FileInputStream(path);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException("Could not load properties from " + path, e);
+            }
         }
         return loadProperties(resourceAsStream);
-    }
-
-    private static Properties loadPropertiesFromPath(String path) {
-        try {
-            return loadProperties(new FileInputStream(path));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private static Properties loadProperties(InputStream inputStream) {
