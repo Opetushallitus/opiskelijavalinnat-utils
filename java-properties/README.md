@@ -20,7 +20,7 @@
 * Backend override properties can be loaded from files with command line. These will override values loaded with code
   * `-Doph-properties=file1.properties,file2.properties` - for properties (url. and front. filtering is applied to get front properties)
   * `-Doph-front=file3.properties,file4.properties` - for front only properties
-* Easily redirect urls. URL resolving looks for "<service>.baseUrl" and "baseUrl" to resolve the whole url: "suoritusrekisteri.info"
+* Easily redirect urls. URL resolving looks for "*service*.baseUrl" and "baseUrl" to resolve the whole url: "*suoritusrekisteri*.info"
   * `-Dsuoritusrekisteri.baseUrl=https://testserver/suoritusrekisteri` - for suoritusrekisteri urls
   * `-DbaseUrl=https://testserver/suoritusrekisteri` - for all urls
 * [project_info_server](https://github.com/Opetushallitus/dokumentaatio/tree/master/project_info)
