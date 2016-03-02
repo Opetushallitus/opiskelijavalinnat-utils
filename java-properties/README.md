@@ -1,17 +1,16 @@
 # OPH properties and url configuration
 
-* Works for java, scala, javascript
+* Works for Java, Scala, Javascript
 * Simple syntax which is the same across languages
-  * javascript:
-        ```javascript window.url("organisaatio-service.soap", param1, param2)```
-  * java and scala: `ophProperties.url("organisaatio-service.soap", param1, param2)`
+  * Javascript: `window.url("organisaatio-service.soap", param1, param2)`
+  * Java and Scala: `ophProperties.url("organisaatio-service.soap", param1, param2)`
   * .properties: `organisaatio-service.soap=/organisaatio-service/soap/$1/$2`
   * .json: `{"organisaatio-service.soap": "/organisaatio-service/soap/$1/$2"}`
 * Supports named parameters
     * .properties: `organisaatio-service.info=/organisaatio-service/info/$id/$user`
-    * javascript: `window.url("organisaatio-service.info", {id: oid, user: user.id})`
-    * java supports Maps
-    * scala implementation supports Maps and case classes
+    * Javascript: `window.url("organisaatio-service.info", {id: oid, user: user.id})`
+    * Java supports Maps
+    * Scala implementation supports Maps and case classes
 * Supports development, property keys can be overridden
     * Property values can be overriden with command line parameters: `-Dorganisaatio-service.soap=https://testserver/soap/123/456`
     * Frontend can be instructed with: `-Dfront.organisaatio-service.soap=https://testserver/soap/123/456`
@@ -21,14 +20,17 @@
 * Url resolving looks for "<service>.baseUrl" and "baseUrl" to resolve the whole url: "suoritusrekisteri.info"
     * `-Dsuoritusrekisteri.baseUrl=https://testserver/suoritusrekisteri` - for suoritusrekisteri urls
     * `-DbaseUrl=https://testserver/suoritusrekisteri` - for all urls
+* Backend override properties can be loaded from files with command line. These will override values loaded with code
+    * `-Doph-properties=file1.properties,file2.properties` - for properties (url. and front. filtering is applied to get front properties)
+    * `-Doph-front=file3.properties,file4.properties` - for front only properties
 * project_info_server is able to generate dependency graphs from url property keys. The files can be named
 `*url.properties|*url_properties.json|*oph.properties|*oph_properties.json`, for example `suoritusrekisteri_oph.properties`.
 project_info_server takes "suoritusrekisteri" from the filename and adds dependencies for each key service, for example "organisaatio-service".
 
 See implementation and usage in following projects
-* [java](https://github.com/Opetushallitus/java-utils/tree/master/java-properties)
-* [javascript](https://github.com/Opetushallitus/java-utils/tree/master/java-properties/src/main/javascript)
-* [scala](https://github.com/Opetushallitus/scala-utils/tree/master/scala-properties_2.11)
+* [Java](https://github.com/Opetushallitus/java-utils/tree/master/java-properties)
+* [Javascript](https://github.com/Opetushallitus/java-utils/tree/master/java-properties/src/main/javascript)
+* [Scala](https://github.com/Opetushallitus/scala-utils/tree/master/scala-properties_2.11)
 * [project_info_server](https://github.com/Opetushallitus/dokumentaatio/tree/master/project_info)
 * [suoritusrekisteri](https://github.com/Opetushallitus/hakurekisteri) - uses scala-properties and oph_urls.js
 
@@ -51,3 +53,23 @@ See implementation and usage in following projects
 * [.bowerrc](https://github.com/Opetushallitus/hakurekisteri/blob/master/.bowerrc)
 * [bower.json](https://github.com/Opetushallitus/hakurekisteri/blob/master/bower.json)
 
+note: Add the file oph_urls.js to the javascript build process or refer to it in the main page with a script tag.
+
+    <script type="text/javascript" src="static/js/oph_urls.js/index.js"></script>
+
+### Java and Scala
+
+    // load properties by default from /suoritusrekisteri-web-oph.properties (which should be placed in class path)
+    OphProperties properties = new OphProperties("/suoritusrekisteri-web-oph.properties");
+    properties.url("organisaatio-service.soap");
+
+### Javascript
+
+    // load properties from a static file and rest resource which returns override properties
+    window.urls.loadFromUrls("suoritusrekisteri-web-frontend-url_properties.json", "rest/v1/properties").success(function() {
+      // bootstrap angular application manually after properties are loaded
+      angular.element(document).ready(function() {
+        angular.bootstrap(document, ['myApp'])
+      })
+    })
+    window.url("organisaatio-service.soap")
