@@ -21,10 +21,19 @@ public class OphProperties {
     private boolean debug = false;
 
     public OphProperties(String... files) {
-        config.addFile(files);
         config.addSystemKeyForFiles("oph-properties");
         frontConfig.addSystemKeyForFiles("front-properties");
-        reload();
+        addFiles(files);
+    }
+
+    private OphProperties addFiles(String... files) {
+        config.addFiles(files);
+        return reload();
+    }
+
+    public OphProperties optionalFiles(String... files) {
+        config.addOptionalFiles(files);
+        return reload();
     }
 
     public OphProperties reload() {

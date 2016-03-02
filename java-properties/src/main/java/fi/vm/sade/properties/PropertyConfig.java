@@ -10,27 +10,45 @@ import java.util.List;
 import java.util.Properties;
 
 public class PropertyConfig {
-    private List<String> filePaths = new ArrayList<String>();
+    private class PropertyFile {
+        final String path;
+        final boolean throwError;
+
+        private PropertyFile(String path, boolean throwError) {
+            this.path = path;
+            this.throwError = throwError;
+        }
+    }
+    private List<PropertyFile> filePaths = new ArrayList<PropertyFile>();
     private List<String> systemPropertyFileKeys = new ArrayList<String>();
 
     public Properties load() {
         Properties dest = new Properties();
-        for (String path : filePaths) {
-            OphProperties.merge(dest, loadPropertiesFromPath(path));
+        for (PropertyFile file : filePaths) {
+            OphProperties.merge(dest, loadPropertiesFromPath(file.path, file.throwError));
         }
         Properties system = System.getProperties();
         for (String key : systemPropertyFileKeys) {
             if (system.containsKey(key)) {
                 for (String path : system.getProperty(key).split(",")) {
-                    OphProperties.merge(dest, loadPropertiesFromPath(path));
+                    OphProperties.merge(dest, loadPropertiesFromPath(path, true));
                 }
             }
         }
         return dest;
     }
 
-    public PropertyConfig addFile(String... files) {
-        Collections.addAll(filePaths, files);
+    public PropertyConfig addFiles(String... paths) {
+        for (String path : paths) {
+            filePaths.add(new PropertyFile(path, true));
+        }
+        return this;
+    }
+
+    public PropertyConfig addOptionalFiles(String... paths) {
+        for (String path : paths) {
+            filePaths.add(new PropertyFile(path, true));
+        }
         return this;
     }
 
@@ -39,13 +57,18 @@ public class PropertyConfig {
         return this;
     }
 
-    private Properties loadPropertiesFromPath(String path) {
+    private Properties loadPropertiesFromPath(String path, boolean throwError) {
         InputStream resourceAsStream = this.getClass().getResourceAsStream(path);
         if(resourceAsStream == null) {
             try {
                 resourceAsStream = new FileInputStream(path);
             } catch (FileNotFoundException e) {
-                throw new RuntimeException("Could not load properties from " + path, e);
+                if(throwError) {
+                    throw new RuntimeException("Could not load properties from " + path, e);
+                } else {
+                    System.out.println("Could not load properties from " + path + ". It was marked optional, this is not an error.");
+                    return new Properties();
+                }
             }
         }
         return loadProperties(resourceAsStream);
@@ -66,4 +89,5 @@ public class PropertyConfig {
             throw new RuntimeException(e);
         }
     }
+
 }
