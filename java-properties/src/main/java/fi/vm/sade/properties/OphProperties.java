@@ -18,7 +18,7 @@ public class OphProperties {
     public final Properties defaults = new Properties();
     public final Properties overrides = new Properties();
     private final ParamReplacer replacer = new ParamReplacer();
-    private boolean debug = false;
+    private boolean debug = System.getProperty("OphProperties.debug", null) != null;
 
     public OphProperties(String... files) {
         config.addSystemKeyForFiles("oph-properties");
