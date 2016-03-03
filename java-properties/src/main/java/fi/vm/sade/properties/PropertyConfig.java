@@ -47,7 +47,7 @@ public class PropertyConfig {
 
     public PropertyConfig addOptionalFiles(String... paths) {
         for (String path : paths) {
-            filePaths.add(new PropertyFile(path, true));
+            filePaths.add(new PropertyFile(path, false));
         }
         return this;
     }

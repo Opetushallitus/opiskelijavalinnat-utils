@@ -31,7 +31,7 @@ public class OphProperties {
         return reload();
     }
 
-    public OphProperties optionalFiles(String... files) {
+    public OphProperties addOptionalFiles(String... files) {
         config.addOptionalFiles(files);
         return reload();
     }

@@ -23,6 +23,7 @@
 * Easily redirect urls. URL resolving looks for "*service*.baseUrl" and "baseUrl" to resolve the whole url: "*suoritusrekisteri*.info"
   * `-Dsuoritusrekisteri.baseUrl=https://testserver/suoritusrekisteri` - for suoritusrekisteri urls
   * `-DbaseUrl=https://testserver/suoritusrekisteri` - for all urls
+* Debug-mode for showing how application works: `-DOphProperties.debug=true`
 * [project_info_server](https://github.com/Opetushallitus/dokumentaatio/tree/master/project_info)
 parses the configuration files and is able to generate reports from the data.
 
