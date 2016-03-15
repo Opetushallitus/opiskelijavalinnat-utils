@@ -26,7 +26,7 @@ public class OphProperties {
         addFiles(files);
     }
 
-    private OphProperties addFiles(String... files) {
+    public OphProperties addFiles(String... files) {
         config.addFiles(files);
         return reload();
     }
