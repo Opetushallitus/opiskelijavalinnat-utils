@@ -195,7 +195,11 @@
             if(!url) {
                 url = arg
             } else {
-                if(url.endsWith("/") || arg.startsWith("/")) {
+                var endsWith = url.endsWith("/");
+                var startsWith = arg.startsWith("/");
+                if(endsWith && startsWith) {
+                    url = url + arg.substring(1)
+                } else if(endsWith || startsWith) {
                     url = url + arg
                 } else {
                     url = url + "/" + arg

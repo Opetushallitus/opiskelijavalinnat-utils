@@ -159,4 +159,10 @@ public class OphPropertiesTest {
         }});
         assertEquals("e", ctx2.url("a.a"));
     }
+
+    @Test
+    public void joinUrl() {
+        assertEquals("a/b/c", UrlUtils.joinUrl("a","b","c"));
+        assertEquals("a/b/c/d", UrlUtils.joinUrl("a/","b/","c/","/d"));
+    }
 }

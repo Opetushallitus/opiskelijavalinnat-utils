@@ -13,7 +13,11 @@ public class UrlUtils {
             if (url == null) {
                 url = arg;
             } else {
-                if (url.endsWith("/") || arg.startsWith("/")) {
+                boolean endsWith = url.endsWith("/");
+                boolean startsWith = arg.startsWith("/");
+                if(endsWith && startsWith) {
+                    url = url + arg.substring(1);
+                } else if (endsWith || startsWith) {
                     url = url + arg;
                 } else {
                     url = url + "/" + arg;
