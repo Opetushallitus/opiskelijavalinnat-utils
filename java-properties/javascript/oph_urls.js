@@ -21,6 +21,9 @@
  * window.urls.defaults = {
  *   encode: true
  * }
+ *
+ * window.urls.debug = true
+ *
  */
 
 (function(exportDest) {
@@ -98,7 +101,9 @@
                 if(baseUrl) {
                     url = joinUrl(baseUrl, url)
                 }
-                return url + queryString
+                url = url + queryString
+                debug("url:", key, "->", url)
+                return url
             }
         }
     }
@@ -109,6 +114,15 @@
         encode: true
     }
     exportDest.urls.override = {}
+    exportDest.urls.debug = false
+    
+    function debug() {
+        var args = Array.prototype.slice.call(arguments)
+        args.unshift("OphProperties")
+        if(exportDest.urls.debug && exportDest.console && exportDest.console.log) {
+            exportDest.console.log.apply(exportDest.console, args)
+        }
+    }
 
     function ajaxJson(method, url, onload, onerror) {
         var oReq = new XMLHttpRequest();
