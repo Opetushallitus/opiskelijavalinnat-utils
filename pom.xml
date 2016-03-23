@@ -9,6 +9,7 @@
     <modules>
         <module>java-cas</module>
         <module>java-properties</module>
+        <module>jetty-test-utils</module>
         <module>oid-generator</module>
         <module>tcp-utils</module>
     </modules>
