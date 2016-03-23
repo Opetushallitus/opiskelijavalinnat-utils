@@ -11,7 +11,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Form;
 
 import fi.vm.sade.jetty.JettyJersey;
-import fi.vm.sade.jetty.TestParams;
 import org.apache.cxf.helpers.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.message.Message;
@@ -54,7 +53,6 @@ public class CasFriendlyCxfInterceptorTest {
     @Before
     public void setUp() throws Exception {
         JettyJersey.startServer("fi.vm.sade.authentication.cas", null);
-        TestParams.instance = new TestParams();
         SecurityContextHolder.clearContext();
         cache.clearAll();
     }

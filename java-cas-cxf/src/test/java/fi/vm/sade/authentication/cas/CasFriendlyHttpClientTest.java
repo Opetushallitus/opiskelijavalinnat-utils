@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 import fi.vm.sade.jetty.JettyJersey;
-import fi.vm.sade.jetty.TestParams;
 import org.apache.cxf.helpers.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -35,7 +34,6 @@ public class CasFriendlyHttpClientTest {
     @Before
     public void setUp() throws Exception {
         JettyJersey.startServer("fi.vm.sade.authentication.cas", null);
-        TestParams.instance = new TestParams();
         SecurityContextHolder.clearContext();
     }
 
