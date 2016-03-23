@@ -10,7 +10,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Form;
 
-import fi.vm.sade.jetty.HttpTestResource;
 import fi.vm.sade.jetty.JettyJersey;
 import fi.vm.sade.jetty.TestParams;
 import org.apache.cxf.helpers.IOUtils;
@@ -56,8 +55,6 @@ public class CasFriendlyCxfInterceptorTest {
     public void setUp() throws Exception {
         JettyJersey.startServer("fi.vm.sade.authentication.cas", null);
         TestParams.instance = new TestParams();
-        HttpTestResource.counter = 1;
-        HttpTestResource.someResource = "original value";
         SecurityContextHolder.clearContext();
         cache.clearAll();
     }
