@@ -8,6 +8,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>java-cas</module>
+        <module>java-cas-cxf</module>
         <module>java-properties</module>
         <module>jetty-test-utils</module>
         <module>oid-generator</module>
