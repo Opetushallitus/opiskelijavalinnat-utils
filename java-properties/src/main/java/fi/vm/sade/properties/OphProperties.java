@@ -213,4 +213,9 @@ public class OphProperties {
             System.out.println(s);
         }
     }
+
+    public OphProperties addDefault(String key, String value) {
+        defaults.put(key, value);
+        return this;
+    }
 }
