@@ -13,6 +13,7 @@
         <module>jetty-test-utils</module>
         <module>java-cas</module>
         <module>java-cas-cxf</module>
+        <module>java-cas-spring-security</module>
     </modules>
     <build>
         <plugins>
