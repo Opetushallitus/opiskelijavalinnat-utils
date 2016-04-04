@@ -22,6 +22,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HttpContext;
@@ -120,46 +122,37 @@ public class CasFriendlyHttpClient extends DefaultHttpClient {
             // Just the authentication request
             uriRequest = new HttpGet(url);
         } else {
-            // Create request based on given message
-            String encoding = (String)outMessage.get(Message.ENCODING);
-            if(StringUtils.isEmpty(encoding))
-                encoding = "UTF-8";
-    
-            // Get headers
-            @SuppressWarnings ("unchecked")
-            Map<String, List<String>> headers = (Map<String, List<String>>)outMessage.get(Message.PROTOCOL_HEADERS);
-    
-            // Get the body of request
-            InputStream is = (InputStream)message.getExchange().get(CasFriendlyCxfInterceptor.ORIGINAL_POST_BODY_INPUTSTREAM);
-            Long length = (Long)message.getExchange().get(CasFriendlyCxfInterceptor.ORIGINAL_POST_BODY_LENGTH);
-            String body = null;
-            if(is != null) {
-                CachedOutputStream bos = new CachedOutputStream();
-                IOUtils.copy(is, bos);
-                body = new String(bos.getBytes(), encoding);
-            }
-    
-            // Create request based on method
             if(method.equalsIgnoreCase("POST")) {
                 uriRequest = new HttpPost(url);
-//                if(is != null && length != null)
-//                    ((HttpPost)uriRequest).setEntity(new InputStreamEntity(is, length.longValue()));
-                if(body != null)
-                    ((HttpPost)uriRequest).setEntity(new StringEntity(body));
+                InputStream is = (InputStream)message.getExchange().get(CasFriendlyCxfInterceptor.ORIGINAL_POST_BODY_INPUTSTREAM);
+                String mimeType = (String) outMessage.get(Message.CONTENT_TYPE);
+                String charset = (String) outMessage.get(Message.ENCODING);
+                if (charset == null && ContentType.APPLICATION_JSON.getMimeType().equals(mimeType)) {
+                    charset = "UTF-8";
+                }
+                if(is != null) {
+                    ((HttpPost) uriRequest).setEntity(new StringEntity(IOUtils.toString(is, charset), ContentType.create(mimeType, charset)));
+                }
             } else if(method.equalsIgnoreCase("GET")) {
                 uriRequest = new HttpGet(url);
             } else if(method.equalsIgnoreCase("DELETE")) {
                 uriRequest = new HttpDelete(url);
             } else if(method.equalsIgnoreCase("PUT")) {
                 uriRequest = new HttpPut(url);
-//                if(is != null && length != null)
-//                    ((HttpPost)uriRequest).setEntity(new InputStreamEntity(is, length.longValue()));
-                if(body != null)
-                    ((HttpPost)uriRequest).setEntity(new StringEntity(body));
+                InputStream is = (InputStream)message.getExchange().get(CasFriendlyCxfInterceptor.ORIGINAL_POST_BODY_INPUTSTREAM);
+                String mimeType = (String) outMessage.get(Message.CONTENT_TYPE);
+                String charset = (String) outMessage.get(Message.ENCODING);
+                if (charset == null && ContentType.APPLICATION_JSON.getMimeType().equals(mimeType)) {
+                    charset = "UTF-8";
+                }
+                if(is != null) {
+                    ((HttpPut) uriRequest).setEntity(new StringEntity(IOUtils.toString(is, charset), ContentType.create(mimeType, charset)));
+                }
             }
-    
-            // Set headers to request
-            for(String one:headers.keySet()) {
+
+            @SuppressWarnings("unchecked")
+            Map<String, List<String>> headers = (Map<String, List<String>>) outMessage.get(Message.PROTOCOL_HEADERS);
+            for (String one : headers.keySet()) {
                 List<String> values = headers.get(one);
                 // Just add the first value
                 uriRequest.addHeader(one, values.get(0));

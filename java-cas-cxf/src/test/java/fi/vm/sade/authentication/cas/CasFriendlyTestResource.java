@@ -57,7 +57,7 @@ public class CasFriendlyTestResource {
                     .build();
             }
         } catch (Exception e) {
-            return Response.serverError().build();
+            return Response.serverError().entity(e.getMessage()).build();
         }
     }
 
@@ -93,7 +93,7 @@ public class CasFriendlyTestResource {
                     .build();
             }
         } catch (Exception e) {
-            return Response.serverError().build();
+            return Response.serverError().entity(e.getMessage()).build();
         }
     }
     
