@@ -9,7 +9,7 @@ import static fi.vm.sade.properties.UrlUtils.joinUrl;
  * Supports parameter replace (index & named) and url generation.
  * Collects configuration to be used at front (application code can configure separately which files are loaded and which system properties prefixes are used for front).
  */
-public class OphProperties {
+public class OphProperties implements PropertyResolver {
     public final PropertyConfig config = new PropertyConfig();
     public final PropertyConfig frontConfig = new PropertyConfig();
     public Properties ophProperties = null;
@@ -69,29 +69,52 @@ public class OphProperties {
         return dest;
     }
 
+    @Override
     public String require(String key, Object... params) {
-        String value = ophProperties.getProperty(key);
-        if (value == null) {
-            debug(key, "not found. Throw exception");
-            throw new RuntimeException("'" + key + "' not defined.");
-        } else {
-            value = replacer.replaceParams(value, convertParams(params));
-            debug(key, "->", value);
-        }
-        return value;
+        return requireProperty(key, params, replacer, overrides, ophProperties, defaults);
     }
 
+    @Override
     public String getProperty(String key, Object... params) {
-        String value = ophProperties.getProperty(key);
-        if (value == null) {
-            debug(key, "not found. Returning null");
-        } else {
-            value = replacer.replaceParams(value, convertParams(params));
-            debug(key, "->", value);
-        }
-        return value;
+        return getOrElse(key, null, params);
     }
 
+    @Override
+    public String getOrElse(String key, String defaultValue, Object... params) {
+        return resolveProperty(key, defaultValue, params, replacer, overrides, ophProperties, defaults);
+    }
+
+    private String resolveProperty(String key, String defaultValue, Object[] params, ParamReplacer replacer, Properties... properties) {
+        for(Properties props: properties) {
+            if(props.containsKey(key)) {
+                String value = (String) props.get(key);
+                if (value == null) {
+                    debug(key, "not found. Returning null");
+                } else {
+                    value = replacer.replaceParams(value, convertParams(params));
+                    debug(key, "->", value);
+                }
+                return value;
+            }
+        }
+        return defaultValue;
+    }
+
+    private String requireProperty(String key, Object[] params, ParamReplacer replacer, Properties... properties) {
+        for(Properties props: properties) {
+            if(props.containsKey(key)) {
+                String value = (String) props.get(key);
+                if (value != null) {
+                    value = replacer.replaceParams(value, convertParams(params));
+                    debug(key, "->", value);
+                }
+                return value;
+            }
+        }
+        throw new RuntimeException("\"" + key + "\" not defined.");
+    }
+
+    @Override
     public String url(String key, Object... params) {
         return new UrlResolver().url(key, params);
     }
@@ -122,7 +145,7 @@ public class OphProperties {
         return params;
     }
 
-    public class UrlResolver extends ParamReplacer {
+    public class UrlResolver extends ParamReplacer implements PropertyResolver {
         private final Properties urlsConfig = new Properties();
         private boolean encode = true;
 
@@ -135,19 +158,6 @@ public class OphProperties {
             ensureLoad();
         }
 
-        private Object resolveConfig(String key) {
-            return resolveConfig(key, null);
-        }
-
-        private Object resolveConfig(String key, String defaultValue) {
-            for (Properties props : new Properties[]{urlsConfig, overrides, ophProperties, defaults}) {
-                if (props.containsKey(key)) {
-                    return props.get(key);
-                }
-            }
-            return defaultValue;
-        }
-
         public UrlResolver baseUrl(String baseUrl) {
             urlsConfig.put("baseUrl", baseUrl);
             return this;
@@ -158,15 +168,27 @@ public class OphProperties {
             return this;
         }
 
+        @Override
+        public String require(String key, Object... params) {
+            return requireProperty(key, params, this, urlsConfig, overrides, ophProperties, defaults);
+        }
+
+        @Override
+        public String getProperty(String key, Object... params) {
+            return getOrElse(key, null, params);
+        }
+
+        @Override
+        public String getOrElse(String key, String defaultValue, Object... params) {
+            return resolveProperty(key, defaultValue, params, this, urlsConfig, overrides, ophProperties, defaults);
+        }
+
+        @Override
         public String url(String key, Object... params) {
-            Object o = resolveConfig(key);
-            if (o == null) {
-                throw new RuntimeException("'" + key + "' not defined.");
-            }
-            String url = replaceParams(o.toString(), convertParams(params));
-            Object baseUrl = resolveConfig(parseService(key) + ".baseUrl");
+            String url = require(key, params);
+            Object baseUrl = getProperty(parseService(key) + ".baseUrl");
             if (baseUrl == null) {
-                baseUrl = resolveConfig("baseUrl");
+                baseUrl = getProperty("baseUrl");
             }
             if (baseUrl != null) {
                 url = joinUrl(baseUrl.toString(), url);

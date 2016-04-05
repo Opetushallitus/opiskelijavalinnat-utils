@@ -32,7 +32,7 @@ public class OphPropertiesTest {
             ctx.require("c.c");
             throw new RuntimeException("Should not reach here");
         } catch (RuntimeException e) {
-            assertEquals("'c.c' not defined.", e.getMessage());
+            assertEquals("\"c.c\" not defined.", e.getMessage());
         }
     }
 
@@ -51,7 +51,7 @@ public class OphPropertiesTest {
             ctx.url("b.b");
             throw new RuntimeException("Should not reach here");
         } catch (RuntimeException e) {
-            assertEquals("'b.b' not defined.", e.getMessage());
+            assertEquals("\"b.b\" not defined.", e.getMessage());
         }
     }
 
