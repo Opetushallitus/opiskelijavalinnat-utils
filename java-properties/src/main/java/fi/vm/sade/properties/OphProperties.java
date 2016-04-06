@@ -141,7 +141,7 @@ public class OphProperties implements PropertyResolver {
      * @param args
      * @return
      */
-    public PropertyResolver urls(Object... args) {
+    public UrlResolver urls(Object... args) {
         Properties urlsConfig = new Properties();
         for (Object o : args) {
             if (o instanceof Map) {

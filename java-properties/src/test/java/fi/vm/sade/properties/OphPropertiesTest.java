@@ -72,7 +72,7 @@ public class OphPropertiesTest {
         assertEquals("http://foo/2", ctx.url("b.b"));
 
         // ctx.urls(baseUrl) overrides baseUrl and ctx.urls.defaults.override
-        OphProperties.UrlResolver ctx2 = ctx.urls("http://zap");
+        PropertyResolver ctx2 = ctx.urls("http://zap");
         assertEquals("http://pow/1", ctx2.url("a.a"));
         assertEquals("http://zap/2", ctx2.url("b.b"));
     }
@@ -154,7 +154,7 @@ public class OphPropertiesTest {
         ctx.overrides.setProperty("a.a", "d");
         assertEquals("d", ctx.url("a.a"));
 
-        OphProperties.UrlResolver ctx2 = ctx.urls(new HashMap() {{
+        PropertyResolver ctx2 = ctx.urls(new HashMap() {{
             put("a.a", "e");
         }});
         assertEquals("e", ctx2.url("a.a"));
