@@ -75,6 +75,21 @@ public class OphPropertiesTest {
         PropertyResolver ctx2 = ctx.urls("http://zap");
         assertEquals("http://pow/1", ctx2.url("a.a"));
         assertEquals("http://zap/2", ctx2.url("b.b"));
+
+        // ctx.urls(null) should throw NPE
+        try {
+            ctx.urls(null);
+            throw new RuntimeException("Should not reach here");
+        } catch (NullPointerException e) {
+            assertEquals("ophProperties.urls(null) not supported", e.getMessage());
+        }
+        // ctx.urls("1", null) should throw NPE
+        try {
+            ctx.urls("1", null);
+            throw new RuntimeException("Should not reach here");
+        } catch (NullPointerException e) {
+            assertEquals("one parameter for ophProperties.urls() was null", e.getMessage());
+        }
     }
 
     @Test

@@ -142,9 +142,14 @@ public class OphProperties implements PropertyResolver {
      * @return
      */
     public UrlResolver urls(Object... args) {
+        if(args == null) {
+            throw new NullPointerException("ophProperties.urls(null) not supported");
+        }
         Properties urlsConfig = new Properties();
         for (Object o : args) {
-            if (o instanceof Map) {
+            if(o == null) {
+                throw new NullPointerException("one parameter for ophProperties.urls() was null");
+            } else if (o instanceof Map) {
                 merge(urlsConfig, (Map) o);
             } else if (o instanceof String) {
                 urlsConfig.put("baseUrl", o);
