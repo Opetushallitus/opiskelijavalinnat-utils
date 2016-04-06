@@ -36,7 +36,7 @@ public class OphProperties implements PropertyResolver {
         return reload();
     }
 
-    public OphProperties reload() {
+    private OphProperties reload() {
         try {
             ophProperties = merge(new Properties(), config.load(), System.getProperties());
             merge(ophProperties, getPropertiesWithPrefix(ophProperties, "url."));
@@ -79,6 +79,14 @@ public class OphProperties implements PropertyResolver {
         return getOrElse(key, null, params);
     }
 
+    /**
+     * Return defaultValue if value not defined. Format returned string with params
+     * Resolve order: overrides, ophProperties, defaults
+     * @param key
+     * @param defaultValue
+     * @param params
+     * @return
+     */
     @Override
     public String getOrElse(String key, String defaultValue, Object... params) {
         return resolveProperty(key, defaultValue, params, replacer, overrides, ophProperties, defaults);
@@ -88,16 +96,18 @@ public class OphProperties implements PropertyResolver {
         for(Properties props: properties) {
             if(props.containsKey(key)) {
                 String value = (String) props.get(key);
-                if (value == null) {
-                    debug(key, "not found. Returning null");
-                } else {
-                    value = replacer.replaceParams(value, convertParams(params));
-                    debug(key, "->", value);
-                }
-                return value;
+                return replaceParams(key, params, replacer, value);
             }
         }
-        return defaultValue;
+        return replaceParams(key, params, replacer, defaultValue);
+    }
+
+    private String replaceParams(String key, Object[] params, ParamReplacer replacer, String value) {
+        if (value != null) {
+            value = replacer.replaceParams(value, convertParams(params));
+        }
+        debug(key, "->", value);
+        return value;
     }
 
     private String requireProperty(String key, Object[] params, ParamReplacer replacer, Properties... properties) {
@@ -114,12 +124,24 @@ public class OphProperties implements PropertyResolver {
         throw new RuntimeException("\"" + key + "\" not defined.");
     }
 
+    /**
+     * Resolves url for the key.
+     * @param key
+     * @param params
+     * @return
+     */
     @Override
     public String url(String key, Object... params) {
         return new UrlResolver().url(key, params);
     }
 
-    public UrlResolver urls(Object... args) {
+    /**
+     * Return a new PropertyResolver for urls. Parameters override properties in parent OphProperties. String parameter is set to "baseUrl"
+     * Resolve order: urlsConfig, overrides, ophProperties, defaults
+     * @param args
+     * @return
+     */
+    public PropertyResolver urls(Object... args) {
         Properties urlsConfig = new Properties();
         for (Object o : args) {
             if (o instanceof Map) {
