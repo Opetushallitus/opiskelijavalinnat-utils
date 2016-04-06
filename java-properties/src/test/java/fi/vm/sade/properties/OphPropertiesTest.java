@@ -3,6 +3,8 @@ package fi.vm.sade.properties;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -179,5 +181,18 @@ public class OphPropertiesTest {
     public void joinUrl() {
         assertEquals("a/b/c", UrlUtils.joinUrl("a","b","c"));
         assertEquals("a/b/c/d", UrlUtils.joinUrl("a/","b/","c/","/d"));
+    }
+
+    @Test
+    public void parameterSubstitution() {
+        assertEquals("https://POW/!", ctx.addDefault("host","POW").addDefault("url", "https://${host}/$1").require("url","!"));
+    }
+
+    @Test
+    public void baseUrlOverride() throws URISyntaxException {
+        new URI("hs.fi");
+        ctx.addDefault("koodisto.url", "http://pow.fi/pow?123&a=1#/fpp");
+        assertEquals("https://POW.FI/pow?123&a=1#/fpp", ctx.addDefault("baseUrl", "https://POW.FI").url("koodisto.url"));
+        assertEquals("https://POW.FI/pow?123&a=1#/fpp", ctx.addDefault("baseUrl", "https://oph.fi").addDefault("koodisto.baseUrl", "https://POW.FI").url("koodisto.url"));
     }
 }

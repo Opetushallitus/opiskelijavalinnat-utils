@@ -1,12 +1,14 @@
 package fi.vm.sade.properties;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 import static fi.vm.sade.properties.UrlUtils.joinUrl;
 
 /**
  * Reads property values from classpath files, files in filesystem paths and system properties (-D).
- * Supports parameter replace (index & named) and url generation.
+ * Supports parameter replace ($1 & $name), recursive reference for values: ${key:optionalDefaultValue} and url generation from service.url (looks up service.baseUrl)
  * Collects configuration to be used at front (application code can configure separately which files are loaded and which system properties prefixes are used for front).
  */
 public class OphProperties implements PropertyResolver {
@@ -95,18 +97,38 @@ public class OphProperties implements PropertyResolver {
     private String resolveProperty(String key, String defaultValue, Object[] params, ParamReplacer replacer, Properties... properties) {
         for(Properties props: properties) {
             if(props.containsKey(key)) {
-                String value = (String) props.get(key);
-                return replaceParams(key, params, replacer, value);
+                return replaceParams((String) props.get(key), params, replacer, properties, key);
             }
         }
-        return replaceParams(key, params, replacer, defaultValue);
+        return replaceParams(defaultValue, params, replacer, properties, key);
     }
 
-    private String replaceParams(String key, Object[] params, ParamReplacer replacer, String value) {
+    private String replaceParams(String value, Object[] params, ParamReplacer replacer, Properties[] properties, String key) {
         if (value != null) {
             value = replacer.replaceParams(value, convertParams(params));
+            value = resolveRecursiveReferences(value, properties);
         }
         debug(key, "->", value);
+        return value;
+    }
+
+    private String resolveRecursiveReferences(String value, Properties[] properties) {
+        int start,end;
+        while((start=value.indexOf("${"))!=-1) {
+            end = value.indexOf("}", start+2);
+            if(end == -1) {
+                throw new RuntimeException("Value contains open key reference: " + value);
+            }
+            String substring = value.substring(start + 2, end);
+            String args[] = substring.split(":");
+            String key=args[0],defaultValue=null, subValue;
+            if(args.length == 2) {
+                subValue = resolveProperty(key, defaultValue, new Object[0], replacer, properties);
+            } else {
+                subValue = requireProperty(key, new Object[0], replacer, properties);
+            }
+            value = value.substring(0, start) + subValue + value.substring(end+1);
+        }
         return value;
     }
 
@@ -114,11 +136,7 @@ public class OphProperties implements PropertyResolver {
         for(Properties props: properties) {
             if(props.containsKey(key)) {
                 String value = (String) props.get(key);
-                if (value != null) {
-                    value = replacer.replaceParams(value, convertParams(params));
-                    debug(key, "->", value);
-                }
-                return value;
+                return replaceParams(value, params, replacer, properties, key);
             }
         }
         throw new RuntimeException("\"" + key + "\" not defined.");
@@ -218,10 +236,31 @@ public class OphProperties implements PropertyResolver {
                 baseUrl = getProperty("baseUrl");
             }
             if (baseUrl != null) {
-                url = joinUrl(baseUrl.toString(), url);
+                String strippedUrl = stripBaseUrl(url);
+                url = joinUrl(baseUrl.toString(), strippedUrl);
             }
             debug("url:", key, "->", url);
             return url;
+        }
+
+        private String stripBaseUrl(String url) {
+            URI uri;
+            try {
+                uri = new URI(url);
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+            String stripped = "";
+            if(uri.getRawPath() != null) {
+                stripped += uri.getRawPath();
+            }
+            if(uri.getRawQuery() != null) {
+                stripped += "?" + uri.getRawQuery();
+            }
+            if(uri.getRawFragment() != null) {
+                stripped += "#" + uri.getRawFragment();
+            }
+            return stripped;
         }
 
         @Override
