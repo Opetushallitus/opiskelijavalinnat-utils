@@ -73,7 +73,7 @@ public class OphProperties implements PropertyResolver {
 
     @Override
     public String require(String key, Object... params) {
-        return requireProperty(key, params, replacer, overrides, ophProperties, defaults);
+        return requireProperty(key, params, replacer, true, overrides, ophProperties, defaults);
     }
 
     @Override
@@ -91,24 +91,26 @@ public class OphProperties implements PropertyResolver {
      */
     @Override
     public String getOrElse(String key, String defaultValue, Object... params) {
-        return resolveProperty(key, defaultValue, params, replacer, overrides, ophProperties, defaults);
+        return resolveProperty(key, defaultValue, params, replacer, true, overrides, ophProperties, defaults);
     }
 
-    private String resolveProperty(String key, String defaultValue, Object[] params, ParamReplacer replacer, Properties... properties) {
+    private String resolveProperty(String key, String defaultValue, Object[] params, ParamReplacer replacer, boolean printDebug, Properties... properties) {
         for(Properties props: properties) {
             if(props.containsKey(key)) {
-                return replaceParams((String) props.get(key), params, replacer, properties, key);
+                return replaceParams((String) props.get(key), params, replacer, properties, key, printDebug);
             }
         }
-        return replaceParams(defaultValue, params, replacer, properties, key);
+        return replaceParams(defaultValue, params, replacer, properties, key, printDebug);
     }
 
-    private String replaceParams(String value, Object[] params, ParamReplacer replacer, Properties[] properties, String key) {
+    private String replaceParams(String value, Object[] params, ParamReplacer replacer, Properties[] properties, String key, boolean printDebug) {
         if (value != null) {
             value = replacer.replaceParams(value, convertParams(params));
             value = resolveRecursiveReferences(value, properties);
         }
-        debug(key, "->", value);
+        if(printDebug) {
+            debug(key, "->", value);
+        }
         return value;
     }
 
@@ -123,20 +125,20 @@ public class OphProperties implements PropertyResolver {
             String args[] = substring.split(":");
             String key=args[0],defaultValue=null, subValue;
             if(args.length == 2) {
-                subValue = resolveProperty(key, defaultValue, new Object[0], replacer, properties);
+                subValue = resolveProperty(key, defaultValue, new Object[0], replacer, false, properties);
             } else {
-                subValue = requireProperty(key, new Object[0], replacer, properties);
+                subValue = requireProperty(key, new Object[0], replacer, false, properties);
             }
             value = value.substring(0, start) + subValue + value.substring(end+1);
         }
         return value;
     }
 
-    private String requireProperty(String key, Object[] params, ParamReplacer replacer, Properties... properties) {
+    private String requireProperty(String key, Object[] params, ParamReplacer replacer, boolean printDebug, Properties... properties) {
         for(Properties props: properties) {
             if(props.containsKey(key)) {
                 String value = (String) props.get(key);
-                return replaceParams(value, params, replacer, properties, key);
+                return replaceParams(value, params, replacer, properties, key, printDebug);
             }
         }
         throw new RuntimeException("\"" + key + "\" not defined.");
@@ -215,7 +217,7 @@ public class OphProperties implements PropertyResolver {
 
         @Override
         public String require(String key, Object... params) {
-            return requireProperty(key, params, this, urlsConfig, overrides, ophProperties, defaults);
+            return requireProperty(key, params, this, true, urlsConfig, overrides, ophProperties, defaults);
         }
 
         @Override
@@ -225,7 +227,7 @@ public class OphProperties implements PropertyResolver {
 
         @Override
         public String getOrElse(String key, String defaultValue, Object... params) {
-            return resolveProperty(key, defaultValue, params, this, urlsConfig, overrides, ophProperties, defaults);
+            return resolveProperty(key, defaultValue, params, this, true, urlsConfig, overrides, ophProperties, defaults);
         }
 
         @Override
