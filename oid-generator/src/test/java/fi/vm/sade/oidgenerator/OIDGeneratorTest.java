@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class OIDGeneratorTest {
     @Test
-    public void henkilöOidUsesIBMChecksum() {
+    public void henkiloOidUsesIBMChecksum() {
         String oid = OIDGenerator.generateOID(24);
         String lastPart = oid.substring(oid.lastIndexOf('.') + 1);
         long number = Long.parseLong(lastPart.substring(0, lastPart.length() - 1));
@@ -15,7 +15,7 @@ public class OIDGeneratorTest {
     }
 
     @Test
-    public void henkilöOidHasConsistentLength() {
+    public void henkiloOidHasConsistentLength() {
         for (int i = 0; i < 1000000; i++) {
             String oid = OIDGenerator.generateOID(24);
             assertEquals("try " + i, 26, oid.length());
