@@ -13,7 +13,7 @@ import java.util.Random;
 public class OIDGenerator {
     private static final String root = "1.2.246.562";
 
-    private static final int HENKILÖ_OID_NODE = 24;
+    private static final int HENKILO_OID_NODE = 24;
     static long min = 1000000000L;
     static long max = 10000000000L;
     private static Random r = new Random();
@@ -29,7 +29,7 @@ public class OIDGenerator {
     }
 
     private static int checksum(final long number, final int node) {
-        if (HENKILÖ_OID_NODE == node) {
+        if (HENKILO_OID_NODE == node) {
             return ibmChecksum(number);
         } else {
             return luhnChecksum(number);
