@@ -199,9 +199,8 @@ public class OphPropertiesTest {
     @Test
     public void testFrontToJson() {
         ctx.frontProperties.put("a","a!.\n\"");
-        System.out.println(ctx.frontPropertiesAsString());
         assertEquals("{\n" +
                 "\"a\": \"a!.\\\\n\\\"\"\n" +
-                "}",ctx.frontPropertiesAsString());
+                "}",ctx.frontPropertiesToJson());
     }
 }
