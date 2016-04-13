@@ -195,4 +195,13 @@ public class OphPropertiesTest {
         assertEquals("https://POW.FI/pow?123&a=1#/fpp", ctx.addDefault("baseUrl", "https://POW.FI").url("koodisto.url"));
         assertEquals("https://POW.FI/pow?123&a=1#/fpp", ctx.addDefault("baseUrl", "https://oph.fi").addDefault("koodisto.baseUrl", "https://POW.FI").url("koodisto.url"));
     }
+
+    @Test
+    public void testFrontToJson() {
+        ctx.frontProperties.put("a","a!.\n\"");
+        System.out.println(ctx.frontPropertiesAsString());
+        assertEquals("{\n" +
+                "\"a\": \"a!.\\\\n\\\"\"\n" +
+                "}",ctx.frontPropertiesAsString());
+    }
 }

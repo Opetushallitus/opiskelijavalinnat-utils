@@ -6,11 +6,16 @@
   * Java and Scala: `ophProperties.url("organisaatio-service.soap", param1, param2)`
   * .properties: `organisaatio-service.soap=/organisaatio-service/soap/$1/$2`
   * .json: `{"organisaatio-service.soap": "/organisaatio-service/soap/$1/$2"}`
-* Supports named parameters
-  * .properties: `organisaatio-service.info=/organisaatio-service/info/$id/$user`
+* Different property resolve methods:
+  * url(key, param1, param2, ...) property resolving with additional url features: baseUrl override (see below) and unused named parameters are added to querystring
+  * require(key, param1, param2, ...) throws an exception if key is not defined
+  * getProperty(key, param1, param2, ...) returns null if key is not defined
+  * getOrElse(key, defaultValue, param1, param2, ...) returns defaultValue if key is not defined
+* All property resolve methods support parameter lookup: by index ($1), by parameter name ($id) and by property key ${key:defaultValue}
+  * .properties: `organisaatio-service.info=${publicLB}/organisaatio-service/info/$id/$user`
   * Javascript: `window.url("organisaatio-service.info", {id: oid, user: user.id})`
-  * Java supports Maps
-  * Scala implementation supports Maps and case classes
+  * Parameter name supports two syntaxes: ${key} throws an exception if key is not defined, ${key:defaultValue} uses defaultValue if key not defined
+  * Java supports Maps, Scala implementation supports Maps and case classes
 * Supports development, property values can be overridden
   * Property values can be overriden with command line parameters: `-Dorganisaatio-service.soap=https://testserver/soap/123/456`
   * Frontend can be instructed with: `-Dfront.organisaatio-service.soap=https://testserver/soap/123/456`
@@ -20,7 +25,7 @@
 * Backend override properties can be loaded from files with command line. These will override values loaded with code
   * `-Doph-properties=file1.properties,file2.properties` - for properties (url. and front. filtering is applied to get front properties)
   * `-Doph-front=file3.properties,file4.properties` - for front only properties
-* Easily redirect urls. URL resolving looks for "*service*.baseUrl" and "baseUrl" to resolve the whole url: "*suoritusrekisteri*.info"
+* Easily modify base urls. URL resolving looks for "*service*.baseUrl" and "baseUrl" to resolve the whole url: "*suoritusrekisteri*.info"
   * `-Dsuoritusrekisteri.baseUrl=https://testserver/suoritusrekisteri` - for suoritusrekisteri urls
   * `-DbaseUrl=https://testserver/suoritusrekisteri` - for all urls
 * Debug-mode for showing how application works: `-DOphProperties.debug=true`
@@ -56,6 +61,7 @@ See implementation and usage in following projects
 ### Bower, example from suoritusrekisteri
 
 * [.bowerrc](https://github.com/Opetushallitus/hakurekisteri/blob/master/.bowerrc)
+* `bower install https://github.com/Opetushallitus/java-utils/blob/master/java-properties/javascript/oph_urls.js`
 * [bower.json](https://github.com/Opetushallitus/hakurekisteri/blob/master/bower.json)
 
 note: Add the file oph_urls.js to the javascript build process or refer to it in the main page with a script tag.
@@ -70,7 +76,8 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
 
 ### Javascript
 
-    // load properties from a static file and rest resource which returns override properties
+    // load properties from a static file and a rest resource which returns override properties
+    // start application after resources are loaded
     window.urls.loadFromUrls("suoritusrekisteri-web-frontend-url_properties.json", "rest/v1/properties").success(function() {
       // bootstrap angular application manually after properties are loaded
       angular.element(document).ready(function() {
@@ -78,3 +85,42 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
       })
     })
     window.url("organisaatio-service.soap")
+
+### Supported property file formats
+
+* .properties
+
+        service.key=value
+
+* .json, nested and flat structure
+
+        {
+            "service": {
+                "key": "value"
+            }
+        }
+
+        {
+            "service.key": "value"
+        }
+
+* .js which is loaded with a script tag after including oph_urls.js can set properties directly to window.urls.XX
+
+        // window.urls.override should be set with rest end point from backend application
+        window.urls.override = {
+        }
+        // window.urls.properties should be set with with static file
+        window.urls.properties = {
+        }
+        // should not be set
+        window.urls.defaults = {
+        }
+
+* .js es6
+
+        export default {
+            hakuperusteetadmin: {
+                paymentUpdateUrl: "/hakuperusteetadmin/api/v1/admin/payment"
+            }
+        }
+

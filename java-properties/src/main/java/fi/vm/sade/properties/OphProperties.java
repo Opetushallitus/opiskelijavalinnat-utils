@@ -38,12 +38,14 @@ public class OphProperties implements PropertyResolver {
         return reload();
     }
 
-    private OphProperties reload() {
+    public OphProperties reload() {
         try {
             ophProperties = merge(new Properties(), config.load(), System.getProperties());
             merge(ophProperties, getPropertiesWithPrefix(ophProperties, "url."));
             frontProperties = merge(new Properties(),
+                    getPropertiesWithPrefix(defaults, "url.", "front."),
                     getPropertiesWithPrefix(ophProperties, "url.", "front."),
+                    getPropertiesWithPrefix(overrides, "url.", "front."),
                     frontConfig.load(),
                     getPropertiesWithPrefix(System.getProperties(), "url.", "front."));
             return this;
@@ -192,6 +194,10 @@ public class OphProperties implements PropertyResolver {
         return params;
     }
 
+    public String frontPropertiesAsString() {
+        return mapToString(frontProperties);
+    }
+
     public class UrlResolver extends ParamReplacer implements PropertyResolver {
         private final Properties urlsConfig = new Properties();
         private boolean encode = true;
@@ -307,5 +313,32 @@ public class OphProperties implements PropertyResolver {
     public OphProperties addDefault(String key, String value) {
         defaults.put(key, value);
         return this;
+    }
+
+    // Simplified JSON map generator. Escapes newlines and " chars
+    public static String mapToString(Map map) {
+        StringBuilder buf = new StringBuilder("{\n");
+        boolean first = true;
+        for(Object key: map.keySet()) {
+            if(first) {
+                first = false;
+            } else {
+                buf.append(",\n");
+            }
+            buf.append('"').append(escapeForJson(key.toString())).append("\": ");
+            Object value = map.get(key);
+            if(value == null) {
+                buf.append("null");
+            } else {
+                buf.append('"').append(escapeForJson(value.toString())).append('"');
+            }
+        }
+        buf.append("\n}");
+        return buf.toString();
+    }
+
+    public static String escapeForJson(String s) {
+        return s.replace("\n", "\\\\n")
+                .replace("\"", "\\\"");
     }
 }
