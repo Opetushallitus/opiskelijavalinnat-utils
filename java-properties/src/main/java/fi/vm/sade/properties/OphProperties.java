@@ -194,8 +194,8 @@ public class OphProperties implements PropertyResolver {
         return params;
     }
 
-    public String frontPropertiesAsString() {
-        return mapToString(frontProperties);
+    public String frontPropertiesToJson() {
+        return mapToJson(frontProperties);
     }
 
     public class UrlResolver extends ParamReplacer implements PropertyResolver {
@@ -316,7 +316,7 @@ public class OphProperties implements PropertyResolver {
     }
 
     // Simplified JSON map generator. Escapes newlines and " chars
-    public static String mapToString(Map map) {
+    public static String mapToJson(Map map) {
         StringBuilder buf = new StringBuilder("{\n");
         boolean first = true;
         for(Object key: map.keySet()) {
