@@ -138,18 +138,18 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
 3. Add a helper class to the project
   * Java / Spring
 
-        import fi.vm.sade.properties.OphProperties;
-        import org.springframework.context.annotation.Configuration;
+          import fi.vm.sade.properties.OphProperties;
+          import org.springframework.context.annotation.Configuration;
 
-        import java.nio.file.Paths;
+          import java.nio.file.Paths;
 
-        @Configuration
-        public class UrlConfiguration extends OphProperties {
-            public UrlConfiguration() {
-                addFiles("/hakemus-api-oph.properties");
-                addOptionalFiles(Paths.get(System.getProperties().getProperty("user.home"), "/oph-configuration/common.properties").toString());
-            }
-        }
+          @Configuration
+          public class UrlConfiguration extends OphProperties {
+              public UrlConfiguration() {
+                  addFiles("/hakemus-api-oph.properties");
+                  addOptionalFiles(Paths.get(System.getProperties().getProperty("user.home"), "/oph-configuration/common.properties").toString());
+              }
+          }
 
   * Scala
 
@@ -211,8 +211,8 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
    * If the application has many starting points it's better to include the oph_urls.js first with js script and then load the url configurations.
    This prevents the application from starting before urls are loaded.
 
-        <script src="${contextPath}/resources/javascript/oph_urls.js/index.js" type="text/javascript"></script>
-        <script src="${contextPath}/rest/frontProperties" type="text/javascript"></script>
-        <script src="${contextPath}/resources/javascript/haku-app-web-url_properties.js" type="text/javascript"></script>
+          <script src="${contextPath}/resources/javascript/oph_urls.js/index.js" type="text/javascript"></script>
+          <script src="${contextPath}/rest/frontProperties" type="text/javascript"></script>
+          <script src="${contextPath}/resources/javascript/haku-app-web-url_properties.js" type="text/javascript"></script>
 
 8. Fix all front tests and test manually in real use
