@@ -74,7 +74,7 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
     OphProperties properties = new OphProperties("/suoritusrekisteri-web-oph.properties");
     properties.url("organisaatio-service.soap");
 
-### Javascript
+### Javascript, Angular
 
     // load properties from a static file and a rest resource which returns override properties
     // start application after resources are loaded
@@ -88,11 +88,11 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
 
 ### Supported property file formats
 
-* .properties
+* .properties (java, scala)
 
         service.key=value
 
-* .json, nested and flat structure
+* .json, nested and flat structure (front)
 
         {
             "service": {
@@ -104,7 +104,7 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
             "service.key": "value"
         }
 
-* .js which is loaded with a script tag after including oph_urls.js can set properties directly to window.urls.XX
+* .js which is loaded with a script tag after including oph_urls.js can set properties directly to window.urls.XX (front)
 
         // window.urls.override should be set with rest end point from backend application
         window.urls.override = {
@@ -116,7 +116,7 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
         window.urls.defaults = {
         }
 
-* .js es6
+* .js es6 (front)
 
         export default {
             hakuperusteetadmin: {
@@ -124,3 +124,95 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
             }
         }
 
+# Steps for converting existing applications
+
+1. Add maven or sbt dependency
+2. Add <service-name>-oph.properties file
+
+        url-cas=https://${host.cas}
+        url-haku=https://${host.haku}
+        url-virkailija=https://${host.virkailija}
+
+        sijoittelu-service.hakija=${url-virkailija}/sijoittelu-service/resources/sijoittelu/$1/sijoitteluajo/latest/hakemus/$2
+
+3. Add a helper class to the project
+  * Java / Spring
+
+        import fi.vm.sade.properties.OphProperties;
+        import org.springframework.context.annotation.Configuration;
+
+        import java.nio.file.Paths;
+
+        @Configuration
+        public class UrlConfiguration extends OphProperties {
+            public UrlConfiguration() {
+                addFiles("/hakemus-api-oph.properties");
+                addOptionalFiles(Paths.get(System.getProperties().getProperty("user.home"), "/oph-configuration/common.properties").toString());
+            }
+        }
+
+  * Scala
+
+        object OphUrlProperties {
+          val ophProperties = new OphProperties("/suoritusrekisteri-web-oph.properties").addOptionalFiles(Paths.get(sys.props.getOrElse("user.home", ""), "/oph-configuration/common.properties").toString)
+        }
+
+4. Replace all external links
+  * Take care that all parameters are handled correctly
+  * Remove all manual link generation code, no more baseUrl + "resource/" + "oid"
+  * Extra parameters are appended to the querystring, remove that code too
+  * If some urls need different hosts, create url key for each language
+
+        hakuperusteet.tokenUrl.en=${url-haku-en}/hakuperusteet/app/$1#/token/
+        hakuperusteet.tokenUrl.fi=${url-haku}/hakuperusteet/app/$1#/token/
+        hakuperusteet.tokenUrl.sv=${url-haku-sv}/hakuperusteet/app/$1#/token/
+
+  * If there is a common http client, consider if that should take in url key + params
+
+        get(String key, Object... params) // java
+        get(key: String, args: AnyRef*)) // scala
+
+5. Fix all tests
+
+6. For front-apps you'll need to include oph_urls.js. Just add .bowerrc and use `bower install` according to instructions above.
+
+7. Decide on how front app's url configuration is loaded
+  * If there is a single .js file which is built with webpack (etc), just include a file with `window.urls.properties={key: "url"}` and oph_urls.js
+  * It's a good practice to add a REST endpoint to the backend application that returns the override urls
+
+        import org.springframework.beans.factory.annotation.Autowired;
+        import org.springframework.stereotype.Component;
+
+        import javax.ws.rs.GET;
+        import javax.ws.rs.Path;
+        import javax.ws.rs.Produces;
+        import javax.ws.rs.core.MediaType;
+
+        @Path("/rest/frontProperties")
+        @Component
+        public class FrontPropertiesResource {
+
+          @Autowired
+          UrlConfiguration urlConfiguration;
+
+          @GET
+          @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+          public String frontProperties() {
+              return "window.urls.override=" + urlConfiguration.frontPropertiesToJson();
+          }
+        }
+
+  * If the application can be started with a method call, you can delay startup by loading the properties separately with AJAX.
+
+        window.urls.loadFromUrls(url1, url2).success(function() {
+            // ..
+        }
+
+   * If the application has many starting points it's better to include the oph_urls.js first with js script and then load the url configurations.
+   This prevents the application from starting before urls are loaded.
+
+        <script src="${contextPath}/resources/javascript/oph_urls.js/index.js" type="text/javascript"></script>
+        <script src="${contextPath}/rest/frontProperties" type="text/javascript"></script>
+        <script src="${contextPath}/resources/javascript/haku-app-web-url_properties.js" type="text/javascript"></script>
+
+8. Fix all front tests and test manually in real use
