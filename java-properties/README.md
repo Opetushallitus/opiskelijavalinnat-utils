@@ -172,7 +172,7 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
         get(String key, Object... params) // java
         get(key: String, args: AnyRef*)) // scala
 
-5. Fix all tests
+5. Fix all backend tests
 
 6. For front-apps you'll need to include oph_urls.js. Just add .bowerrc and use `bower install` according to instructions above.
 
