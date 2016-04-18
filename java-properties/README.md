@@ -178,27 +178,26 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
   * If there is a single .js file which is built with webpack (etc), just include a file with `window.urls.properties={key: "url"}` and oph_urls.js
   * It's a good practice to add a REST endpoint to the backend application that returns the override urls
 
-        import org.springframework.beans.factory.annotation.Autowired;
-        import org.springframework.stereotype.Component;
+          import org.springframework.beans.factory.annotation.Autowired;
+          import org.springframework.stereotype.Component;
+          import javax.ws.rs.GET;
+          import javax.ws.rs.Path;
+          import javax.ws.rs.Produces;
+          import javax.ws.rs.core.MediaType;
 
-        import javax.ws.rs.GET;
-        import javax.ws.rs.Path;
-        import javax.ws.rs.Produces;
-        import javax.ws.rs.core.MediaType;
+          @Path("/rest/frontProperties")
+          @Component
+          public class FrontPropertiesResource {
 
-        @Path("/rest/frontProperties")
-        @Component
-        public class FrontPropertiesResource {
+            @Autowired
+            UrlConfiguration urlConfiguration;
 
-          @Autowired
-          UrlConfiguration urlConfiguration;
-
-          @GET
-          @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-          public String frontProperties() {
+            @GET
+            @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+            public String frontProperties() {
               return "window.urls.override=" + urlConfiguration.frontPropertiesToJson();
+            }
           }
-        }
 
   * If the application can be started with a method call, you can delay startup by loading the properties separately with AJAX.
 
