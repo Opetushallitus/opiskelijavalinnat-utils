@@ -150,13 +150,11 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
                   addOptionalFiles(Paths.get(System.getProperties().getProperty("user.home"), "/oph-configuration/common.properties").toString());
               }
           }
-
   * Scala
 
-        object OphUrlProperties {
-          val ophProperties = new OphProperties("/suoritusrekisteri-web-oph.properties").addOptionalFiles(Paths.get(sys.props.getOrElse("user.home", ""), "/oph-configuration/common.properties").toString)
-        }
-
+          object OphUrlProperties {
+            val ophProperties = new OphProperties("/suoritusrekisteri-web-oph.properties").addOptionalFiles(Paths.get(sys.props.getOrElse("user.home", ""), "/oph-configuration/common.properties").toString)
+          }
 4. Replace all external links
   * Take care that all parameters are handled correctly
   * Remove all manual link generation code, no more baseUrl + "resource/" + "oid"
