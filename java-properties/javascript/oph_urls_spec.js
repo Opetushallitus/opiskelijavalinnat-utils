@@ -5,7 +5,6 @@ describe('oph_urls.js', function() {
     beforeEach(function() {
         ctx.urls.properties = {}
         ctx.urls.defaults = {
-            encode: true
         }
         ctx.urls.override = {}
     });
@@ -84,7 +83,7 @@ describe('oph_urls.js', function() {
             "query Parameter": "1:23",
             "query Parameter2": "1:23"
         }), "/b/pow?query%20Parameter=1%3A23&query%20Parameter2=1%3A23");
-        var ctx2 = ctx.urls({encode:false})
+        var ctx2 = ctx.urls().noEncode()
         assert.equal(ctx2.url("a.a","1:"), "/a/1:");
         assert.equal(ctx2.url("b.b", {
             param: "pow:"
@@ -108,5 +107,13 @@ describe('oph_urls.js', function() {
 
         var ctx2 = ctx.urls({"a.a": "e"});
         assert.equal(ctx2.url("a.a"), "e");
+    })
+
+    it("should omit empty values", function() {
+        ctx.urls.defaults["a.a"] = "b"
+        assert.equal(ctx.url("a.a"), "b");
+        assert.equal(ctx.url("a.a",{}), "b");
+        assert.equal(ctx.url("a.a",{a: "", b: null, c:undefined, d:1}), "b?a=&b=&d=1");
+        assert.equal(ctx.urls().omitEmptyValuesFromQuerystring().url("a.a",{a: "", b: null, c:undefined, d:1}), "b?d=1");
     })
 });
