@@ -62,7 +62,7 @@ See implementation and usage in following projects
 
 * [.bowerrc](https://github.com/Opetushallitus/hakurekisteri/blob/master/.bowerrc)
 * `bower init`
-* `bower install --save https://github.com/Opetushallitus/java-utils/blob/master/java-properties/javascript/oph_urls.js`
+* `bower install --save https://raw.githubusercontent.com/Opetushallitus/java-utils/master/java-properties/javascript/oph_urls.js`
 * [bower.json](https://github.com/Opetushallitus/hakurekisteri/blob/master/bower.json)
 
 note: Add the file oph_urls.js to the javascript build process or refer to it in the main page with a script tag.
