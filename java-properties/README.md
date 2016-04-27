@@ -177,7 +177,7 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
 6. For front-apps you'll need to include oph_urls.js. Just add .bowerrc and use `bower install` according to instructions above.
 
 7. Decide on how front app's url configuration is loaded
-  * If there is a single .js file which is built with webpack (etc), just include a file with `window.urls.properties={key: "url"}` and oph_urls.js
+  * If there is a single .js file which is built with webpack (etc) include oph_urls.js and a properties file with contents `window.urls.properties={key: "url"}`
   * It's a good practice to add a REST endpoint to the backend application that returns the override urls
 
           import org.springframework.beans.factory.annotation.Autowired;
@@ -201,7 +201,7 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
             }
           }
 
-  * If the application can be started with a method call, you can delay startup by loading the properties separately with AJAX.
+  * If the application can be started with a method call, you can delay startup until properties are loaded with
 
           window.urls.loadFromUrls(url1, url2).success(function() {
               // ..
