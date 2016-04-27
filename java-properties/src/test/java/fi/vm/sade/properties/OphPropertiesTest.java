@@ -203,4 +203,22 @@ public class OphPropertiesTest {
                 "\"a\": \"a!.\\\\n\\\"\"\n" +
                 "}",ctx.frontPropertiesToJson());
     }
+
+    @Test
+    public void resolveUrlShouldNotThrowExceptionIfNoService() {
+        ctx.ophProperties.put("a","a/$1");
+        assertEquals("a/POW!", ctx.url("a", "POW!"));
+    }
+
+    @Test
+    public void resolveFor() {
+        ctx.ophProperties.put("a.a","a/$1");
+        assertEquals("a/POW!", ctx.resolveFor("a.a").url("POW!"));
+        try {
+            ctx.resolveFor("b.b");
+            throw new RuntimeException("Should not reach here");
+        } catch (RuntimeException e) {
+            assertEquals("\"b.b\" not defined.", e.getMessage());
+        }
+    }
 }

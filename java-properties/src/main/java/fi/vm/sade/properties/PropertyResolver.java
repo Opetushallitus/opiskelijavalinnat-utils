@@ -5,4 +5,5 @@ public interface PropertyResolver {
     String getProperty(String key, Object... params);
     String getOrElse(String key, String defaultValue, Object... params);
     String url(String key, Object... params);
+    ValueResolver resolveFor(String key);
 }

@@ -11,6 +11,7 @@
   * require(key, param1, param2, ...) throws an exception if key is not defined
   * getProperty(key, param1, param2, ...) returns null if key is not defined
   * getOrElse(key, defaultValue, param1, param2, ...) returns defaultValue if key is not defined
+  * resolveFor(key).url(param1) makes it easy to ensure at startup time that the key is defined. url(), require(), getProperty() and getOrElse() use original key parameter and take parameters
 * All property resolve methods support parameter lookup: by index ($1), by parameter name ($id) and by property key ${key:defaultValue}
   * .properties: `organisaatio-service.info=${publicLB}/organisaatio-service/info/$id/$user`
   * Javascript: `window.url("organisaatio-service.info", {id: oid, user: user.id})`

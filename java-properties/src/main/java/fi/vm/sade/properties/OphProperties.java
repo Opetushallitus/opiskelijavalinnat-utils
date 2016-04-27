@@ -157,6 +157,12 @@ public class OphProperties implements PropertyResolver {
         return new UrlResolver().url(key, params);
     }
 
+    @Override
+    public ValueResolver resolveFor(String key) {
+        require(key);
+        return new ValueResolverImpl(this, key);
+    }
+
     /**
      * Return a new PropertyResolver for urls. Parameters override properties in parent OphProperties. String parameter is set to "baseUrl"
      * Resolve order: urlsConfig, overrides, ophProperties, defaults
@@ -239,9 +245,13 @@ public class OphProperties implements PropertyResolver {
         @Override
         public String url(String key, Object... params) {
             String url = require(key, params);
-            Object baseUrl = getProperty(parseService(key) + ".baseUrl");
+            Object baseUrl = null;
+            String service = parseService(key);
+            if(service != null) {
+                baseUrl = getOrElse(service + ".baseUrl", null);
+            }
             if (baseUrl == null) {
-                baseUrl = getProperty("baseUrl");
+                baseUrl = getOrElse("baseUrl", null);
             }
             if (baseUrl != null) {
                 String strippedUrl = stripBaseUrl(url);
@@ -290,8 +300,18 @@ public class OphProperties implements PropertyResolver {
             return s;
         }
 
+        @Override
+        public ValueResolver resolveFor(String key) {
+            require(key);
+            return new ValueResolverImpl(this, key);
+        }
+
         private String parseService(String key) {
-            return key.substring(0, key.indexOf("."));
+            int i = key.indexOf(".");
+            if(i > 0) {
+                return key.substring(0, i);
+            }
+            return null;
         }
     }
 
