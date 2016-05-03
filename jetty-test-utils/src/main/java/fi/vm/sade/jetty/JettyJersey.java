@@ -38,8 +38,12 @@ public class JettyJersey {
         System.out.println("jetty started at port "+port);
     }
 
-    public static void stopServer() throws Exception {
-        server.stop();
+    public static void stopServer() {
+        try {
+            server.stop();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static int getPort() {
