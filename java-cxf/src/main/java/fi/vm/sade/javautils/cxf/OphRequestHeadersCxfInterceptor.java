@@ -1,4 +1,4 @@
-package fi.vm.sade.generic.rest;
+package fi.vm.sade.javautils.cxf;
 
 import java.net.HttpURLConnection;
 
@@ -7,30 +7,33 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.apache.cxf.transport.http.HTTPConduit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Interceptor for adding Caller-Id header to all requests. Interceptor must be registered for all 
  * services, in xml like following:
- * <bean id="callerIdInterceptor" class="fi.vm.sade.generic.rest.OphHeadersCxfInterceptor">
- *   <property name="clientSubSystemCode" value="${caller.id}"/>
+ *
+ * <bean id="ophRequestHeaders" class="fi.vm.sade.javautils.cxf.OphRequestHeadersCxfInterceptor">
+ *   <property name="clientSubSystemCode" value="viestintapalvelu.ryhmasahkoposti-service.backend"/>
  * </bean>
  *
  *  <cxf:bus>
  *      <cxf:outInterceptors>
- *          <ref bean="callerIdInterceptor"/>
+ *          <ref bean="ophRequestHeaders"/>
  *     </cxf:outInterceptors>
  *  </cxf:bus>
+ *
+ *  <jaxrs-client:client>
+ *      <jaxrs-client:outInterceptors>
+ *          <ref bean="ophRequestHeaders"/>
+ *      </jaxrs-client:outInterceptors>
+ *  </jaxrs-client:client>
  */
-public class OphHeadersCxfInterceptor<T extends Message> extends AbstractPhaseInterceptor<T> {
-
-    private static final Logger log = LoggerFactory.getLogger(OphHeadersCxfInterceptor.class);
+public class OphRequestHeadersCxfInterceptor<T extends Message> extends AbstractPhaseInterceptor<T> {
 
     private String clientSubSystemCode = null;
 
-    public OphHeadersCxfInterceptor() {
-        // Intercept in receive phase
+    public OphRequestHeadersCxfInterceptor() {
+        // Intercept before sending
         super(Phase.PRE_PROTOCOL);
     }
 
@@ -47,14 +50,14 @@ public class OphHeadersCxfInterceptor<T extends Message> extends AbstractPhaseIn
      * @throws Fault
      */
     public void handleOutbound(Message message) throws Fault {
-        log.debug("Inbound message intercepted for Caller-Id insertion.");
-
         HttpURLConnection conn = resolveConnection(message);
         
-        if(clientSubSystemCode != null)
+        if(clientSubSystemCode != null) {
             conn.setRequestProperty("clientSubSystemCode", clientSubSystemCode);
-        else
-            log.warn("Missing Caller-Id clientSubSystemCode. Set clientSubSystemCode for OphHeadersCxfInterceptor.");
+        }
+        else {
+            throw new RuntimeException("Missing clientSubSystemCode. Set clientSubSystemCode for OphRequestHeadersCxfInterceptor.");
+        }
         conn.setRequestProperty("CSRF", "CSRF");
         String cookieString  = conn.getRequestProperty("Cookie");
         if(cookieString != null) {
@@ -68,8 +71,7 @@ public class OphHeadersCxfInterceptor<T extends Message> extends AbstractPhaseIn
      * Resolve connection from message.
      */
     private static HttpURLConnection resolveConnection(Message message) {
-        HttpURLConnection conn = (HttpURLConnection)message.getExchange().getOutMessage().get(HTTPConduit.KEY_HTTP_CONNECTION);
-        return conn;
+        return (HttpURLConnection)message.getExchange().getOutMessage().get(HTTPConduit.KEY_HTTP_CONNECTION);
     }
 
     public String getClientSubSystemCode() {

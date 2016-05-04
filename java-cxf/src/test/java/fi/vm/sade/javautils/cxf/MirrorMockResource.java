@@ -1,4 +1,4 @@
-package fi.vm.sade.generic.rest;
+package fi.vm.sade.javautils.cxf;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;

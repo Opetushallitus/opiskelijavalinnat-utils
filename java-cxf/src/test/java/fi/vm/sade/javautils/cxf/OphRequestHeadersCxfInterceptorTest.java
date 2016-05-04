@@ -1,5 +1,6 @@
-package fi.vm.sade.generic.rest;
+package fi.vm.sade.javautils.cxf;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import javax.ws.rs.core.MediaType;
@@ -24,7 +25,7 @@ import static org.junit.Assert.assertEquals;
  * @author Jouni Stam
  *
  */
-public class CallerIdCxfInterceptorTest {
+public class OphRequestHeadersCxfInterceptorTest {
 
     String unprotectedTargetUrl = "/mirror/headers";
 
@@ -38,7 +39,7 @@ public class CallerIdCxfInterceptorTest {
 
     @Before
     public void setUp() throws Exception {
-        JettyJersey.startServer("fi.vm.sade.generic.rest", null);
+        JettyJersey.startServer("fi.vm.sade.javautils.cxf", null);
         //SecurityContextHolder.clearContext();
     }
 
@@ -51,17 +52,11 @@ public class CallerIdCxfInterceptorTest {
      * Caller-Id:n tulisi tulla pyynnön headeriin.
      */
     @Test
-    public void testCallerIdInsertion() {
-        try {
-            OphHeadersCxfInterceptor<Message> interceptor = this.createInterceptor();
-            interceptor.setClientSubSystemCode("TESTCLIENT");
-            WebClient cxfClient = createClient(this.unprotectedTargetUrl, interceptor);
-            String response = IOUtils.toString((InputStream) cxfClient.get().getEntity());
-            assertContains(response, "clientSubSystemCode: TESTCLIENT", "CSRF: CSRF", "Cookie: CSRF=CSRF");
-        } catch(Exception ex) {
-            ex.printStackTrace();
-            Assert.assertTrue(false);
-        }
+    public void testCallerIdInsertion() throws IOException {
+        OphRequestHeadersCxfInterceptor<Message> interceptor = createInterceptor();
+        WebClient cxfClient = createClient(this.unprotectedTargetUrl, interceptor);
+        String response = IOUtils.toString((InputStream) cxfClient.get().getEntity());
+        assertContains(response, "clientSubSystemCode: TESTCLIENT", "CSRF: CSRF", "Cookie: CSRF=CSRF");
     }
 
     private static void assertContains(String from, String... args) {
@@ -70,17 +65,16 @@ public class CallerIdCxfInterceptorTest {
         }
     }
 
-    private WebClient createClient(String url, OphHeadersCxfInterceptor<Message> interceptor) {
+    private WebClient createClient(String url, OphRequestHeadersCxfInterceptor<Message> interceptor) {
         WebClient c = WebClient.create(getUrl(url)).accept(MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON);
         // Add only as OUT interceptor
         WebClient.getConfig(c).getOutInterceptors().add(interceptor);
         return c;
     }
     
-    private OphHeadersCxfInterceptor<Message> createInterceptor() {
-        OphHeadersCxfInterceptor<Message> interceptor = new OphHeadersCxfInterceptor<Message>();
-        interceptor.setClientSubSystemCode("TEST");
-
+    private OphRequestHeadersCxfInterceptor<Message> createInterceptor() {
+        OphRequestHeadersCxfInterceptor<Message> interceptor = new OphRequestHeadersCxfInterceptor<Message>();
+        interceptor.setClientSubSystemCode("TESTCLIENT");
         return interceptor;
     }
     
