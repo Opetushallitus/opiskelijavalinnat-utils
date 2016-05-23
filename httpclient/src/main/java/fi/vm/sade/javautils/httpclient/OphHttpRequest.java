@@ -37,7 +37,11 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
             @Override
             public R handleResponse(OphHttpResponse response) {
                 verifyResponse(response);
-                return handler.handleResponse(response);
+                try {
+                    return handler.handleResponse(response);
+                } catch (Exception e) {
+                    throw new RuntimeException("Error handling url: " + url, e);
+                }
             }
         });
     }
