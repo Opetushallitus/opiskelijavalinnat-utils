@@ -1,0 +1,287 @@
+package fi.vm.sade.javautils.httpclient;
+
+import fi.vm.sade.properties.OphProperties;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.*;
+import org.apache.http.config.SocketConfig;
+import org.apache.http.entity.AbstractHttpEntity;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.cache.CacheConfig;
+import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.impl.cookie.BasicClientCookie;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+public class ApacheOphHttpClient extends OphHttpClientProxy {
+    private CloseableHttpClient httpclient;
+    private HashMap<String, Boolean> csrfCookiesCreateForHost = new HashMap<>();
+    private CookieStore cookieStore;
+
+    private ApacheOphHttpClient(ApacheHttpClientBuilder config) {
+        this.httpclient = config.httpBuilder.build();
+        cookieStore = config.cookieStore;
+    }
+
+    public static OphHttpClient createDefaultOphHttpClient(String clientSubsystemCode, OphProperties urlProperties, int timeoutMs, long connectionTimeToLiveSec) {
+        return new ApacheHttpClientBuilder()
+                .createClosableClient()
+                .configureDefaults(timeoutMs, connectionTimeToLiveSec)
+                .buildOphClient(clientSubsystemCode, urlProperties);
+    }
+
+    public static ApacheHttpClientBuilder createCustomBuilder() {
+        return new ApacheHttpClientBuilder();
+    }
+
+    public static class ApacheHttpClientBuilder {
+        HttpClientBuilder httpBuilder = null;
+        CookieStore cookieStore = null;
+
+        public ApacheHttpClientBuilder createClosableClient() {
+            httpBuilder = HttpClientBuilder.create();
+            return this;
+        }
+
+        // good values could be 50 * 1000 and 10 * 1024 * 1024
+        public ApacheHttpClientBuilder createCachingClient(int maxCacheEntries, int maxObjectSize) {
+            CachingHttpClientBuilder builder = CachingHttpClientBuilder.create();
+            CacheConfig cacheConfig = CacheConfig.custom().
+                    setMaxCacheEntries(maxCacheEntries).
+                    setMaxObjectSize(maxObjectSize).build();
+            builder.setCacheConfig(cacheConfig);
+            this.httpBuilder = builder;
+            return this;
+        }
+
+        public ApacheHttpClientBuilder configureDefaults(int timeoutMs, long connectionTimeToLiveSec) {
+            setPoolingConnectionManager(connectionTimeToLiveSec, 100, 1000);
+            setRequestTimeouts(timeoutMs);
+            setSocketConfig(timeoutMs);
+            setCookieStore();
+            disableRetry();
+            return this;
+        }
+
+        public ApacheHttpClientBuilder setSocketConfig(int timeoutMs) {
+            SocketConfig socketConfig = SocketConfig.custom().
+                    setSoKeepAlive(true).
+                    setSoTimeout(timeoutMs).
+                    setTcpNoDelay(true).
+                    build();
+            httpBuilder.setDefaultSocketConfig(socketConfig);
+            return this;
+        }
+
+        public ApacheHttpClientBuilder setRequestTimeouts(int timeoutMs) {
+            RequestConfig requestConfig = RequestConfig.custom().
+                    setConnectionRequestTimeout(timeoutMs).
+                    setConnectTimeout(timeoutMs).
+                    setSocketTimeout(timeoutMs).
+                    build();
+            httpBuilder.setDefaultRequestConfig(requestConfig);
+            return this;
+        }
+
+        public ApacheHttpClientBuilder setPoolingConnectionManager(long connectionTimeToLiveSec, int defaultMaxPerRoute, int maxTotal) {
+            // multithread support + max connections
+            PoolingHttpClientConnectionManager connectionManager;
+            connectionManager = new PoolingHttpClientConnectionManager(connectionTimeToLiveSec, TimeUnit.MILLISECONDS);
+            connectionManager.setDefaultMaxPerRoute(defaultMaxPerRoute); // default 2
+            connectionManager.setMaxTotal(maxTotal); // default 20
+            httpBuilder.setConnectionManager(connectionManager);
+            return this;
+        }
+
+        public ApacheHttpClientBuilder setCookieStore() {
+            cookieStore = new BasicCookieStore();
+            httpBuilder.setDefaultCookieStore(cookieStore);
+            return this;
+        }
+
+        public ApacheHttpClientBuilder disableRetry() {
+            httpBuilder.disableAutomaticRetries();
+            return this;
+        }
+
+        public OphHttpClient buildOphClient(String clientSubsystemCode, OphProperties urlProperties) {
+            return new OphHttpClient(new ApacheOphHttpClient(this), clientSubsystemCode, urlProperties);
+        }
+    }
+
+    @Override
+    public OphHttpClientProxyRequest createRequest(String method, OphRequestParameters requestParameters, String url) {
+        return new ApacheHttpClientRequestAdapter(method, url, requestParameters);
+    }
+
+    private class ApacheHttpClientRequestAdapter implements OphHttpClientProxyRequest {
+        private final String url;
+        private final HttpRequestBase request;
+
+        ApacheHttpClientRequestAdapter(String method, String url, OphRequestParameters requestParameters) {
+            this.url = url;
+            request = createRequest(method, url, requestParameters);
+        }
+
+        @Override
+        public OphHttpResponse execute() {
+            try {
+                return new ApacheOphHttpResponse(url, httpclient.execute(request));
+            } catch (IOException e) {
+                throw new RuntimeException("Url: " + url, e);
+            }
+        }
+
+        @Override
+        public <R> R execute(final OphHttpResponseHandler<? extends R> handler) {
+            ResponseHandler<R> responseHandler = new ResponseHandler<R>() {
+                @Override
+                public R handleResponse(final HttpResponse response) throws IOException {
+                    return handler.handleResponse(new ApacheOphHttpResponse(url, response));
+                }
+            };
+
+            try {
+                return httpclient.execute(request, responseHandler);
+            } catch (IOException e) {
+                throw new RuntimeException("Url: " + url, e);
+            }
+        }
+
+        private HttpRequestBase createRequest(String method, String url, OphRequestParameters requestParameters) {
+            HttpRequestBase request = getHttpClientRequest(method, url);
+            if(requestParameters.dataWriter != null) {
+                ((HttpEntityEnclosingRequestBase)request).setEntity(new DataWriter(requestParameters.dataWriterCharset, requestParameters.dataWriter));
+            }
+            if(!OphHttpClient.CSRF_SAFE_VERBS.contains(method)) {
+                ensureCSRFCookie(request);
+            }
+            for(OphHeader ophHeader : requestParameters.headers) {
+                request.setHeader(ophHeader.key, ophHeader.value);
+            }
+            return request;
+        }
+
+        private void ensureCSRFCookie(HttpRequestBase req) {
+            String host = req.getURI().getHost();
+            if (!csrfCookiesCreateForHost.containsKey(host) && cookieStore != null) {
+                synchronized (csrfCookiesCreateForHost) {
+                    if (!csrfCookiesCreateForHost.containsKey(host)) {
+                        csrfCookiesCreateForHost.put(host, true);
+                        BasicClientCookie cookie = new BasicClientCookie("CSRF", "CSRF");
+                        cookie.setDomain(host);
+                        cookie.setPath("/");
+                        cookieStore.addCookie(cookie);
+                    }
+                }
+            }
+        }
+    }
+
+    private static HttpRequestBase getHttpClientRequest(String method, String url) {
+        switch (method) {
+            case OphHttpClient.Method.GET: return new HttpGet(url);
+            case OphHttpClient.Method.HEAD: return new HttpHead(url);
+            case OphHttpClient.Method.OPTIONS: return new HttpOptions(url);
+            case OphHttpClient.Method.POST: return new HttpPost(url);
+            case OphHttpClient.Method.PUT: return new HttpPut(url);
+            case OphHttpClient.Method.PATCH: return new HttpPatch(url);
+            case OphHttpClient.Method.DELETE: return new HttpDelete(url);
+        }
+        throw new RuntimeException("Unsupported HTTP method: " + method + " for url: " + url);
+    }
+
+    class ApacheOphHttpResponse implements OphHttpResponse {
+        private final String url;
+        private HttpResponse response;
+
+        ApacheOphHttpResponse(String url, HttpResponse response) {
+            this.url = url;
+            this.response = response;
+        }
+
+        @Override
+        public InputStream asInputStream() {
+            try {
+                return response.getEntity().getContent();
+            } catch (IOException e) {
+                throw new RuntimeException("Url: " + url, e);
+            }
+        }
+
+        @Override
+        public String asText() {
+            try {
+                return OphHttpClient.toString(asInputStream());
+            } catch (IOException e) {
+                throw new RuntimeException("Url: " + url, e);
+            }
+        }
+
+        @Override
+        public void close() {
+            try {
+                ((CloseableHttpResponse)response).close();
+            } catch (IOException e) {
+                throw new RuntimeException("Error closing connection: " + url, e);
+            }
+        }
+
+        @Override
+        public int getStatusCode() {
+            return response.getStatusLine().getStatusCode();
+        }
+
+        @Override
+        public List<String> getHeaders(String key) {
+            List<String> ret = new ArrayList<>();
+            for(Header h: response.getHeaders(key)) {
+                ret.add(h.getValue());
+            }
+            return ret;
+        }
+    }
+
+    class DataWriter extends AbstractHttpEntity {
+        private OphRequestPostWriter dataWriter;
+        private String charsetName;
+
+        DataWriter(String charsetName, OphRequestPostWriter dataWriter) {
+            this.dataWriter = dataWriter;
+            this.charsetName = charsetName;
+        }
+
+        public boolean isRepeatable() {
+            return false;
+        }
+
+        public long getContentLength() {
+            return -1;
+        }
+
+        public boolean isStreaming() {
+            return false;
+        }
+
+        public InputStream getContent() throws IOException {
+            // Should be implemented as well but is irrelevant for this case
+            throw new UnsupportedOperationException();
+        }
+
+        public void writeTo(final OutputStream outstream) throws IOException {
+            Writer writer = new OutputStreamWriter(outstream, charsetName);
+            dataWriter.writeTo(writer);
+            writer.flush();
+        }
+    }
+}

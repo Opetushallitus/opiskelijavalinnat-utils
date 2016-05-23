@@ -13,6 +13,7 @@
         <module>jetty-test-utils</module>
         <module>java-cas</module>
         <module>java-cxf</module>
+        <module>httpclient</module>
     </modules>
     <build>
         <plugins>
