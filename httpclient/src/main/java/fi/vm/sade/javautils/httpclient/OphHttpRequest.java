@@ -1,16 +1,17 @@
 package fi.vm.sade.javautils.httpclient;
 
+import fi.vm.sade.properties.OphProperties;
+
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
-    private final String url;
-    private final String method;
+    private final OphProperties properties;
     private OphHttpClientProxy client;
 
-    public OphHttpRequest(String method, String url, OphRequestParameters ophRequestParameters, OphHttpClientProxy client) {
-        this.method = method;
-        this.url = url;
+    public OphHttpRequest(OphProperties properties, OphRequestParameters ophRequestParameters, OphHttpClientProxy client) {
+        this.properties = properties;
         this.client = client;
         setThisForRequestParamSetters(this);
         setRequestParameters(ophRequestParameters);
@@ -18,7 +19,7 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
 
     public OphHttpResponse handleManually() throws IOException {
         prepareRequest();
-        OphHttpResponse response = client.createRequest(method, getRequestParameters(), url).execute();
+        OphHttpResponse response = client.createRequest(getRequestParameters()).execute();
         verifyResponse(response);
         return response;
     }
@@ -34,8 +35,9 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
 
     public <R> R execute(final OphHttpResponseHandler<? extends R> handler) {
         prepareRequest();
+        OphRequestParameters requestParameters = getRequestParameters();
         try {
-            return client.createRequest(method, getRequestParameters(), url).execute(new OphHttpResponseHandler<R>() {
+            return client.createRequest(requestParameters).execute(new OphHttpResponseHandler<R>() {
                 @Override
                 public R handleResponse(OphHttpResponse response) throws IOException {
                     verifyResponse(response);
@@ -43,7 +45,7 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
                 }
             });
         } catch (IOException e) {
-            throw new RuntimeException("Error handling url: " + url, e);
+            throw new RuntimeException("Error handling url: " + requestParameters.url, e);
         }
     }
 
@@ -56,7 +58,7 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
             }
             header(OphHttpClient.Header.CONTENT_TYPE, contentType);
         }
-        if(!OphHttpClient.CSRF_SAFE_VERBS.contains(method)) {
+        if(!OphHttpClient.CSRF_SAFE_VERBS.contains(requestParameters.method)) {
             header(OphHttpClient.Header.CSRF, OphHttpClient.Header.CSRF);
         }
         if(requestParameters.acceptMediaTypes.size() > 0) {
@@ -65,10 +67,28 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
         if(requestParameters.clientSubSystemCode != null) {
             header("clientSubSystemCode", requestParameters.clientSubSystemCode);
         }
+        requestParameters.url = createUrl();
     }
+
+    private String createUrl() {
+        OphRequestParameters requestParameters = getRequestParameters();
+        Object params[] = requestParameters.urlParams;
+        if(requestParameters.params.size() > 0) {
+            params = appendElementToArray(params, requestParameters.params);
+        }
+        return properties.url(requestParameters.urlKey, params);
+    }
+
+    private static <R> R[] appendElementToArray(final R[] a, final R e) {
+        R[] copy  = Arrays.copyOf(a, a.length + 1);
+        copy[copy.length - 1] = e;
+        return copy;
+    }
+
 
     private void verifyResponse(OphHttpResponse response) {
         OphRequestParameters requestParameters = getRequestParameters();
+        String url = requestParameters.url;
 
         boolean statusOk;
         int status = response.getStatusCode();
@@ -77,6 +97,7 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
         } else {
             statusOk = requestParameters.expectStatus.contains(status);
         }
+
         if (!statusOk) {
             String expected;
             if(requestParameters.expectStatus.size() == 0) {
@@ -103,7 +124,7 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
                 error = "returned " + responseContentTypeHeaders.size() + " headers when expected one. Values: " + OphHttpClient.join(responseContentTypeHeaders, ", ");
             }
             if(error != null) {
-                throw new RuntimeException("Error with response " + OphHttpClient.Header.CONTENT_TYPE + " header. Url: "+url+" Error: " + error + " Expected: " + OphHttpClient.join(requestParameters.acceptMediaTypes, ", "));
+                throw new RuntimeException("Error with response " + OphHttpClient.Header.CONTENT_TYPE + " header. Url: "+ url +" Error: " + error + " Expected: " + OphHttpClient.join(requestParameters.acceptMediaTypes, ", "));
             }
         }
     }

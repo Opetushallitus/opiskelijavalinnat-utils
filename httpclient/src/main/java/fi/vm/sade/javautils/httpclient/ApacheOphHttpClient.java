@@ -138,22 +138,20 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
     }
 
     @Override
-    public OphHttpClientProxyRequest createRequest(String method, OphRequestParameters requestParameters, String url) {
-        return new ApacheHttpClientRequestAdapter(method, url, requestParameters);
+    public OphHttpClientProxyRequest createRequest(OphRequestParameters requestParameters) {
+        return new ApacheHttpClientRequestAdapter(requestParameters);
     }
 
     private class ApacheHttpClientRequestAdapter implements OphHttpClientProxyRequest {
-        private final String url;
-        private final HttpRequestBase request;
+        private final OphRequestParameters requestParameters;
 
-        ApacheHttpClientRequestAdapter(String method, String url, OphRequestParameters requestParameters) {
-            this.url = url;
-            request = createRequest(method, url, requestParameters);
+        ApacheHttpClientRequestAdapter(OphRequestParameters requestParameters) {
+            this.requestParameters = requestParameters;
         }
 
         @Override
         public OphHttpResponse execute() throws IOException {
-            return new ApacheOphHttpResponse(url, httpclient.execute(request));
+            return new ApacheOphHttpResponse(requestParameters, httpclient.execute(createRequest(requestParameters)));
         }
 
         @Override
@@ -161,23 +159,25 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
             ResponseHandler<R> responseHandler = new ResponseHandler<R>() {
                 @Override
                 public R handleResponse(final HttpResponse response) throws IOException {
-                    return handler.handleResponse(new ApacheOphHttpResponse(url, response));
+                    return handler.handleResponse(new ApacheOphHttpResponse(requestParameters, response));
                 }
             };
 
-                return httpclient.execute(request, responseHandler);
+            return httpclient.execute(createRequest(requestParameters), responseHandler);
         }
 
-        private HttpRequestBase createRequest(String method, String url, OphRequestParameters requestParameters) {
-            HttpRequestBase request = getHttpClientRequest(method, url);
+        private HttpRequestBase createRequest(OphRequestParameters requestParameters) {
+            HttpRequestBase request = getHttpClientRequest(requestParameters.method, requestParameters.url);
             if(requestParameters.dataWriter != null) {
                 ((HttpEntityEnclosingRequestBase)request).setEntity(new DataWriter(requestParameters.dataWriterCharset, requestParameters.dataWriter));
             }
-            if(!OphHttpClient.CSRF_SAFE_VERBS.contains(method)) {
+            if(!OphHttpClient.CSRF_SAFE_VERBS.contains(requestParameters.method)) {
                 ensureCSRFCookie(request);
             }
-            for(OphHeader ophHeader : requestParameters.headers) {
-                request.setHeader(ophHeader.key, ophHeader.value);
+            for(String header : requestParameters.headers.keySet()) {
+                for(String value: requestParameters.headers.get(header)) {
+                    request.setHeader(header, value);
+                }
             }
             return request;
         }
@@ -213,10 +213,12 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
 
     class ApacheOphHttpResponse implements OphHttpResponse {
         private final String url;
+        private final OphRequestParameters requestParameters;
         private HttpResponse response;
 
-        ApacheOphHttpResponse(String url, HttpResponse response) {
-            this.url = url;
+        ApacheOphHttpResponse(OphRequestParameters requestParameters, HttpResponse response) {
+            this.url = requestParameters.url;
+            this.requestParameters = requestParameters;
             this.response = response;
         }
 

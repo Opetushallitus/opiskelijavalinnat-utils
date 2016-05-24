@@ -43,30 +43,34 @@ public class OphHttpClient extends OphRequestParameterStorage<OphHttpClient> {
     }
 
     public OphHttpRequest get(String key, Object... params) {
-        return createRequest(Method.GET, urlProperties.url(key, params));
+        return createRequest(Method.GET, key, params);
     }
 
     public OphHttpRequest head(String key, Object... params) {
-        return createRequest(Method.HEAD, urlProperties.url(key, params));
+        return createRequest(Method.HEAD, key, params);
     }
     public OphHttpRequest options(String key, Object... params) {
-        return createRequest(Method.OPTIONS, urlProperties.url(key, params));
+        return createRequest(Method.OPTIONS, key, params);
     }
     public OphHttpRequest post(String key, Object... params) {
-        return createRequest(Method.POST, urlProperties.url(key, params));
+        return createRequest(Method.POST, key, params);
     }
     public OphHttpRequest put(String key, Object... params) {
-        return createRequest(Method.PUT, urlProperties.url(key, params));
+        return createRequest(Method.PUT, key, params);
     }
     public OphHttpRequest patch(String key, Object... params) {
-        return createRequest(Method.PATCH, urlProperties.url(key, params));
+        return createRequest(Method.PATCH, key, params);
     }
     public OphHttpRequest delete(String key, Object... params) {
-        return createRequest(Method.DELETE, urlProperties.url(key, params));
+        return createRequest(Method.DELETE, key, params);
     }
 
-    private OphHttpRequest createRequest(String method, String url) {
-        return new OphHttpRequest(method, url, cloneRequestParameters(), httpAdapter);
+    private OphHttpRequest createRequest(String method, String url, Object[] params) {
+        OphRequestParameters requestParameters = cloneRequestParameters();
+        requestParameters.method = method;
+        requestParameters.urlKey = url;
+        requestParameters.urlParams = params;
+        return new OphHttpRequest(urlProperties, requestParameters, httpAdapter);
     }
 
     public static String toString(InputStream stream) throws IOException {

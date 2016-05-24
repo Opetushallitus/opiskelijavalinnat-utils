@@ -1,8 +1,6 @@
 package fi.vm.sade.javautils.httpclient;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class OphRequestParameterStorage<T> {
     private T thisParams;
@@ -39,7 +37,15 @@ public class OphRequestParameterStorage<T> {
     }
 
     public T header(String key, String value) {
-        requestParameters.headers.add(new OphHeader(key, value));
+        requestParameters.headers.add(key, value);
+        return thisParams;
+    }
+
+    /**
+     * Add named path parameter, if it's not used as a named path parameter use it as querystring parameter
+     */
+    public T param(String key, String value) {
+        requestParameters.params.add(key, value);
         return thisParams;
     }
 
@@ -51,34 +57,4 @@ public class OphRequestParameterStorage<T> {
         return requestParameters.cloneParameters();
     }
 
-    public static class OphRequestParameters implements Cloneable {
-        public String clientSubSystemCode = null;
-        public List<Integer> expectStatus = new ArrayList<>();
-        public OphRequestPostWriter dataWriter = null;
-        public String contentType;
-        public String dataWriterCharset;
-        public List<OphHeader> headers = new ArrayList<>();
-        public List<String> acceptMediaTypes = new ArrayList<>();
-
-        public OphRequestParameters cloneParameters() {
-            try {
-                OphRequestParameters clone = (OphRequestParameters) super.clone();
-                clone.expectStatus = new ArrayList<>(clone.expectStatus);
-                clone.headers = new ArrayList<>(clone.headers);
-                clone.acceptMediaTypes = new ArrayList<>(clone.acceptMediaTypes);
-                return clone;
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    public static class OphHeader {
-        public final String key, value;
-
-        public OphHeader(String key, String value) {
-            this.key = key;
-            this.value = value;
-        }
-    }
 }
