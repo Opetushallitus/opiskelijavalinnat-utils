@@ -1,5 +1,6 @@
 package fi.vm.sade.javautils.httpclient;
 
+import java.io.IOException;
 import java.util.List;
 
 public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
@@ -15,7 +16,7 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
         setRequestParameters(ophRequestParameters);
     }
 
-    public OphHttpResponse handleManually() {
+    public OphHttpResponse handleManually() throws IOException {
         prepareRequest();
         OphHttpResponse response = client.createRequest(method, getRequestParameters(), url).execute();
         verifyResponse(response);
@@ -33,17 +34,17 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
 
     public <R> R execute(final OphHttpResponseHandler<? extends R> handler) {
         prepareRequest();
-        return client.createRequest(method, getRequestParameters(), url).execute(new OphHttpResponseHandler<R>() {
-            @Override
-            public R handleResponse(OphHttpResponse response) {
-                verifyResponse(response);
-                try {
+        try {
+            return client.createRequest(method, getRequestParameters(), url).execute(new OphHttpResponseHandler<R>() {
+                @Override
+                public R handleResponse(OphHttpResponse response) throws IOException {
+                    verifyResponse(response);
                     return handler.handleResponse(response);
-                } catch (Exception e) {
-                    throw new RuntimeException("Error handling url: " + url, e);
                 }
-            }
-        });
+            });
+        } catch (IOException e) {
+            throw new RuntimeException("Error handling url: " + url, e);
+        }
     }
 
     private void prepareRequest() {

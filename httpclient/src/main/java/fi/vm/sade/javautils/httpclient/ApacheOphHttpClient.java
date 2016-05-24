@@ -36,7 +36,7 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
     public static OphHttpClient createDefaultOphHttpClient(String clientSubsystemCode, OphProperties urlProperties, int timeoutMs, long connectionTimeToLiveSec) {
         return new ApacheHttpClientBuilder()
                 .createClosableClient()
-                .configureDefaults(timeoutMs, connectionTimeToLiveSec)
+                .setDefaultConfiguration(timeoutMs, connectionTimeToLiveSec)
                 .buildOphClient(clientSubsystemCode, urlProperties);
     }
 
@@ -44,9 +44,22 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
         return new ApacheHttpClientBuilder();
     }
 
+    /**
+     * Helper methods for HttpClientBuilder.
+     *
+     * 1. Use createClosableClient(), createCachingClient() or setHttpClientBuilder() to initialize httpBuilder
+     *
+     * 2. Call helper methods to configure httpBuilder
+     *
+     * 3. Call build() and create OphHttpClient
+     */
     public static class ApacheHttpClientBuilder {
-        HttpClientBuilder httpBuilder = null;
-        CookieStore cookieStore = null;
+        public HttpClientBuilder httpBuilder = null;
+        public CookieStore cookieStore = null;
+
+        public ApacheOphHttpClient build() {
+            return new ApacheOphHttpClient(this);
+        }
 
         public ApacheHttpClientBuilder createClosableClient() {
             httpBuilder = HttpClientBuilder.create();
@@ -64,7 +77,12 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
             return this;
         }
 
-        public ApacheHttpClientBuilder configureDefaults(int timeoutMs, long connectionTimeToLiveSec) {
+        public ApacheHttpClientBuilder setHttpClientBuilder(HttpClientBuilder httpBuilder) {
+            this.httpBuilder = httpBuilder;
+            return this;
+        }
+
+        public ApacheHttpClientBuilder setDefaultConfiguration(int timeoutMs, long connectionTimeToLiveSec) {
             setPoolingConnectionManager(connectionTimeToLiveSec, 100, 1000);
             setRequestTimeouts(timeoutMs);
             setSocketConfig(timeoutMs);
@@ -115,7 +133,7 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
         }
 
         public OphHttpClient buildOphClient(String clientSubsystemCode, OphProperties urlProperties) {
-            return new OphHttpClient(new ApacheOphHttpClient(this), clientSubsystemCode, urlProperties);
+            return new OphHttpClient(build(), clientSubsystemCode, urlProperties);
         }
     }
 
@@ -134,16 +152,12 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
         }
 
         @Override
-        public OphHttpResponse execute() {
-            try {
-                return new ApacheOphHttpResponse(url, httpclient.execute(request));
-            } catch (IOException e) {
-                throw new RuntimeException("Url: " + url, e);
-            }
+        public OphHttpResponse execute() throws IOException {
+            return new ApacheOphHttpResponse(url, httpclient.execute(request));
         }
 
         @Override
-        public <R> R execute(final OphHttpResponseHandler<? extends R> handler) {
+        public <R> R execute(final OphHttpResponseHandler<? extends R> handler) throws IOException {
             ResponseHandler<R> responseHandler = new ResponseHandler<R>() {
                 @Override
                 public R handleResponse(final HttpResponse response) throws IOException {
@@ -151,11 +165,7 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
                 }
             };
 
-            try {
                 return httpclient.execute(request, responseHandler);
-            } catch (IOException e) {
-                throw new RuntimeException("Url: " + url, e);
-            }
         }
 
         private HttpRequestBase createRequest(String method, String url, OphRequestParameters requestParameters) {

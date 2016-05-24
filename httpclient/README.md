@@ -44,10 +44,8 @@ Initialize a non-caching http client that pools connections.
 `ApacheHttpClientBuilder.createCustomBuilder()` can be used to configure your own HttpClient.
 See available methods in `ApacheHttpClientBuilder`
 
-    ApacheHttpClientBuilder builder = ApacheHttpClientBuilder.createCustomBuilder().
+    ApacheHttpClientBuilder builder = ApacheOphHttpClient.createCustomBuilder().
                             createCachingClient( 50 * 1000, 10 * 1024 * 1024).
-                            configureDefaults(10000, 60);
-
-    builder.httpBuilder.disableAutomaticRetries(); // Accessing original HttpClientBuilder
-
-    OphHttpClient cachingClient = builder.buildOphClient("tester", properties)
+                            setDefaultConfiguration(10000, 60);
+    builder.httpBuilder.setProxy(...); // Accessing the original HttpClientBuilder's method
+    OphHttpClient cachingClient = new OphHttpClient(builder.build(), "tester", properties)
