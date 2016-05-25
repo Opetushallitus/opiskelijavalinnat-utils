@@ -29,6 +29,8 @@ public class OphRequestParameters implements Cloneable {
             OphRequestParameters clone = (OphRequestParameters) super.clone();
             clone.expectStatus = new ArrayList<>(expectStatus);
             clone.acceptMediaTypes = new ArrayList<>(acceptMediaTypes);
+            clone.headers = new MultiValueMap<>();
+            clone.params = new MultiValueMap<>();
             clone.headers.putAll(headers);
             clone.params.putAll(params);
             return clone;
