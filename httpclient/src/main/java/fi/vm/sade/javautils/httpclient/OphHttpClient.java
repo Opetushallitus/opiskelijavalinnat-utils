@@ -33,6 +33,7 @@ public class OphHttpClient extends OphRequestParameterStorage<OphHttpClient> {
     public static final String UTF8 = "UTF-8";
     public static final String JSON = "application/json";
     public static final String HTML = "text/html";
+    private static final String JSON_UTF8 = JSON + ";charset=UTF-8";
     public static final List<String> CSRF_SAFE_VERBS = Arrays.asList(Method.GET, Method.HEAD, Method.OPTIONS);
 
     public OphHttpClient(OphHttpClientProxy httpAdapter, String clientSubsystemCode, OphProperties urlProperties) {
