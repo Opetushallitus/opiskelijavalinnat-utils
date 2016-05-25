@@ -6,6 +6,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * A configurable request object.
+ * Once execute() or handleManually() is called OphHttpRequest instance can't be modified.
+ * The same OphHttpRequest object can be used to make multiple requests to the same URL.
+ */
 public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
     private final OphProperties properties;
     private OphHttpClientProxy client;
@@ -17,23 +22,14 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
         setRequestParameters(ophRequestParameters);
     }
 
-    public OphHttpResponse handleManually() throws IOException {
-        prepareRequest();
-        OphHttpResponse response = client.createRequest(getRequestParameters()).execute();
-        verifyResponse(response);
-        return response;
-    }
-
-    public void execute() {
-        execute(new OphHttpResponseHandler<Void>() {
-            @Override
-            public Void handleResponse(OphHttpResponse response) {
-                return null;
-            }
-        });
-    }
-
-    public <R> R execute(final OphHttpResponseHandler<? extends R> handler) {
+    /**
+     * Make a request and use handler to handle the response.
+     * All resources are automatically released after the handler code finishes.
+     * @param handler
+     * @param <R>
+     * @return
+     */
+    public <R> R execute(final OphHttpResponseHandler<R> handler) {
         prepareRequest();
         OphRequestParameters requestParameters = getRequestParameters();
         try {
@@ -49,29 +45,58 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
         }
     }
 
-    private void prepareRequest() {
-        final OphRequestParameters requestParameters = getRequestParameters();
-        if(requestParameters.dataWriter != null) {
-            String contentType = requestParameters.contentType;
-            if(!contentType.contains("charset")) {
-                contentType += "; charset=" + requestParameters.dataWriterCharset;
+    /**
+     * Make a request and use #expectStatus and #accept() to verify that returned content was ok.
+     * All resources are automatically released.
+     */
+    public void execute() {
+        execute(new OphHttpResponseHandler<Void>() {
+            @Override
+            public Void handleResponse(OphHttpResponse response) {
+                return null;
             }
-            header(OphHttpClient.Header.CONTENT_TYPE, contentType);
-        }
-        if(!OphHttpClient.CSRF_SAFE_VERBS.contains(requestParameters.method)) {
-            header(OphHttpClient.Header.CSRF, OphHttpClient.Header.CSRF);
-        }
-        if(requestParameters.acceptMediaTypes.size() > 0) {
-            header(OphHttpClient.Header.ACCEPT, OphHttpClient.join(requestParameters.acceptMediaTypes, ", "));
-        }
-        if(requestParameters.clientSubSystemCode != null) {
-            header("clientSubSystemCode", requestParameters.clientSubSystemCode);
-        }
-        requestParameters.url = createUrl();
+        });
     }
 
-    private String createUrl() {
-        OphRequestParameters requestParameters = getRequestParameters();
+    /**
+     * Make a request and handle everything manually. There should not be the need to use this method.
+     * @return
+     * @throws IOException
+     */
+    public OphHttpResponse handleManually() throws IOException {
+        prepareRequest();
+        OphHttpResponse response = client.createRequest(getRequestParameters()).execute();
+        verifyResponse(response);
+        return response;
+    }
+
+    private void prepareRequest() {
+        if(isEditMode()) {
+            final OphRequestParameters requestParameters = getRequestParameters();
+            if(requestParameters.dataWriter != null) {
+                String contentType = requestParameters.contentType;
+                if(!contentType.contains("charset")) {
+                    contentType += "; charset=" + requestParameters.dataWriterCharset;
+                }
+                header(OphHttpClient.Header.CONTENT_TYPE, contentType);
+            }
+            if(!OphHttpClient.CSRF_SAFE_VERBS.contains(requestParameters.method)) {
+                header(OphHttpClient.Header.CSRF, OphHttpClient.Header.CSRF);
+            }
+            if(requestParameters.acceptMediaTypes.size() > 0) {
+                header(OphHttpClient.Header.ACCEPT, OphHttpClient.join(requestParameters.acceptMediaTypes, ", "));
+            }
+            if(requestParameters.clientSubSystemCode != null) {
+                header("clientSubSystemCode", requestParameters.clientSubSystemCode);
+            }
+            if(requestParameters.url == null) {
+                requestParameters.url = createUrl(requestParameters);
+            }
+            disableEditMode();
+        }
+    }
+
+    private String createUrl(OphRequestParameters requestParameters) {
         Object params[] = requestParameters.urlParams;
         if(requestParameters.params.size() > 0) {
             params = appendElementToArray(params, requestParameters.params);

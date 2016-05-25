@@ -49,3 +49,18 @@ See available methods in `ApacheHttpClientBuilder`
                             setDefaultConfiguration(10000, 60);
     builder.httpBuilder.setProxy(...); // Accessing the original HttpClientBuilder's method
     OphHttpClient cachingClient = new OphHttpClient(builder.build(), "tester", properties)
+
+### Making requests
+
+Handle the response with your code:
+
+    Koulutus koulutus = client.get("tarjonta-service.koulutus", koulutusId).expectStatus(200).accept(JSON).
+        execute(r -> mapper.readValue(r.asInputStream(), Koulutus.class));
+
+Make a post and verify that the response code is 200:
+
+   client.post("tarjonta-service.koulutus").expectStatus(200).
+        data("application/json", "UTF-8", out -> mapper.writeValue(out, koulutus) )
+        execute();
+
+
