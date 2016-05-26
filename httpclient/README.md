@@ -30,7 +30,7 @@
 
     "fi.vm.sade.java-utils" %% "httpclient" % "0.0.1-SNAPSHOT"
 
-## Code
+## Initializing a client
 
 Initialize a non-caching http client that pools connections.
 
@@ -50,7 +50,12 @@ See available methods in `ApacheHttpClientBuilder`
     builder.httpBuilder.setProxy(...); // Accessing the original HttpClientBuilder's method
     OphHttpClient cachingClient = new OphHttpClient(builder.build(), "tester", properties)
 
-### Making requests
+By default initialized clients:
+* accept the response if the response status code is between 200 and 299.
+* follow redirects automatically
+* don't retry automatically
+
+## Making requests
 
 Handle the response with your code:
 
@@ -63,4 +68,13 @@ Make a post and verify that the response code is 200:
         data("application/json", "UTF-8", out -> mapper.writeValue(out, koulutus) )
         execute();
 
+## Retrying
 
+Make the request and handle the response. Retry 3 times (and wait 2000ms between requests) if anything throws an exception during the process.
+Warning: The HTTP request is also repeated, so you might get multiple requests even if the original request succeeds but the assertions or
+the handler throw an exception.
+
+    Koulutus koulutus = client.get("tarjonta-service.koulutus", koulutusId).
+        expectStatus(200).accept(JSON).
+        retryOnError(3, 2000).
+        execute(r -> mapper.readValue(r.asInputStream(), Koulutus.class));

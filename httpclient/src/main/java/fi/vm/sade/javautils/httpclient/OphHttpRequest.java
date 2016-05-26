@@ -31,18 +31,23 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
      */
     public <R> R execute(final OphHttpResponseHandler<R> handler) {
         prepareRequest();
-        OphRequestParameters requestParameters = getRequestParameters();
-        try {
-            return client.createRequest(requestParameters).execute(new OphHttpResponseHandler<R>() {
-                @Override
-                public R handleResponse(OphHttpResponse response) throws IOException {
-                    verifyResponse(response);
-                    return handler.handleResponse(response);
+        final OphRequestParameters requestParameters = getRequestParameters();
+        return handleRetryOnError(requestParameters.method + " " + requestParameters.url, requestParameters.maxRetryCount, requestParameters.retryDelayMs, new CallableWithoutException<R>() {
+            @Override
+            public R call() {
+                try {
+                    return client.createRequest(requestParameters).execute(new OphHttpResponseHandler<R>() {
+                        @Override
+                        public R handleResponse(OphHttpResponse response) throws IOException {
+                            verifyResponse(response);
+                            return handler.handleResponse(response);
+                        }
+                    });
+                } catch (IOException e) {
+                    throw new RuntimeException("Error handling url: " + requestParameters.url, e);
                 }
-            });
-        } catch (IOException e) {
-            throw new RuntimeException("Error handling url: " + requestParameters.url, e);
-        }
+            }
+        });
     }
 
     /**
@@ -65,9 +70,20 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
      */
     public OphHttpResponse handleManually() throws IOException {
         prepareRequest();
-        OphHttpResponse response = client.createRequest(getRequestParameters()).execute();
-        verifyResponse(response);
-        return response;
+        final OphRequestParameters requestParameters = getRequestParameters();
+        return handleRetryOnError(requestParameters.method + " " + requestParameters.url, requestParameters.maxRetryCount, requestParameters.retryDelayMs, new CallableWithoutException<OphHttpResponse>() {
+            @Override
+            public OphHttpResponse call() {
+                OphHttpResponse response;
+                try {
+                    response = client.createRequest(requestParameters).execute();
+                } catch (IOException e) {
+                    throw new RuntimeException("Error handling url: " + requestParameters.url, e);
+                }
+                verifyResponse(response);
+                return response;
+            }
+        });
     }
 
     private void prepareRequest() {
@@ -162,4 +178,30 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
         }
         return false;
     }
+
+    private static <V> V handleRetryOnError(String id, Integer maxCount, Long delayMs, CallableWithoutException<V> callable) {
+        if(maxCount != null) {
+            int count = 0;
+            while(true) {
+                try {
+                    return callable.call();
+                } catch(Exception e) {
+                    ++count;
+                    if(maxCount != -1 && maxCount == count) {
+                        throw new RuntimeException("Tried " + id + " " + count + " times", e);
+                    }
+                    if(delayMs != null && delayMs > 0) {
+                        try {
+                            Thread.sleep(delayMs);
+                        } catch (InterruptedException e1) {
+                            throw new RuntimeException("Interrupted: " + id, e1);
+                        }
+                    }
+                }
+            }
+        } else {
+            return callable.call();
+        }
+    }
 }
+

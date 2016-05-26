@@ -11,6 +11,7 @@ import org.apache.http.config.SocketConfig;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.cache.CacheConfig;
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
@@ -58,6 +59,7 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
         public CookieStore cookieStore = null;
 
         public ApacheOphHttpClient build() {
+            httpBuilder.disableAutomaticRetries();
             return new ApacheOphHttpClient(this);
         }
 
@@ -87,7 +89,6 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
             setRequestTimeouts(timeoutMs);
             setSocketConfig(timeoutMs);
             setCookieStore();
-            disableRetry();
             return this;
         }
 
@@ -127,8 +128,8 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
             return this;
         }
 
-        public ApacheHttpClientBuilder disableRetry() {
-            httpBuilder.disableAutomaticRetries();
+        public ApacheHttpClientBuilder disableRedirectHandling() {
+            httpBuilder.disableRedirectHandling();
             return this;
         }
 

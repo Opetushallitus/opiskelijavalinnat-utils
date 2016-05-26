@@ -80,4 +80,14 @@ public class OphRequestParameterStorage<T> {
         }
     }
 
+    public T retryOnError(Integer maxRetryCount, Long retryDelayMs) {
+        requestParameters.maxRetryCount = maxRetryCount;
+        requestParameters.retryDelayMs = retryDelayMs;
+        return thisParams;
+    }
+
+    public T retryOnError(Integer maxRetryCount) {
+        requestParameters.maxRetryCount = maxRetryCount;
+        return thisParams;
+    }
 }
