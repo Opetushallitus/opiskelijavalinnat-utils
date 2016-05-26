@@ -62,9 +62,9 @@ Handle the response with your code:
     Koulutus koulutus = client.get("tarjonta-service.koulutus", koulutusId).expectStatus(200).accept(JSON).
         execute(r -> mapper.readValue(r.asInputStream(), Koulutus.class));
 
-Make a post and verify that the response code is 200:
+Make a post and verify that the response code is 200 can use the plain execute() method without writing a handler.
 
-   client.post("tarjonta-service.koulutus").expectStatus(200).
+    client.post("tarjonta-service.koulutus").expectStatus(200).
         data("application/json", "UTF-8", out -> mapper.writeValue(out, koulutus) )
         execute();
 
