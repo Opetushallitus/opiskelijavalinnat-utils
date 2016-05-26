@@ -51,18 +51,25 @@ See available methods in `ApacheHttpClientBuilder`
     OphHttpClient cachingClient = new OphHttpClient(builder.build(), "tester", properties)
 
 By default initialized clients:
-* accept the response if the response status code is between 200 and 299.
+* accept the response if the response status code is between 200 and 299. Otherwise an exception is thrown.
 * follow redirects automatically
 * don't retry automatically
 
 ## Making requests
 
-Handle the response with your code:
+A regular GET for JSON
+
+1. Resolve url. Url is resolved from OphProperties instances and koulutusId is filled in to the url.
+2. Make the request. Request is made with header: Accept: application/json
+3. Verify that response code is 200 and Content-Type matches Accept
+4. Handle the response with a handler.
+5. Connection is released after handler is finished.
+
 
     Koulutus koulutus = client.get("tarjonta-service.koulutus", koulutusId).expectStatus(200).accept(JSON).
         execute(r -> mapper.readValue(r.asInputStream(), Koulutus.class));
 
-Make a post and verify that the response code is 200 can use the plain execute() method without writing a handler.
+Make a POST and verify that the response code is 200. You can use the plain execute() method without writing a handler.
 
     client.post("tarjonta-service.koulutus").expectStatus(200).
         data("application/json", "UTF-8", out -> mapper.writeValue(out, koulutus) )
