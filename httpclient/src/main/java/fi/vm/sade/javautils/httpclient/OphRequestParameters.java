@@ -24,7 +24,7 @@ public class OphRequestParameters implements Cloneable {
     public List<Integer> expectStatus = new ArrayList<>();
     public List<String> acceptMediaTypes = new ArrayList<>();
     public Integer maxRetryCount;
-    public Long retryDelayMs;
+    public Integer retryDelayMs;
 
     public OphRequestParameters cloneParameters() {
         try {
