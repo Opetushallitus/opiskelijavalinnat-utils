@@ -5,9 +5,13 @@ import java.util.List;
 
 public interface OphHttpResponse {
     InputStream asInputStream();
-    String asText();
     void close();
     int getStatusCode();
-
     List<String> getHeaders(String contentType);
+
+    /**
+     * Use asInputStream() if possible. For testing only.
+     * @return
+     */
+    String asText();
 }

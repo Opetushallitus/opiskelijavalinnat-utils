@@ -11,7 +11,6 @@ import org.apache.http.config.SocketConfig;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.cache.CacheConfig;
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
@@ -26,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ApacheOphHttpClient extends OphHttpClientProxy {
     private CloseableHttpClient httpclient;
-    private HashMap<String, Boolean> csrfCookiesCreateForHost = new HashMap<>();
+    private final HashMap<String, Boolean> csrfCookiesCreateForHost = new HashMap<>();
     private CookieStore cookieStore;
 
     private ApacheOphHttpClient(ApacheHttpClientBuilder config) {
@@ -212,14 +211,12 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
         throw new RuntimeException("Unsupported HTTP method: " + method + " for url: " + url);
     }
 
-    class ApacheOphHttpResponse implements OphHttpResponse {
+    private class ApacheOphHttpResponse implements OphHttpResponse {
         private final String url;
-        private final OphRequestParameters requestParameters;
         private HttpResponse response;
 
         ApacheOphHttpResponse(OphRequestParameters requestParameters, HttpResponse response) {
             this.url = requestParameters.url;
-            this.requestParameters = requestParameters;
             this.response = response;
         }
 
@@ -265,7 +262,7 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
         }
     }
 
-    class DataWriter extends AbstractHttpEntity {
+    private class DataWriter extends AbstractHttpEntity {
         private OphRequestPostWriter dataWriter;
         private String charsetName;
 

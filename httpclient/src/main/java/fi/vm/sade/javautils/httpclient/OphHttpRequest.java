@@ -4,6 +4,7 @@ import fi.vm.sade.properties.OphProperties;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -100,7 +101,7 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
                 header(OphHttpClient.Header.CSRF, OphHttpClient.Header.CSRF);
             }
             if(requestParameters.acceptMediaTypes.size() > 0) {
-                header(OphHttpClient.Header.ACCEPT, OphHttpClient.join(requestParameters.acceptMediaTypes, ", "));
+                header(OphHttpClient.Header.ACCEPT, join(requestParameters.acceptMediaTypes, ", "));
             }
             if(requestParameters.clientSubSystemCode != null) {
                 header("clientSubSystemCode", requestParameters.clientSubSystemCode);
@@ -146,7 +147,7 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
             } else if(requestParameters.expectStatus.size() == 1){
                 expected = requestParameters.expectStatus.get(0).toString();
             } else {
-                expected = "any of " + OphHttpClient.join(requestParameters.expectStatus, ", ");
+                expected = "any of " + join(requestParameters.expectStatus, ", ");
             }
             throw new RuntimeException("Unexpected response status: " + status + " Url: " + url + " Expected: " + expected);
         }
@@ -162,10 +163,10 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
                     error = "value " + s;
                 }
             } else {
-                error = "returned " + responseContentTypeHeaders.size() + " headers when expected one. Values: " + OphHttpClient.join(responseContentTypeHeaders, ", ");
+                error = "returned " + responseContentTypeHeaders.size() + " headers when expected one. Values: " + join(responseContentTypeHeaders, ", ");
             }
             if(error != null) {
-                throw new RuntimeException("Error with response " + OphHttpClient.Header.CONTENT_TYPE + " header. Url: "+ url +" Error: " + error + " Expected: " + OphHttpClient.join(requestParameters.acceptMediaTypes, ", "));
+                throw new RuntimeException("Error with response " + OphHttpClient.Header.CONTENT_TYPE + " header. Url: "+ url +" Error: " + error + " Expected: " + join(requestParameters.acceptMediaTypes, ", "));
             }
         }
     }
@@ -179,7 +180,7 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
         return false;
     }
 
-    private static <V> V handleRetryOnError(String id, Integer maxCount, Long delayMs, CallableWithoutException<V> callable) {
+    private static <V> V handleRetryOnError(String id, Integer maxCount, Integer delayMs, CallableWithoutException<V> callable) {
         if(maxCount != null) {
             int count = 0;
             while(true) {
@@ -202,6 +203,20 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
         } else {
             return callable.call();
         }
+    }
+
+    public static String join(Collection col, String sep) {
+        StringBuilder buf = new StringBuilder();
+        boolean firstDone = false;
+        for(Object o: col) {
+            if(firstDone) {
+                buf.append(sep);
+            } else {
+                firstDone = true;
+            }
+            buf.append(o.toString());
+        }
+        return buf.toString();
     }
 }
 

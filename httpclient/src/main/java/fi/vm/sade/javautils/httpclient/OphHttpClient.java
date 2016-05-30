@@ -33,7 +33,7 @@ public class OphHttpClient extends OphRequestParameterStorage<OphHttpClient> {
     public static final String UTF8 = "UTF-8";
     public static final String JSON = "application/json";
     public static final String HTML = "text/html";
-    public static final String JSON_UTF8 = JSON + ";charset=UTF-8";
+    public static final String TEXT = "text/plain";
     public static final List<String> CSRF_SAFE_VERBS = Arrays.asList(Method.GET, Method.HEAD, Method.OPTIONS);
 
     public OphHttpClient(OphHttpClientProxy httpAdapter, String clientSubsystemCode, OphProperties urlProperties) {
@@ -66,11 +66,12 @@ public class OphHttpClient extends OphRequestParameterStorage<OphHttpClient> {
         return createRequest(Method.DELETE, key, params);
     }
 
-    private OphHttpRequest createRequest(String method, String url, Object[] params) {
+    private OphHttpRequest createRequest(String method, String urlKey, Object[] params) {
         OphRequestParameters requestParameters = cloneRequestParameters();
         requestParameters.method = method;
-        requestParameters.urlKey = url;
+        requestParameters.urlKey = urlKey;
         requestParameters.urlParams = params;
+        urlProperties.require(urlKey);
         return new OphHttpRequest(urlProperties, requestParameters, httpAdapter);
     }
 
@@ -86,17 +87,4 @@ public class OphHttpClient extends OphRequestParameterStorage<OphHttpClient> {
         return buf.toString();
     }
 
-    public static String join(Collection col, String sep) {
-        StringBuilder buf = new StringBuilder();
-        boolean firstDone = false;
-        for(Object o: col) {
-            if(firstDone) {
-                buf.append(sep);
-            } else {
-                firstDone = true;
-            }
-            buf.append(o.toString());
-        }
-        return buf.toString();
-    }
 }
