@@ -150,11 +150,6 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
         }
 
         @Override
-        public OphHttpResponse execute() throws IOException {
-            return new ApacheOphHttpResponse(requestParameters, httpclient.execute(createRequest(requestParameters)));
-        }
-
-        @Override
         public <R> R execute(final OphHttpResponseHandler<? extends R> handler) throws IOException {
             ResponseHandler<R> responseHandler = new ResponseHandler<R>() {
                 @Override
@@ -164,6 +159,14 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
             };
 
             return httpclient.execute(createRequest(requestParameters), responseHandler);
+        }
+
+        /**
+         * Should not be used. Use execute() instead because it closes connection automatically.
+         */
+        @Override
+        public OphHttpResponse handleManually() throws IOException {
+            return new ApacheOphHttpResponse(requestParameters, httpclient.execute(createRequest(requestParameters)));
         }
 
         private HttpRequestBase createRequest(OphRequestParameters requestParameters) {
@@ -253,10 +256,21 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
         }
 
         @Override
-        public List<String> getHeaders(String key) {
+        public List<String> getHeaderValues(String key) {
             List<String> ret = new ArrayList<>();
             for(Header h: response.getHeaders(key)) {
                 ret.add(h.getValue());
+            }
+            return ret;
+        }
+
+        @Override
+        public List<String> getHeaderKeys() {
+            List<String> ret = new ArrayList<>();
+            for(Header h: response.getAllHeaders()) {
+                if(!ret.contains(h.getName())) {
+                    ret.add(h.getName());
+                }
             }
             return ret;
         }

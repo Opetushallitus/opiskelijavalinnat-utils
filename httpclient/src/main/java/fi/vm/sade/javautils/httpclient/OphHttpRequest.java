@@ -40,7 +40,7 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
                     return client.createRequest(requestParameters).execute(new OphHttpResponseHandler<R>() {
                         @Override
                         public R handleResponse(OphHttpResponse response) throws IOException {
-                            verifyResponse(response);
+                            checkResponse(response);
                             return handler.handleResponse(response);
                         }
                     });
@@ -77,11 +77,11 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
             public OphHttpResponse call() {
                 OphHttpResponse response;
                 try {
-                    response = client.createRequest(requestParameters).execute();
+                    response = client.createRequest(requestParameters).handleManually();
                 } catch (IOException e) {
                     throw new RuntimeException("Error handling url: " + requestParameters.url, e);
                 }
-                verifyResponse(response);
+                checkResponse(response);
                 return response;
             }
         });
@@ -127,48 +127,53 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
         return copy;
     }
 
-
-    private void verifyResponse(OphHttpResponse response) {
+    private void checkResponse(OphHttpResponse response) {
         OphRequestParameters requestParameters = getRequestParameters();
         String url = requestParameters.url;
+        verifyStatusCode(response, requestParameters.expectStatus, url);
+        verifyContentType(response, requestParameters.acceptMediaTypes, url);
+    }
 
+    private void verifyContentType(OphHttpResponse response, List<String> acceptMediaTypes, String url) {
+        if(acceptMediaTypes != null && acceptMediaTypes.size() > 0) {
+            String headerKey = OphHttpClient.Header.CONTENT_TYPE;
+            String headerValue = getSingleHeaderValue(response, headerKey);
+            if(!matchesAny(headerValue, acceptMediaTypes)) {
+                throw new RuntimeException("Error with response " + headerKey + " header. Url: "+ url +" Error: value " + headerValue + " Expected: " + join(acceptMediaTypes, ", "));
+           }
+        }
+    }
+
+    private void verifyStatusCode(OphHttpResponse response, List<Integer> expectStatus, String url) {
         boolean statusOk;
         int status = response.getStatusCode();
-        if(requestParameters.expectStatus.size() == 0) {
+        if(expectStatus.size() == 0) {
             statusOk = status >= 200 && status < 300;
         } else {
-            statusOk = requestParameters.expectStatus.contains(status);
+            statusOk = expectStatus.contains(status);
         }
 
         if (!statusOk) {
             String expected;
-            if(requestParameters.expectStatus.size() == 0) {
+            if(expectStatus.size() == 0) {
                 expected = "any 2xx code";
-            } else if(requestParameters.expectStatus.size() == 1){
-                expected = requestParameters.expectStatus.get(0).toString();
+            } else if(expectStatus.size() == 1){
+                expected = expectStatus.get(0).toString();
             } else {
-                expected = "any of " + join(requestParameters.expectStatus, ", ");
+                expected = "any of " + join(expectStatus, ", ");
             }
             throw new RuntimeException("Unexpected response status: " + status + " Url: " + url + " Expected: " + expected);
         }
+    }
 
-        if(requestParameters.acceptMediaTypes.size() > 0) {
-            String error = null;
-            List<String> responseContentTypeHeaders = response.getHeaders(OphHttpClient.Header.CONTENT_TYPE);
-            if( responseContentTypeHeaders.size() == 0) {
-                error = "header is missing";
-            } else if(responseContentTypeHeaders.size() == 1){
-                String s = responseContentTypeHeaders.get(0);
-                if(!matchesAny(s, requestParameters.acceptMediaTypes)) {
-                    error = "value " + s;
-                }
-            } else {
-                error = "returned " + responseContentTypeHeaders.size() + " headers when expected one. Values: " + join(responseContentTypeHeaders, ", ");
-            }
-            if(error != null) {
-                throw new RuntimeException("Error with response " + OphHttpClient.Header.CONTENT_TYPE + " header. Url: "+ url +" Error: " + error + " Expected: " + join(requestParameters.acceptMediaTypes, ", "));
-            }
+    private String getSingleHeaderValue(OphHttpResponse response, String headerKey) {
+        List<String> values = response.getHeaderValues(headerKey);
+        if( values.size() == 0 || values.size() > 1) {
+            OphRequestParameters requestParameters = getRequestParameters();
+            String url = requestParameters.url;
+            throw new RuntimeException("Expected response for url " + url + " to include header " + headerKey + " once. There was " + values.size() + " headers.");
         }
+        return values.get(0);
     }
 
     private static boolean matchesAny(String s, List<String> acceptMediaTypes) {

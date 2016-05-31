@@ -5,13 +5,20 @@ import java.util.List;
 
 public interface OphHttpResponse {
     InputStream asInputStream();
-    void close();
     int getStatusCode();
-    List<String> getHeaders(String contentType);
+    List<String> getHeaderValues(String contentType);
+    List<String> getHeaderKeys();
 
     /**
-     * Use asInputStream() if possible. For testing only.
+     * For testing only. Use asInputStream() instead.
      * @return
      */
     String asText();
+
+    /**
+     * For responses that have been opened with handleManually()
+     * Don't use otherwise.
+     */
+    void close();
+
 }
