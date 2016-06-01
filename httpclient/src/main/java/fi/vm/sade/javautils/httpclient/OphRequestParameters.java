@@ -7,24 +7,25 @@ import java.util.List;
 public class OphRequestParameters implements Cloneable {
 
     // Method and url
-    public String method;
-    public String url;
-    public String urlKey;
-    public Object[] urlParams;
+    public String method = null;
+    public String url = null;
+    public String urlKey = null;
+    public Object[] urlParams = null;
     public MultiValueMap<String, String> params = new MultiValueMap<>();
 
     // Values for request
     public MultiValueMap<String, String> headers = new MultiValueMap<>();
     public String clientSubSystemCode = null;
     public OphRequestPostWriter dataWriter = null;
-    public String contentType;
-    public String dataWriterCharset;
+    public String contentType = null;
+    public String dataWriterCharset = null;
 
     // Assertions for response
     public List<Integer> expectStatus = new ArrayList<>();
     public List<String> acceptMediaTypes = new ArrayList<>();
-    public Integer maxRetryCount;
-    public Integer retryDelayMs;
+    public Integer maxRetryCount  = null;
+    public Integer retryDelayMs = null;
+    public boolean skipResponseAssertions = false;
 
     public OphRequestParameters cloneParameters() {
         try {

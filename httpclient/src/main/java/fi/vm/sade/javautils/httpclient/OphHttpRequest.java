@@ -129,9 +129,11 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
 
     private void checkResponse(OphHttpResponse response) {
         OphRequestParameters requestParameters = getRequestParameters();
-        String url = requestParameters.url;
-        verifyStatusCode(response, requestParameters.expectStatus, url);
-        verifyContentType(response, requestParameters.acceptMediaTypes, url);
+        if(requestParameters.skipResponseAssertions == false) {
+            String url = requestParameters.url;
+            verifyStatusCode(response, requestParameters.expectStatus, url);
+            verifyContentType(response, requestParameters.acceptMediaTypes, url);
+        }
     }
 
     private void verifyContentType(OphHttpResponse response, List<String> acceptMediaTypes, String url) {

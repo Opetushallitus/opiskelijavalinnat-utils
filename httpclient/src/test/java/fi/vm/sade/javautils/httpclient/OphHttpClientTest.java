@@ -2,7 +2,6 @@ package fi.vm.sade.javautils.httpclient;
 
 import fi.vm.sade.properties.OphProperties;
 import org.junit.*;
-import org.junit.internal.matchers.ThrowableCauseMatcher;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
@@ -14,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static fi.vm.sade.javautils.httpclient.OphHttpClient.*;
+import static fi.vm.sade.javautils.httpclient.OphHttpClient.Header.ACCEPT;
 import static org.junit.Assert.assertEquals;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -24,7 +24,7 @@ public class OphHttpClientTest {
     public MockServerRule mockServerRule = new MockServerRule(this);
 
     OphProperties properties = new OphProperties();
-    private OphHttpClient client = ApacheOphHttpClient.createDefaultOphHttpClient("TESTCLIENT", properties, 1000, 1000);
+    private OphHttpClient client;
     private OphHttpResponseHandler<String> responseAsText = new OphHttpResponseHandler<String>() {
         @Override
         public String handleResponse(OphHttpResponse response) {
@@ -34,6 +34,8 @@ public class OphHttpClientTest {
 
     @Before
     public void setUp() throws Exception {
+        properties = new OphProperties();
+        client = ApacheOphHttpClient.createDefaultOphHttpClient("TESTCLIENT", properties, 1000, 1000);
         Logger.getLogger("io.netty").setLevel(Level.OFF);
         properties.addDefault("local.test", "/test");
         properties.addDefault("baseUrl", "http://localhost:" + mockServerRule.getPort());
@@ -147,6 +149,26 @@ public class OphHttpClientTest {
                     "Unexpected response status: 404 Url: http://localhost:",
                     "/test Expected: any of 200, 201");
         }
+    }
+
+    @Test
+    public void skipResponseAssertions() {
+        new MockServerClient("localhost", mockServerRule.getPort()).when(
+                request()
+                        .withMethod("GET")
+                        .withPath("/test")
+                        .withHeader(ACCEPT, JSON)
+        ).respond(response()
+                .withStatusCode(404)
+                .withHeader("Content-Type", TEXT)
+                .withBody("NOT OK!")
+        );
+        assertEquals(new Integer(404), client.get("local.test").skipResponseAssertions().accept(JSON).execute(new OphHttpResponseHandler<Integer>() {
+            @Override
+            public Integer handleResponse(OphHttpResponse response) throws IOException {
+                return response.getStatusCode();
+            }
+        }));
     }
 
     @Test

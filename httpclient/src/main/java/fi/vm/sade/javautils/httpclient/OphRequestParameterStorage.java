@@ -81,13 +81,21 @@ public class OphRequestParameterStorage<T> {
     }
 
     public T retryOnError(Integer maxRetryCount, Integer retryDelayMs) {
+        checkEditMode();
         requestParameters.maxRetryCount = maxRetryCount;
         requestParameters.retryDelayMs = retryDelayMs;
         return thisParams;
     }
 
     public T retryOnError(Integer maxRetryCount) {
+        checkEditMode();
         requestParameters.maxRetryCount = maxRetryCount;
+        return thisParams;
+    }
+
+    public T skipResponseAssertions() {
+        checkEditMode();
+        requestParameters.skipResponseAssertions = true;
         return thisParams;
     }
 }

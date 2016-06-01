@@ -12,7 +12,8 @@
 
 * Simple fluent API
 * Easy streaming for request and response -> one liner handlers and small memory use by default
-* Built in assertions for response status `expectStatus(200,...)` and content type `accept(JSON)`
+* Built in assertions for response status `expectStatus(200,...)` and content type `accept(JSON)`.
+By default the client expects the status code to be 2xx.
 * Built in retry: `retryOnError(times, delayMs)`
 * Uses Apache Httpclient 4.5.2, but you can write an adapter for other http client libraries.
   Just implement your own OphHttpClientProxy, OphHttpClientProxyRequest and OphHttpResponse
