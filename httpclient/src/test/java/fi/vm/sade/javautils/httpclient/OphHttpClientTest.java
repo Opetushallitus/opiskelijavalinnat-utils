@@ -232,6 +232,28 @@ public class OphHttpClientTest {
         }
     }
 
+    private void wrappedGetWithVarArgs(String... args) {
+        assertEquals("OK!", client.get("local.test", args)
+                .accept(TEXT)
+                .execute(responseAsText));
+    }
+
+    @Test
+    public void wrappedGetWithVarArgs() {
+        new MockServerClient("localhost", mockServerRule.getPort()).when(
+                request()
+                        .withMethod("GET")
+                        .withPath("/test/a/b")
+        ).respond(response()
+                .withStatusCode(200)
+                .withHeader("Content-Type", TEXT)
+                .withBody("OK!")
+        );
+
+        properties.addDefault("local.test", "/test/$1/$2");
+        wrappedGetWithVarArgs("a", "b");
+    }
+
     private static void assertContains(String from, String... args) {
         for (String arg : args) {
             Assert.assertTrue("String " + arg + " not found from: " + from, from.contains(arg));

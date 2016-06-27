@@ -42,10 +42,12 @@ public class OphHttpClient extends OphRequestParameterStorage<OphHttpClient> {
         setClientSubSystemCode(clientSubsystemCode);
     }
 
+    /*
+    note: if you pass in an array as the only params parameter, you need to cast it to (Object) if you want it to be handled correctly.
+     */
     public OphHttpRequest get(String key, Object... params) {
         return createRequest(Method.GET, key, params);
     }
-
     public OphHttpRequest head(String key, Object... params) {
         return createRequest(Method.HEAD, key, params);
     }

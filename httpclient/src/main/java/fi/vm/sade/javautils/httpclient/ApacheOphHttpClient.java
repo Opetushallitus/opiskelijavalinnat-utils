@@ -58,7 +58,7 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
         public CookieStore cookieStore = null;
 
         public ApacheOphHttpClient build() {
-            httpBuilder.disableAutomaticRetries();
+            disableRedirectHandling();
             return new ApacheOphHttpClient(this);
         }
 
