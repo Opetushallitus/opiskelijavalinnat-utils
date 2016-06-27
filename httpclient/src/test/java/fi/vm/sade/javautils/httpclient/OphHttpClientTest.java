@@ -58,6 +58,7 @@ public class OphHttpClientTest {
                 request()
                         .withMethod("GET")
                         .withPath("/test")
+                        .withQueryStringParameter("a","1","2")
                         .withHeader("clientSubSystemCode: TESTCLIENT")
         ).respond(response()
                 .withStatusCode(200)
@@ -66,6 +67,8 @@ public class OphHttpClientTest {
         );
 
         assertEquals("OK!", client.get("local.test")
+                .param("a",1)
+                .param("a",2)
                 .accept(TEXT)
                 .execute(responseAsText));
     }

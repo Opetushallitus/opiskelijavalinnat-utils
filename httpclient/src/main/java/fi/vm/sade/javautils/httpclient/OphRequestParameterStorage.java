@@ -51,9 +51,11 @@ public class OphRequestParameterStorage<T> {
     /**
      * Add named path parameter, if it's not used as a named path parameter use it as querystring parameter
      */
-    public T param(String key, Object value) {
+    public T param(String key, Object... values) {
         checkEditMode();
-        requestParameters.params.add(key, value.toString());
+        for(Object value: values) {
+            requestParameters.params.add(key, value.toString());
+        }
         return thisParams;
     }
 

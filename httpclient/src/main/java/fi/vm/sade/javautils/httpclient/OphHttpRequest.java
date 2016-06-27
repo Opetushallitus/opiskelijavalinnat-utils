@@ -3,6 +3,7 @@ package fi.vm.sade.javautils.httpclient;
 import fi.vm.sade.properties.OphProperties;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -114,17 +115,12 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
     }
 
     private String createUrl(OphRequestParameters requestParameters) {
-        Object params[] = requestParameters.urlParams;
+        List params = new ArrayList();
+        params.addAll(Arrays.asList(requestParameters.urlParams));
         if(requestParameters.params.size() > 0) {
-            params = appendElementToArray(params, requestParameters.params);
+            params.add(requestParameters.params);
         }
-        return properties.url(requestParameters.urlKey, params);
-    }
-
-    private static <R> R[] appendElementToArray(final R[] a, final R e) {
-        R[] copy  = Arrays.copyOf(a, a.length + 1);
-        copy[copy.length - 1] = e;
-        return copy;
+        return properties.url(requestParameters.urlKey, params.toArray(new Object[params.size()]));
     }
 
     private void checkResponse(OphHttpResponse response) {
