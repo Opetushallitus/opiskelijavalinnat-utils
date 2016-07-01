@@ -136,8 +136,13 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
         if(acceptMediaTypes != null && acceptMediaTypes.size() > 0) {
             String headerKey = OphHttpClient.Header.CONTENT_TYPE;
             String headerValue = getSingleHeaderValue(response, headerKey);
+            int i = headerValue.indexOf(";");
+            if(i > -1) {
+                headerValue = headerValue.substring(0,i);
+            }
+            headerValue = headerValue.trim();
             if(!matchesAny(headerValue, acceptMediaTypes)) {
-                throw new RuntimeException("Error with response " + headerKey + " header. Url: "+ url +" Error: value " + headerValue + " Expected: " + join(acceptMediaTypes, ", "));
+                throw new RuntimeException("Error with response " + headerKey + " header. Url: "+ url +" Error value: " + headerValue + " Expected: " + join(acceptMediaTypes, ", "));
            }
         }
     }

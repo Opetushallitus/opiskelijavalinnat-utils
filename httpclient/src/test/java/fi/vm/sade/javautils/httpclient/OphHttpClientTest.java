@@ -101,8 +101,9 @@ public class OphHttpClientTest {
 
     @Test
     public void acceptIsVerifiedFromResponseContentType() {
+        MockServerClient mockServerClient = new MockServerClient("localhost", mockServerRule.getPort());
 
-        new MockServerClient("localhost", mockServerRule.getPort()).when(
+        mockServerClient.when(
                 request()
                         .withMethod("GET")
                         .withPath("/test")
@@ -112,6 +113,9 @@ public class OphHttpClientTest {
                 .withBody("OK!")
         );
 
+        assertEquals("OK!", client.get("local.test")
+                .accept(TEXT)
+                .execute(responseAsText));
         try {
             client.get("local.test")
                     .accept(JSON)
@@ -120,7 +124,34 @@ public class OphHttpClientTest {
         } catch (RuntimeException e) {
             assertContains(e.getMessage(),
                     "Error with response Content-Type header. Url: http://localhost:",
-                    "/test Error: value text/plain Expected: application/json");
+                    "/test Error value: text/plain Expected: application/json");
+        }
+
+        // content type with charset
+        properties.addDefault("local.test2", "/test2");
+        mockServerClient.when(
+                request()
+                        .withMethod("GET")
+                        .withPath("/test2")
+        ).respond(response()
+                .withStatusCode(200)
+                .withHeader("Content-Type", JSON + "; charset=UTF-8")
+                .withBody("OK!")
+        );
+        assertEquals("OK!", client.get("local.test2")
+                .execute(responseAsText));
+        assertEquals("OK!", client.get("local.test2")
+                .accept(JSON)
+                .execute(responseAsText));
+        try {
+            client.get("local.test2")
+                    .accept(TEXT)
+                    .execute(responseAsText);
+            throw new RuntimeException("should not get here");
+        } catch (RuntimeException e) {
+            assertContains(e.getMessage(),
+                    "Error with response Content-Type header. Url: http://localhost:",
+                    "/test2 Error value: application/json Expected: text/plain");
         }
     }
 
