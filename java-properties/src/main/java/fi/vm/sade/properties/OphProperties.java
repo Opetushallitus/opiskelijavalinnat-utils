@@ -242,22 +242,29 @@ public class OphProperties implements PropertyResolver {
             return resolveProperty(key, defaultValue, params, this, true, urlsConfig, overrides, ophProperties, defaults);
         }
 
+        private String getOrElseWithoutDebugPrint(String key, String defaultValue, Object... params) {
+            return resolveProperty(key, defaultValue, params, this, false, urlsConfig, overrides, ophProperties, defaults);
+        }
+
         @Override
         public String url(String key, Object... params) {
             String url = require(key, params);
             Object baseUrl = null;
             String service = parseService(key);
             if(service != null) {
-                baseUrl = getOrElse(service + ".baseUrl", null);
+                baseUrl = getOrElseWithoutDebugPrint(service + ".baseUrl", null);
             }
             if (baseUrl == null) {
-                baseUrl = getOrElse("baseUrl", null);
+                baseUrl = getOrElseWithoutDebugPrint("baseUrl", null);
             }
             if (baseUrl != null) {
+                String originalUrl = url;
                 String strippedUrl = stripBaseUrl(url);
                 url = joinUrl(baseUrl.toString(), strippedUrl);
+                debug("url:", key, " with new baseUrl ->", url, "original: ", originalUrl);
+            } else {
+                debug("url:", key, "->", url);
             }
-            debug("url:", key, "->", url);
             return url;
         }
 
