@@ -342,6 +342,11 @@ public class OphProperties implements PropertyResolver {
         return this;
     }
 
+    public OphProperties addOverride(String key, String value) {
+        overrides.put(key, value);
+        return this;
+    }
+
     // Simplified JSON map generator. Escapes newlines and " chars
     public static String mapToJson(Map map) {
         StringBuilder buf = new StringBuilder("{\n");
