@@ -197,7 +197,7 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
                 } catch(Exception e) {
                     ++count;
                     if(maxCount != -1 && maxCount == count) {
-                        throw new RuntimeException("Tried " + id + " " + count + " times", e);
+                        throw new RuntimeException("Tried " + count + " times " + id, e);
                     }
                     if(delayMs != null && delayMs > 0) {
                         try {

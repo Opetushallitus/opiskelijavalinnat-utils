@@ -228,7 +228,7 @@ public class OphHttpClientTest {
             throw new RuntimeException("should not get here");
         } catch (RuntimeException retryException) {
             assertContains(retryException.getMessage(),
-                    "Tried GET http://localhost:", "/test 2 times");
+                    "Tried 2 times GET http://localhost:", "/test");
 
             Throwable handlerException = retryException.getCause();
             assertEquals("Thrown for testing", handlerException.getMessage());
@@ -240,7 +240,7 @@ public class OphHttpClientTest {
             throw new RuntimeException("should not get here");
         } catch (RuntimeException retryException) {
             assertContains(retryException.getMessage(),
-                    "Tried GET http://localhost:", "/test 3 times");
+                    "Tried 3 times GET http://localhost:", "/test");
 
             Throwable handlerException = retryException.getCause();
             assertContains(handlerException.getMessage(),
@@ -254,7 +254,7 @@ public class OphHttpClientTest {
             client.get("local.test").retryOnError(4,1).execute(responseAsText);
             throw new RuntimeException("should not get here");
         } catch (RuntimeException retryException) {
-            assertEquals("Tried GET http://weriuhweropowejmrcpokmpwock/test 4 times",
+            assertEquals("Tried 4 times GET http://weriuhweropowejmrcpokmpwock/test",
                     retryException.getMessage());
 
             Throwable clientException = retryException.getCause();
