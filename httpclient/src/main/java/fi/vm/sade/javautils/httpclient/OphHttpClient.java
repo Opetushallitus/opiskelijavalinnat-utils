@@ -72,7 +72,7 @@ public class OphHttpClient extends OphRequestParameterStorage<OphHttpClient> {
         requestParameters.method = method;
         requestParameters.urlKey = urlKey;
         requestParameters.urlParams = params;
-        urlProperties.require(urlKey);
+        urlProperties.requireWithoutDebugPrint(urlKey);
         return new OphHttpRequest(urlProperties, requestParameters, httpAdapter);
     }
 

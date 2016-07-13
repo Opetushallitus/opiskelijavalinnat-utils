@@ -78,6 +78,10 @@ public class OphProperties implements PropertyResolver {
         return requireProperty(key, params, replacer, true, overrides, ophProperties, defaults);
     }
 
+    public String requireWithoutDebugPrint(String key, Object... params) {
+        return requireProperty(key, params, replacer, false, overrides, ophProperties, defaults);
+    }
+
     @Override
     public String getProperty(String key, Object... params) {
         return getOrElse(key, null, params);
@@ -232,6 +236,10 @@ public class OphProperties implements PropertyResolver {
             return requireProperty(key, params, this, true, urlsConfig, overrides, ophProperties, defaults);
         }
 
+        public String requireWithoutDebugPrint(String key, Object... params) {
+            return requireProperty(key, params, this, false, urlsConfig, overrides, ophProperties, defaults);
+        }
+
         @Override
         public String getProperty(String key, Object... params) {
             return getOrElse(key, null, params);
@@ -248,7 +256,7 @@ public class OphProperties implements PropertyResolver {
 
         @Override
         public String url(String key, Object... params) {
-            String url = require(key, params);
+            String url = requireWithoutDebugPrint(key, params);
             Object baseUrl = null;
             String service = parseService(key);
             if(service != null) {
@@ -261,7 +269,7 @@ public class OphProperties implements PropertyResolver {
                 String originalUrl = url;
                 String strippedUrl = stripBaseUrl(url);
                 url = joinUrl(baseUrl.toString(), strippedUrl);
-                debug("url:", key, " with new baseUrl ->", url, "original: ", originalUrl);
+                debug("url:", key, "with new baseUrl ->", url, "original: ", originalUrl);
             } else {
                 debug("url:", key, "->", url);
             }
