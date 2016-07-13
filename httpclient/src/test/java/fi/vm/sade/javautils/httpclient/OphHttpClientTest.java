@@ -172,16 +172,16 @@ public class OphHttpClientTest {
             throw new RuntimeException("should not get here");
         } catch (RuntimeException e) {
             assertContains(e.getMessage(),
-                    "Unexpected response status: 404 Url: http://localhost:",
-                    "/test Expected: any 2xx code");
+                    "Unexpected response status: 404 Expected: any 2xx code Url: http://localhost:",
+                    "/test");
         }
         try {
             client.get("local.test").expectStatus(200, 201).execute(responseAsText);
             throw new RuntimeException("should not get here");
         } catch (RuntimeException e) {
             assertContains(e.getMessage(),
-                    "Unexpected response status: 404 Url: http://localhost:",
-                    "/test Expected: any of 200, 201");
+                    "Unexpected response status: 404 Expected: any of 200, 201 Url: http://localhost:",
+                    "/test");
         }
     }
 
@@ -244,8 +244,8 @@ public class OphHttpClientTest {
 
             Throwable handlerException = retryException.getCause();
             assertContains(handlerException.getMessage(),
-                    "Unexpected response status: 200 Url: http://localhost:",
-                    "/test Expected: 201");
+                    "Unexpected response status: 200 Expected: 201 Url: http://localhost:",
+                    "/test");
         }
 
         // cannot connect
