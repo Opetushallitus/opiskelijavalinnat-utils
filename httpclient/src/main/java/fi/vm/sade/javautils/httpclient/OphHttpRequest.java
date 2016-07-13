@@ -165,7 +165,7 @@ public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
             } else {
                 expected = "any of " + join(expectStatus, ", ");
             }
-            throw new RuntimeException("Unexpected response status: " + status + " Url: " + url + " Expected: " + expected);
+            throw new RuntimeException("Unexpected response status: " + status + " Expected: " + expected + " Url: " + url);
         }
     }
 
