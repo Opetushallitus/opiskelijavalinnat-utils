@@ -120,6 +120,13 @@ public class OphProperties implements PropertyResolver {
         return value;
     }
 
+    /**
+     * note: replaces the first "${" and the first  "}" pair with property lookup.
+     * implementation is not recursive but replaces everything because it repeats until no more pairs.
+     * @param value
+     * @param properties
+     * @return
+     */
     private String resolveRecursiveReferences(String value, Properties[] properties) {
         int start,end;
         while((start=value.indexOf("${"))!=-1) {
