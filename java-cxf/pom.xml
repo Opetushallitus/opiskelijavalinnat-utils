@@ -6,13 +6,13 @@
     <parent>
         <groupId>fi.vm.sade.java-utils</groupId>
         <artifactId>java-utils</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.2.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
     <groupId>fi.vm.sade.java-utils</groupId>
     <artifactId>java-cxf</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
     <!-- exclusions due <dependencyConvergence/> -->
     <dependencies>
         <dependency>
@@ -24,7 +24,7 @@
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>jetty-test-utils</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
+            <version>0.2.0-SNAPSHOT</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
