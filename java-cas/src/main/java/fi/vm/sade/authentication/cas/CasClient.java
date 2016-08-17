@@ -52,7 +52,7 @@ public final class CasClient {
 
     private static String getServiceTicket(final String server, final String ticketGrantingTicket, final String service) {
 
-        logger.info("getServiceTicket: server:'{}', ticketGrantingTicket:'{}', service:'{}'", new Object[]{server, ticketGrantingTicket, service});
+        logger.debug("getServiceTicket: server:'{}', ticketGrantingTicket:'{}', service:'{}'", new Object[]{server, ticketGrantingTicket, service});
 
         final HttpClient client = new HttpClient();
         PostMethod post = new PostMethod(server + "/" + ticketGrantingTicket);
@@ -67,7 +67,7 @@ public final class CasClient {
             final String response = post.getResponseBodyAsString();
             switch (post.getStatusCode()) {
                 case HttpStatus.SC_OK:
-                    logger.info("serviceTicket found: {}", response);
+                    logger.debug("serviceTicket found: {}", response);
                     return response;
                 default:
                     logger.warn("Invalid response code ({}) from CAS server!", post.getStatusLine());
@@ -83,7 +83,7 @@ public final class CasClient {
 
     public static String getTicketGrantingTicket(final String server, final String username, final String password) {
 
-        logger.info("getTicketGrantingTicket: server:'{}', user:'{}'", new Object[]{server, username});
+        logger.debug("getTicketGrantingTicket: server:'{}', user:'{}'", new Object[]{server, username});
 
         HttpClient client = new HttpClient();
         PostMethod post = new PostMethod(server);
