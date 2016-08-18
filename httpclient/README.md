@@ -79,7 +79,15 @@ Make a POST and verify that the response code is 200. You can use the plain exec
         data("application/json", "UTF-8", out -> mapper.writeValue(out, koulutus) )
         execute();
 
-There is also `handleManually()` which doesn't release anything. It returns an
+There is also `handleManually()` which doesn't release anything. It returns an OphHttpResponse instance which you need to close.
+
+    OphHttpResponse response = client.get("tarjonta-service.koulutus", koulutusId).expectStatus(200).accept(JSON).handleManually();
+    try {
+        // do something
+        response.asInputStream();
+    } finally {
+        response.close();
+    }
 
 ## Retrying
 
