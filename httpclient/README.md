@@ -1,12 +1,12 @@
 # Common HTTP interface for OPH
 
     Koulutus koulutus = client.get("tarjonta-service.koulutus", koulutusId).expectStatus(200).
-                            execute( r -> mapper.readValue(r.asInputStream(), Koulutus.class) );
+                            execute( r -> mapper.readValue(r.asInputStream(), new GenericType<Koulutus>()) );
 
     Koulutus newKoulutus = new Koulutus()
     Koulutus savedKoulutus = client.post("tarjonta-service.koulutus", koulutusId).expectStatus(200).
                             data("application/json", "UTF-8", out -> mapper.writeValue(out, newKoulutus) ).
-                            execute( r -> mapper.readValue(r.asInputStream(), Koulutus.class) );
+                            execute( r -> mapper.readValue(r.asInputStream(), new GenericType<Koulutus>()) );
 
 # Features
 
@@ -98,4 +98,4 @@ the handler throw an exception.
     Koulutus koulutus = client.get("tarjonta-service.koulutus", koulutusId).
         expectStatus(200).accept(JSON).
         retryOnError(3, 2000).
-        execute(r -> mapper.readValue(r.asInputStream(), Koulutus.class));
+        execute(r -> mapper.readValue(r.asInputStream(), new GenericType<Koulutus>()));
