@@ -321,4 +321,12 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
             writer.flush();
         }
     }
+
+    public void close() {
+        try {
+            httpclient.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

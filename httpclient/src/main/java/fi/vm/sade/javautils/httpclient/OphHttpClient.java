@@ -6,7 +6,7 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 
-public class OphHttpClient extends OphRequestParameterAccessors<OphHttpClient> {
+public class OphHttpClient extends OphRequestParameterAccessors<OphHttpClient> implements AutoCloseable {
     private final OphProperties urlProperties;
     private OphHttpClientProxy httpAdapter;
 
@@ -99,5 +99,12 @@ public class OphHttpClient extends OphRequestParameterAccessors<OphHttpClient> {
 
     public static FormUrlEncodedWriter formUrlEncodedWriter(Writer outstream) {
         return new FormUrlEncodedWriter(outstream);
+    }
+
+    /**
+     * Release all resources
+     */
+    public void close() {
+        httpAdapter.close();
     }
 }

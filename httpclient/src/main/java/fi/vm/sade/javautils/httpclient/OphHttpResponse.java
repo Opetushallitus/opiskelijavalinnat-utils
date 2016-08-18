@@ -3,7 +3,7 @@ package fi.vm.sade.javautils.httpclient;
 import java.io.InputStream;
 import java.util.List;
 
-public interface OphHttpResponse {
+public interface OphHttpResponse extends AutoCloseable {
     InputStream asInputStream();
     int getStatusCode();
     List<String> getHeaderValues(String contentType);
@@ -15,11 +15,4 @@ public interface OphHttpResponse {
      * @return
      */
     String asText();
-
-    /**
-     * For responses that have been opened with handleManually()
-     * Don't use otherwise.
-     */
-    void close();
-
 }
