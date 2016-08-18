@@ -69,9 +69,8 @@ A regular GET for JSON
 provides methods related to the response.
 5. Connection and any related resources are released after handler is finished.
 
-
-    Koulutus koulutus = client.get("tarjonta-service.koulutus", koulutusId).expectStatus(200).accept(JSON).
-        execute(r -> mapper.readValue(r.asInputStream(), Koulutus.class));
+        Koulutus koulutus = client.get("tarjonta-service.koulutus", koulutusId).expectStatus(200).accept(JSON).
+            execute(r -> mapper.readValue(r.asInputStream(), Koulutus.class));
 
 Make a POST and verify that the response code is 200. You can use the plain execute() method without writing a handler.
 
