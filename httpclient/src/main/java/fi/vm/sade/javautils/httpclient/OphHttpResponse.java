@@ -8,6 +8,7 @@ public interface OphHttpResponse {
     int getStatusCode();
     List<String> getHeaderValues(String contentType);
     List<String> getHeaderKeys();
+    OphRequestParameters getRequestParameters();
 
     /**
      * For testing only. Use asInputStream() instead.

@@ -6,7 +6,6 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
@@ -25,12 +24,8 @@ public class OphHttpClientTest {
 
     OphProperties properties = new OphProperties();
     private OphHttpClient client;
-    private OphHttpResponseHandler<String> responseAsText = new OphHttpResponseHandler<String>() {
-        @Override
-        public String handleResponse(OphHttpResponse response) {
-            return response.asText();
-        }
-    };
+    private OphHttpResponseHandler<String> responseAsText = response -> response.asText();
+    OphHttpClient clientPlainUrls;
 
     @Before
     public void setUp() throws Exception {
@@ -39,6 +34,7 @@ public class OphHttpClientTest {
         Logger.getLogger("io.netty").setLevel(Level.OFF);
         properties.addDefault("local.test", "/test");
         properties.addDefault("baseUrl", "http://localhost:" + mockServerRule.getPort());
+        clientPlainUrls = ApacheOphHttpClient.createDefaultOphHttpClient("TESTCLIENT", null, 1000, 1000);
     }
 
     @Test
@@ -91,12 +87,8 @@ public class OphHttpClientTest {
         );
 
         assertEquals("OK!", client.post("local.test")
-                .data(JSON, UTF8, new OphRequestPostWriter() {
-                    @Override
-                    public void writeTo(Writer outstream) throws IOException {
-                        outstream.write("POW!!");
-                    }
-                }).accept(TEXT).execute(responseAsText));
+                .dataWriter(JSON, UTF8, outstream -> outstream.write("POW!!")).accept(TEXT)
+                .execute(responseAsText));
     }
 
     @Test
@@ -197,12 +189,9 @@ public class OphHttpClientTest {
                 .withHeader("Content-Type", TEXT)
                 .withBody("NOT OK!")
         );
-        assertEquals(new Integer(404), client.get("local.test").skipResponseAssertions().accept(JSON).execute(new OphHttpResponseHandler<Integer>() {
-            @Override
-            public Integer handleResponse(OphHttpResponse response) throws IOException {
-                return response.getStatusCode();
-            }
-        }));
+        assertEquals(new Integer(404), client.get("local.test")
+                .skipResponseAssertions().accept(JSON)
+                .execute(response -> response.getStatusCode()));
     }
 
     @Test
@@ -267,7 +256,7 @@ public class OphHttpClientTest {
     }
 
     private void wrappedGetWithVarArgs(String... args) {
-        assertEquals("OK!", client.get("local.test", args)
+        assertEquals("OK!", client.get("local.test", (Object[])args)
                 .accept(TEXT)
                 .execute(responseAsText));
     }
@@ -286,6 +275,21 @@ public class OphHttpClientTest {
 
         properties.addDefault("local.test", "/test/$1/$2");
         wrappedGetWithVarArgs("a", "b");
+    }
+
+    @Test
+    public void plainUrlsWorkIfNoUrlProperties() {
+        new MockServerClient("localhost", mockServerRule.getPort()).when(
+                request()
+                        .withMethod("GET")
+                        .withPath("/test")
+        ).respond(response()
+                .withStatusCode(200)
+                .withHeader("Content-Type", TEXT)
+                .withBody("OK!")
+        );
+        assertEquals("OK!", clientPlainUrls.get("http://localhost:"+mockServerRule.getPort()+"/test")
+                .execute(responseAsText));
     }
 
     private static void assertContains(String from, String... args) {

@@ -5,13 +5,13 @@
 
     Koulutus newKoulutus = new Koulutus()
     Koulutus savedKoulutus = client.post("tarjonta-service.koulutus", koulutusId).expectStatus(200).
-                            data("application/json", "UTF-8", out -> mapper.writeValue(out, newKoulutus) ).
+                            dataWriter("application/json", "UTF-8", out -> mapper.writeValue(out, newKoulutus) ).
                             execute( r -> mapper.readValue(r.asInputStream(), new GenericType<Koulutus>()) );
 
 # Features
 
 * Simple fluent API
-* Easy streaming for request and response -> one liner handlers and small memory use by default
+* Easy streaming for request (chunked, streaming) and response (streaming reads) -> one liner handlers and small memory use by default
 * Built in assertions for response status `expectStatus(200,...)` and content type `accept(JSON)`.
 By default the client expects the status code to be 2xx.
 * Built in retry: `retryOnError(times, delayMs)`
@@ -73,9 +73,16 @@ provides methods related to the response.
             execute(r -> mapper.readValue(r.asInputStream(), Koulutus.class));
 
 Make a POST and verify that the response code is 200. You can use the plain execute() method without writing a handler.
+All dataWriter() content is sent as chunked. note: ApacheHttpClientBuilder uses a 128k buffer so writing is buffered.
 
     client.post("tarjonta-service.koulutus").expectStatus(200).
-        data("application/json", "UTF-8", out -> mapper.writeValue(out, koulutus) )
+        dataWriter("application/json", "UTF-8", out -> mapper.writeValue(out, koulutus) )
+        execute();
+        
+Make a x-www-form-urlencoded POST
+
+    client.post("tarjonta-service.koulutus").expectStatus(200).
+        dataWriter(FORM_URLENCODED, UTF8, out -> OphHttpClient.formUrlEncodedWriter(out).param("service", service).param("size",1) )
         execute();
 
 There is also `handleManually()` which doesn't release anything. It returns an OphHttpResponse instance which you need to close.

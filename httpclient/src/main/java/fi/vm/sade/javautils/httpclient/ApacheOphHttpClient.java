@@ -44,6 +44,18 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
         return new ApacheHttpClientBuilder();
     }
 
+    public static String toString(InputStream stream) throws IOException {
+        BufferedInputStream bis = new BufferedInputStream(stream);
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        int result;
+        result = bis.read();
+        while(result != -1) {
+            buf.write((byte) result);
+            result = bis.read();
+        }
+        return buf.toString();
+    }
+
     /**
      * Helper methods for HttpClientBuilder.
      *
@@ -151,14 +163,7 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
 
         @Override
         public <R> R execute(final OphHttpResponseHandler<? extends R> handler) throws IOException {
-            ResponseHandler<R> responseHandler = new ResponseHandler<R>() {
-                @Override
-                public R handleResponse(final HttpResponse response) throws IOException {
-                    return handler.handleResponse(new ApacheOphHttpResponse(requestParameters, response));
-                }
-            };
-
-            return httpclient.execute(createRequest(requestParameters), responseHandler);
+            return httpclient.execute(createRequest(requestParameters), response -> handler.handleResponse(new ApacheOphHttpResponse(requestParameters, response)));
         }
 
         /**
@@ -172,7 +177,10 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
         private HttpRequestBase createRequest(OphRequestParameters requestParameters) {
             HttpRequestBase request = getHttpClientRequest(requestParameters.method, requestParameters.url);
             if(requestParameters.dataWriter != null) {
-                ((HttpEntityEnclosingRequestBase)request).setEntity(new DataWriter(requestParameters.dataWriterCharset, requestParameters.dataWriter));
+                DataWriterEntity entity = new DataWriterEntity(requestParameters.dataWriterCharset, requestParameters.dataWriter);
+                entity.setChunked(true);
+                entity.setContentType(requestParameters.contentType + "; charset=" + requestParameters.dataWriterCharset);
+                ((HttpEntityEnclosingRequestBase)request).setEntity(entity);
             }
             if(!OphHttpClient.CSRF_SAFE_VERBS.contains(requestParameters.method)) {
                 ensureCSRFCookie(request);
@@ -215,11 +223,11 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
     }
 
     private class ApacheOphHttpResponse implements OphHttpResponse {
-        private final String url;
+        private OphRequestParameters requestParameters;
         private HttpResponse response;
 
         ApacheOphHttpResponse(OphRequestParameters requestParameters, HttpResponse response) {
-            this.url = requestParameters.url;
+            this.requestParameters = requestParameters;
             this.response = response;
         }
 
@@ -228,16 +236,16 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
             try {
                 return response.getEntity().getContent();
             } catch (IOException e) {
-                throw new RuntimeException("Url: " + url, e);
+                throw new RuntimeException("Url: " + requestParameters.url, e);
             }
         }
 
         @Override
         public String asText() {
             try {
-                return OphHttpClient.toString(asInputStream());
+                return ApacheOphHttpClient.toString(asInputStream());
             } catch (IOException e) {
-                throw new RuntimeException("Url: " + url, e);
+                throw new RuntimeException("Url: " + requestParameters.url, e);
             }
         }
 
@@ -246,7 +254,7 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
             try {
                 ((CloseableHttpResponse)response).close();
             } catch (IOException e) {
-                throw new RuntimeException("Error closing connection: " + url, e);
+                throw new RuntimeException("Error closing connection: " + requestParameters.url, e);
             }
         }
 
@@ -274,13 +282,18 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
             }
             return ret;
         }
+
+        @Override
+        public OphRequestParameters getRequestParameters() {
+            return requestParameters;
+        }
     }
 
-    private class DataWriter extends AbstractHttpEntity {
+    private class DataWriterEntity extends AbstractHttpEntity {
         private OphRequestPostWriter dataWriter;
         private String charsetName;
 
-        DataWriter(String charsetName, OphRequestPostWriter dataWriter) {
+        DataWriterEntity(String charsetName, OphRequestPostWriter dataWriter) {
             this.dataWriter = dataWriter;
             this.charsetName = charsetName;
         }
@@ -303,7 +316,7 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
         }
 
         public void writeTo(final OutputStream outstream) throws IOException {
-            Writer writer = new OutputStreamWriter(outstream, charsetName);
+            Writer writer = new BufferedWriter(new OutputStreamWriter(outstream, charsetName), 128*1024);
             dataWriter.writeTo(writer);
             writer.flush();
         }

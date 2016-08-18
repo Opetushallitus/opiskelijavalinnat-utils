@@ -2,7 +2,7 @@ package fi.vm.sade.javautils.httpclient;
 
 import java.util.Arrays;
 
-public class OphRequestParameterStorage<T> {
+class OphRequestParameterAccessors<T> {
     private T thisParams;
     private OphRequestParameters requestParameters = new OphRequestParameters();
     private boolean editMode = true;
@@ -34,7 +34,7 @@ public class OphRequestParameterStorage<T> {
         return thisParams;
     }
 
-    public T data(String contentType, String encoding, OphRequestPostWriter writer) {
+    public T dataWriter(String contentType, String encoding, OphRequestPostWriter writer) {
         checkEditMode();
         requestParameters.contentType = contentType;
         requestParameters.dataWriterCharset = encoding;

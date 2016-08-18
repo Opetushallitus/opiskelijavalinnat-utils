@@ -13,7 +13,7 @@ import java.util.List;
  * Once execute() or handleManually() is called OphHttpRequest instance can't be modified.
  * The same OphHttpRequest object can be used to make multiple requests to the same URL.
  */
-public class OphHttpRequest extends OphRequestParameterStorage<OphHttpRequest> {
+public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest> {
     private final OphProperties properties;
     private OphHttpClientProxy client;
 

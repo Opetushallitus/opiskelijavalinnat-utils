@@ -2,14 +2,11 @@ package fi.vm.sade.javautils.httpclient;
 
 import fi.vm.sade.properties.OphProperties;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 
-public class OphHttpClient extends OphRequestParameterStorage<OphHttpClient> {
+public class OphHttpClient extends OphRequestParameterAccessors<OphHttpClient> {
     private final OphProperties urlProperties;
     private OphHttpClientProxy httpAdapter;
 
@@ -33,11 +30,31 @@ public class OphHttpClient extends OphRequestParameterStorage<OphHttpClient> {
     public static final String JSON = "application/json";
     public static final String HTML = "text/html";
     public static final String TEXT = "text/plain";
+    public static final String FORM_URLENCODED = "application/x-www-form-urlencoded";
+
     public static final List<String> CSRF_SAFE_VERBS = Arrays.asList(Method.GET, Method.HEAD, Method.OPTIONS);
 
+    /**
+     * Resolve urls through urlProperties
+     * @param httpAdapter
+     * @param clientSubsystemCode
+     * @param urlProperties
+     */
     public OphHttpClient(OphHttpClientProxy httpAdapter, String clientSubsystemCode, OphProperties urlProperties) {
         this.httpAdapter = httpAdapter;
         this.urlProperties = urlProperties;
+        setThisForRequestParamSetters(this);
+        setClientSubSystemCode(clientSubsystemCode);
+    }
+
+    /**
+     * Use urls without any parameter resolving
+     * @param httpAdapter
+     * @param clientSubsystemCode
+     */
+    public OphHttpClient(OphHttpClientProxy httpAdapter, String clientSubsystemCode) {
+        this.httpAdapter = httpAdapter;
+        this.urlProperties = null;
         setThisForRequestParamSetters(this);
         setClientSubSystemCode(clientSubsystemCode);
     }
@@ -70,22 +87,17 @@ public class OphHttpClient extends OphRequestParameterStorage<OphHttpClient> {
     private OphHttpRequest createRequest(String method, String urlKey, Object[] params) {
         OphRequestParameters requestParameters = cloneRequestParameters();
         requestParameters.method = method;
-        requestParameters.urlKey = urlKey;
-        requestParameters.urlParams = params;
-        urlProperties.requireWithoutDebugPrint(urlKey);
+        if(urlProperties != null) {
+            requestParameters.urlKey = urlKey;
+            requestParameters.urlParams = params;
+            urlProperties.requireWithoutDebugPrint(urlKey);
+        } else {
+            requestParameters.url = urlKey;
+        }
         return new OphHttpRequest(urlProperties, requestParameters, httpAdapter);
     }
 
-    public static String toString(InputStream stream) throws IOException {
-        BufferedInputStream bis = new BufferedInputStream(stream);
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        int result;
-        result = bis.read();
-        while(result != -1) {
-            buf.write((byte) result);
-            result = bis.read();
-        }
-        return buf.toString();
+    public static FormUrlEncodedWriter formUrlEncodedWriter(Writer outstream) {
+        return new FormUrlEncodedWriter(outstream);
     }
-
 }
