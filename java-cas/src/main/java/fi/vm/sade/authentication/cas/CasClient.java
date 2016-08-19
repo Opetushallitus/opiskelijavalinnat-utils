@@ -1,12 +1,15 @@
 package fi.vm.sade.authentication.cas;
 
 import java.io.IOException;
+import java.util.List;
 
-import org.apache.commons.httpclient.*;
-import org.apache.commons.httpclient.methods.PostMethod;
+import fi.vm.sade.javautils.httpclient.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static fi.vm.sade.javautils.httpclient.OphHttpClient.FORM_URLENCODED;
+import static fi.vm.sade.javautils.httpclient.OphHttpClient.UTF8;
 
 /**
  * An example Java client to authenticate against CAS using REST services.
@@ -18,84 +21,79 @@ import org.slf4j.LoggerFactory;
  * @since 3.4.2
  */
 public final class CasClient {
-    private static final Logger logger = LoggerFactory.getLogger(CasClient.class);
-
     public static final String CAS_URL_SUFFIX = "/v1/tickets";
     public static final String SERVICE_URL_SUFFIX = "/j_spring_cas_security_check";
-        
+    private static final Logger logger = LoggerFactory.getLogger(CasClient.class);
+
     private CasClient() {
         // static-only access
     }
 
-    /** get cas service ticket, throws runtime exception if fails */
+    /**
+     * get cas service ticket, throws runtime exception if fails
+     */
     public static String getTicket(String server, final String username, final String password, String service) {
         return getTicket(server, username, password, service, true);
     }
 
-    /** get cas service ticket, throws runtime exception if fails */
+    /**
+     * get cas service ticket, throws runtime exception if fails
+     */
     public static String getTicket(String server, final String username, final String password, String service, boolean addSuffix) {
-    	
-    	logger.debug("getTicket for server:{}, username:{}, service::{} ", new Object[]{server, username, service});
-    	
-    	server = checkUrl(server, CAS_URL_SUFFIX);
-        if(addSuffix)
-    	    service = checkUrl(service, SERVICE_URL_SUFFIX);
 
-    	notNull(server, "server must not be null");
+        logger.debug("getTicket for server:{}, username:{}, service::{} ", new Object[]{server, username, service});
+
+        notNull(server, "server must not be null");
         notNull(username, "username must not be null");
         notNull(password, "password must not be null");
         notNull(service, "service must not be null");
 
-        String ticketGrantingTicket = getTicketGrantingTicket(server, username, password);
-        return getServiceTicket(server, ticketGrantingTicket, service);
-    }
+        server = checkUrl(server, CAS_URL_SUFFIX);
+        if (addSuffix) {
+            service = checkUrl(service, SERVICE_URL_SUFFIX);
+        }
 
-    private static String getServiceTicket(final String server, final String ticketGrantingTicket, final String service) {
-
-        logger.debug("getServiceTicket: server:'{}', ticketGrantingTicket:'{}', service:'{}'", new Object[]{server, ticketGrantingTicket, service});
-
-        final HttpClient client = new HttpClient();
-        PostMethod post = new PostMethod(server + "/" + ticketGrantingTicket);
-        post.setRequestBody(new NameValuePair[]{
-                new NameValuePair("service", service)});
-
-        try {
-            client.executeMethod(post);
-            
-            printTraceResponse(post, client);
-            
-            final String response = post.getResponseBodyAsString();
-            switch (post.getStatusCode()) {
-                case HttpStatus.SC_OK:
-                    logger.debug("serviceTicket found: {}", response);
-                    return response;
-                default:
-                    logger.warn("Invalid response code ({}) from CAS server!", post.getStatusLine());
-                    logger.info("Response (1k): " + response.substring(0, Math.min(1024, response.length())));
-                    throw new RuntimeException("failed to get CAS service ticket, response code: "+post.getStatusLine()+", server: "+server+", tgt: "+ticketGrantingTicket+", service: "+service);
-            }
-        } catch (final IOException e) {
-            throw new RuntimeException("failed to get CAS service ticket, server: "+server+", tgt: "+ticketGrantingTicket+", service: "+service+", cause: "+e, e);
-        } finally {
-            post.releaseConnection();
+        try (OphHttpClient client = new OphHttpClient(ApacheOphHttpClient.createCustomBuilder().
+                createClosableClient().
+                setDefaultConfiguration(10000, 60).build(), "CasClient")) {
+            return getServiceTicket(server, username, password, service, client);
         }
     }
 
-    public static String getTicketGrantingTicket(final String server, final String username, final String password) {
+    private static String getServiceTicket(final String server, String username, String password, final String service, OphHttpClient client) {
+        final String ticketGrantingTicket = getTicketGrantingTicket(server, username, password, client);
 
+        logger.debug("getServiceTicket: server:'{}', ticketGrantingTicket:'{}', service:'{}'", new Object[]{server, ticketGrantingTicket, service});
+
+        try {
+            return client.post(server + "/" + ticketGrantingTicket).
+                    dataWriter(FORM_URLENCODED, UTF8, out -> OphHttpClient.formUrlEncodedWriter(out).param("service", service)).
+                    skipResponseAssertions().execute(r -> {
+                final String response = r.asText();
+                printTraceResponse(r, response);
+                switch (r.getStatusCode()) {
+                    case 200:
+                        logger.debug("serviceTicket found: {}", response);
+                        return response;
+                    default:
+                        logger.warn("Invalid response code ({}) from CAS server!", r.getStatusCode());
+                        logger.info("Response (1k): " + response.substring(0, Math.min(1024, response.length())));
+                        throw new RuntimeException("failed to get CAS service ticket, response code: " + r.getStatusCode() + ", server: " + server + ", tgt: " + ticketGrantingTicket + ", service: " + service);
+                }
+            });
+        } catch (final Exception e) {
+            throw new RuntimeException("failed to get CAS service ticket, server: " + server + ", tgt: " + ticketGrantingTicket + ", service: " + service + ", cause: " + e, e);
+        }
+    }
+
+    private static String getTicketGrantingTicket(final String server, final String username, final String password, OphHttpClient client) {
         logger.debug("getTicketGrantingTicket: server:'{}', user:'{}'", new Object[]{server, username});
 
-        HttpClient client = new HttpClient();
-        PostMethod post = new PostMethod(server);
-        post.setRequestBody(new NameValuePair[]{
-                new NameValuePair("username", username),
-                new NameValuePair("password", password)});
-        
         //username=battags&password=password&additionalParam1=paramvalue
-        
+
         /*
-         Response example: 
-         
+         Response example:
+
 		Status : 201
 		URI: http://centosx/cas/v1/tickets
 		Request Headers: 4
@@ -124,42 +122,35 @@ public final class CasClient {
 		<input type="submit" value="Submit"></form>
 		</body></html>
          */
-        
+
         try {
-            client.executeMethod(post);
-            
-            printTraceResponse(post, client);
-            
-            // final String response = post.getResponseBodyAsString();
-            switch (post.getStatusCode()) {
-                
-            	case HttpStatus.SC_CREATED: {// 201
-                	Header locationHeader = post.getResponseHeader("Location");
-                	
-                	logger.debug("locationHeader: "+locationHeader);
-                	
-                	if(locationHeader!=null){
-                		String responseLocation = locationHeader.getValue();
-                		String ticket = StringUtils.substringAfterLast(responseLocation, "/");
-                	
-                		logger.debug("-> ticket: "+ticket);
-                		
-                		return ticket;
-                		
-                	}
-                	//final Matcher matcher = Pattern.compile(".*action=\".*/(.*?)\".*").matcher(response);
-                    //if (matcher.matches()) {
-                    //    return matcher.group(1);
-                    //}
-                    throw new RuntimeException("Successful ticket granting request, but no ticket found! server: "+server+", user: "+username);
-                }
-            	default:
-                    throw new RuntimeException("Invalid response code from CAS server: "+post.getStatusLine()+", server: "+server+", user: "+username);
-            }
-        } catch (final IOException e) {
-            throw new RuntimeException("error getting TGT, server: "+server+", user: "+username+", exception: "+e, e);
-        } finally {
-            post.releaseConnection();
+            return client.post(server)
+                    .dataWriter(FORM_URLENCODED, UTF8, out -> OphHttpClient.formUrlEncodedWriter(out)
+                            .param("username", username)
+                            .param("password", password))
+                    .skipResponseAssertions()
+                    .execute(r -> {
+                        switch (r.getStatusCode()) {
+                            case 201: {
+                                List<String> locationHeaders = r.getHeaderValues("Location");
+                                logger.debug("locationHeader: " + locationHeaders);
+                                final String response = r.asText();
+                                printTraceResponse(r, response);
+                                if (locationHeaders != null && locationHeaders.size() == 1) {
+                                    String responseLocation = locationHeaders.get(0);
+                                    String ticket = StringUtils.substringAfterLast(responseLocation, "/");
+                                    logger.debug("-> ticket: " + ticket);
+                                    return ticket;
+                                }
+                                throw new RuntimeException("Successful ticket granting request, but no ticket found! server: " + server + ", user: " + username);
+                            }
+                            default: {
+                                throw new RuntimeException("Invalid response code from CAS server: " + r.getStatusCode() + ", server: " + server + ", user: " + username);
+                            }
+                        }
+                    });
+        } catch (final Exception e) {
+            throw new RuntimeException("error getting TGT, server: " + server + ", user: " + username + ", exception: " + e, e);
         }
     }
 
@@ -168,50 +159,48 @@ public final class CasClient {
             throw new IllegalArgumentException(message);
         }
     }
-    
-    public static String makeServiceUrl(String url) {
-    	return checkUrl(url, SERVICE_URL_SUFFIX);
-    }
-        
+
     private static String checkUrl(String url, final String suffix) {
-    	logger.debug("url: "+url);
-    	url = url.trim();
-    	url = url.endsWith("/")?url.substring(0,url.length()-1):url;
-    	if(!StringUtils.endsWith(url, suffix)){
-    		url += suffix;
+        logger.debug("url: " + url);
+        url = url.trim();
+        url = url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
+        if (!url.endsWith(suffix)) {
+            url += suffix;
         }
-    	logger.debug("-> fixed url: "+url);
-    	return url;
+        logger.debug("-> fixed url: " + url);
+        return url;
     }
-    
-    private static void printTraceResponse(final HttpMethodBase method, final HttpClient client) throws IOException{	
-		
-    	if(!logger.isTraceEnabled()) return;
-    	
-		String responseTxt = method.getResponseBodyAsString();
-				
-		logger.debug("\n<cas-http-response>");
-		logger.debug("Status : "+method.getStatusCode());
-		logger.debug("URI: "+method.getURI());
-		logger.debug("Request Headers: "+method.getRequestHeaders().length);
-        for(Header h : method.getRequestHeaders()){
-        	logger.debug("  "+h.getName()+" = "+h.getValue()); 
+
+    private static void printTraceResponse(final OphHttpResponse response, final String responseTxt) throws IOException {
+
+        if (!logger.isTraceEnabled()) return;
+
+        OphRequestParameters requestParameters = response.getRequestParameters();
+
+        logger.debug("\n<cas-http-response>");
+        logger.debug("Status : " + response.getStatusCode());
+        logger.debug("URI: " + requestParameters.url);
+        logger.debug("Request Headers: " + requestParameters.headers.size());
+
+        for (String headerName : requestParameters.headers.keySet()) {
+            for (String headerValue : requestParameters.headers.get(headerName)) {
+                logger.debug("  " + headerName + " = " + headerValue);
+            }
         }
-        
-        logger.debug("Response Path: "+method.getPath());
-        logger.debug("Response Headers: "+method.getResponseHeaders().length);
-        for(Header h : method.getResponseHeaders()){
-        	logger.debug("  "+h.getName()+" = "+h.getValue()); 
+
+        logger.debug("Response Path: " + requestParameters.url);
+        logger.debug("Response Headers: " + response.getHeaderKeys().size());
+
+        for (String headerName : response.getHeaderKeys()) {
+            for (String headerValue : response.getHeaderValues(headerName)) {
+                logger.debug("  " + headerName + " = " + headerValue);
+            }
         }
-        
-        logger.debug("Cookies: "+client.getState().getCookies().length);
-        for(org.apache.commons.httpclient.Cookie c : client.getState().getCookies()){
-        	logger.debug("  "+c.getName()+" = "+c.getValue()); 
-        }
+
         logger.debug("Response Text: ");
         logger.debug(responseTxt);
         logger.debug("</cas-http-response>\n");
-	}
+    }
 
 
 }
