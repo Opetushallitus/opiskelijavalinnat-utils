@@ -105,6 +105,10 @@ public class OphHttpClient extends OphRequestParameterAccessors<OphHttpClient> i
      * Release all resources
      */
     public void close() {
-        httpAdapter.close();
+        try {
+            httpAdapter.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
