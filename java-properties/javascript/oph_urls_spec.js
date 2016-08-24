@@ -93,6 +93,10 @@ describe('oph_urls.js', function() {
             "query Parameter": "1:23",
             "query Parameter2": "1:23"
         }), "/b/pow?query Parameter=1:23&query Parameter2=1:23");
+        assert.equal(ctx2.url("b.b", {
+            param: "pow",
+            "query Parameter": ["1:23",2]
+        }), "/b/pow?query Parameter=1:23&query Parameter=2");
     });
 
     it('parameter and url lookup order', function() {
