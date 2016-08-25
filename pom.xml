@@ -15,6 +15,7 @@
         <module>java-cxf</module>
         <module>httpclient</module>
         <module>embedded-tomcat</module>
+        <module>opintopolku-cas-servlet-filter</module>
     </modules>
     <build>
         <plugins>
