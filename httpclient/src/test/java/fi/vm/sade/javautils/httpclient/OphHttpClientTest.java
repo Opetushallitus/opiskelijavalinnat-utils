@@ -307,12 +307,14 @@ public class OphHttpClientTest {
         // return correct Object
         assertEquals("Exception: Unexpected response status: 404 Expected: any 2xx code Url: http://localhost:"+mockServerRule.getPort()+"/test",
                 client.get("local.test")
+                .throwOnlyOnErrorExceptions()
                 .onError((requestParameters, response, e) -> "Exception: " + e.getMessage())
                 .execute(responseAsText));
 
         // return incorrect object type -> class cast exception
         try {
             String result = client.get("local.test")
+                    .throwOnlyOnErrorExceptions()
                     .onError((requestParameters, response, e) -> 123)
                     .execute(responseAsText);
             throw new RuntimeException("For some reason class cast exception was not thrown!");
@@ -339,7 +341,7 @@ public class OphHttpClientTest {
         try {
             assertEquals("Exception: Unexpected response status: 404 Expected: any 2xx code Url: http://localhost:"+mockServerRule.getPort()+"/test",
                     client.get("local.test")
-                            .onError((requestParameters, response, e) -> {arr[0]="POW!"; throw e;})
+                            .onError((requestParameters, response, e) -> arr[0]="POW!")
                             .handleManually());
             throw new RuntimeException("For some reason there was no exception");
         } catch (IOException e) {

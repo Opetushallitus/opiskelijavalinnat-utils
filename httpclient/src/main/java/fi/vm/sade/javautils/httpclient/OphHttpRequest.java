@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * A configurable request object.
@@ -190,15 +189,28 @@ public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest>
     private <V> V handleOnError(final OphRequestParameters requestParameters, final OphHttpResponse[] responseForOnError, CallableWithoutException<V> callable) {
         try {
             return callable.call();
-        } catch (RuntimeException e) {
-            OphHttpRequestErrorHandler errorHandler = requestParameters.onError;
-            if(errorHandler != null) {
-                Object o = errorHandler.handleError(requestParameters, responseForOnError[0], e);
-                return (V) o;
-            } else {
-                throw e;
+        } catch (RuntimeException exceptionFromCode) {
+            Object ret = null;
+            RuntimeException exceptionFromOnError = null;
+            if( requestParameters.onError != null) {
+                try {
+                    ret = requestParameters.onError.handleError(requestParameters, responseForOnError[0], exceptionFromCode);
+                } catch (RuntimeException e) {
+                    exceptionFromOnError = e;
+                }
             }
-
+            if(requestParameters.throwOnlyOnErrorExceptions) {
+                if(exceptionFromOnError != null) {
+                    if(exceptionFromCode == exceptionFromOnError) {
+                        throw exceptionFromCode;
+                    } else {
+                        throw new RuntimeException("Http request failed and onError handler failed also! exceptionFromOnError.getMessage() is: " + exceptionFromOnError.getMessage()+ " Exception from http request follows", exceptionFromCode);
+                    }
+                }
+                return (V) ret;
+            } else {
+                throw exceptionFromCode;
+            }
         }
     }
 

@@ -110,14 +110,20 @@ class OphRequestParameterAccessors<T> {
      *
      * note 3: If your execute method throws an exception by itself, onError will catch it.
      *
-     * note 4: Per request, there can be only one onError handler.
+     * note 4: Per request, there can be only one onError or recover handler.
      *
      * @param errorHandler
      * @return
      */
-    public T onError(OphHttpRequestErrorHandler errorHandler) {
+    public <R> T onError(OphHttpRequestErrorHandler<R> errorHandler) {
         checkEditMode();
         requestParameters.onError = errorHandler;
+        return thisParams;
+    }
+
+    public T throwOnlyOnErrorExceptions() {
+        checkEditMode();
+        requestParameters.throwOnlyOnErrorExceptions = true;
         return thisParams;
     }
 }
