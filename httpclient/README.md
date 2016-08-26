@@ -85,6 +85,23 @@ Make a x-www-form-urlencoded POST
         dataWriter(FORM_URLENCODED, UTF8, out -> OphHttpClient.formUrlEncodedWriter(out).param("service", service).param("size",1) )
         execute();
 
+If you want to handle exceptions with your own code, you can use onError
+
+    // handle the error somehow and throw and the original exception
+    String responseBody = client.get("local.test")
+        .onError((requestParameters, response, exception) -> {logger.error("There was an error!", exception); throw exception;})
+        .execute(response -> response.asText())
+        
+    // handle the error somehow and do not throw an exception but instead return a default value
+    String responseBody = client.get("local.test")
+        .onError((requestParameters, response, exception) -> {logger.error("There was an error!", exception); return null;})
+        .execute(response -> response.asText())
+
+* note 1: It should either throw an exception or return an object of correct type (= of the same type as execute returns). Otherwise you'll get a class cast exception if the code uses the returned value.
+* note 2: errorHandler.handleError() needs to handle cases where response is null.
+* note 3: If your execute method throws an exception by itself, onError will catch it.
+* note 4: Per request, there can be only one onError handler.
+
 There is also `handleManually()` which doesn't release anything. It returns an OphHttpResponse instance which you need to close.
 
     OphHttpResponse response = client.get("tarjonta-service.koulutus", koulutusId).

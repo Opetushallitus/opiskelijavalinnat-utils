@@ -26,6 +26,7 @@ public class OphRequestParameters implements Cloneable {
     public Integer maxRetryCount  = null;
     public Integer retryDelayMs = null;
     public boolean skipResponseAssertions = false;
+    public OphHttpRequestErrorHandler onError;
 
     public OphRequestParameters cloneParameters() {
         try {

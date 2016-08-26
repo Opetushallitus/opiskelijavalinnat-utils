@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * A configurable request object.
@@ -34,21 +35,19 @@ public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest>
     public <R> R execute(final OphHttpResponseHandler<R> handler) {
         prepareRequest();
         final OphRequestParameters requestParameters = getRequestParameters();
-        return handleRetryOnError(requestParameters.method + " " + requestParameters.url, requestParameters.maxRetryCount, requestParameters.retryDelayMs, new CallableWithoutException<R>() {
-            @Override
-            public R call() {
+        final OphHttpResponse[] responseForOnError = new OphHttpResponse[1];
+        return handleOnError(requestParameters, responseForOnError, () -> {
+            return handleRetryOnError(requestParameters.method + " " + requestParameters.url, requestParameters.maxRetryCount, requestParameters.retryDelayMs, () -> {
                 try {
-                    return client.createRequest(requestParameters).execute(new OphHttpResponseHandler<R>() {
-                        @Override
-                        public R handleResponse(OphHttpResponse response) throws IOException {
-                            checkResponse(response);
-                            return handler.handleResponse(response);
-                        }
+                    return client.createRequest(requestParameters).execute(response -> {
+                        responseForOnError[0] = response;
+                        checkResponse(response);
+                        return handler.handleResponse(response);
                     });
                 } catch (IOException e) {
                     throw new RuntimeException("Error handling url: " + requestParameters.url, e);
                 }
-            }
+            });
         });
     }
 
@@ -73,9 +72,9 @@ public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest>
     public OphHttpResponse handleManually() throws IOException {
         prepareRequest();
         final OphRequestParameters requestParameters = getRequestParameters();
-        return handleRetryOnError(requestParameters.method + " " + requestParameters.url, requestParameters.maxRetryCount, requestParameters.retryDelayMs, new CallableWithoutException<OphHttpResponse>() {
-            @Override
-            public OphHttpResponse call() {
+        final OphHttpResponse[] responseForOnError = new OphHttpResponse[1];
+        return handleOnError(requestParameters, responseForOnError, () -> {
+            return handleRetryOnError(requestParameters.method + " " + requestParameters.url, requestParameters.maxRetryCount, requestParameters.retryDelayMs, () -> {
                 OphHttpResponse response;
                 try {
                     response = client.createRequest(requestParameters).handleManually();
@@ -84,7 +83,7 @@ public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest>
                 }
                 checkResponse(response);
                 return response;
-            }
+            });
         });
     }
 
@@ -186,6 +185,21 @@ public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest>
             }
         }
         return false;
+    }
+
+    private <V> V handleOnError(final OphRequestParameters requestParameters, final OphHttpResponse[] responseForOnError, CallableWithoutException<V> callable) {
+        try {
+            return callable.call();
+        } catch (RuntimeException e) {
+            OphHttpRequestErrorHandler errorHandler = requestParameters.onError;
+            if(errorHandler != null) {
+                Object o = errorHandler.handleError(requestParameters, responseForOnError[0], e);
+                return (V) o;
+            } else {
+                throw e;
+            }
+
+        }
     }
 
     private static <V> V handleRetryOnError(String id, Integer maxCount, Integer delayMs, CallableWithoutException<V> callable) {

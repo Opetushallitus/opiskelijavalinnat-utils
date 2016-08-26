@@ -292,6 +292,65 @@ public class OphHttpClientTest {
                 .execute(responseAsText));
     }
 
+    @Test
+    public void onErrorHandlesErrors() {
+        new MockServerClient("localhost", mockServerRule.getPort()).when(
+                request()
+                        .withMethod("GET")
+                        .withPath("/test")
+        ).respond(response()
+                .withStatusCode(404)
+                .withHeader("Content-Type", TEXT)
+                .withBody("NOT OK!")
+        );
+
+        // return correct Object
+        assertEquals("Exception: Unexpected response status: 404 Expected: any 2xx code Url: http://localhost:"+mockServerRule.getPort()+"/test",
+                client.get("local.test")
+                .onError((requestParameters, response, e) -> "Exception: " + e.getMessage())
+                .execute(responseAsText));
+
+        // return incorrect object type -> class cast exception
+        try {
+            String result = client.get("local.test")
+                    .onError((requestParameters, response, e) -> 123)
+                    .execute(responseAsText);
+            throw new RuntimeException("For some reason class cast exception was not thrown!");
+        } catch (Exception e) {
+            assertEquals(ClassCastException.class, e.getClass());
+            assertEquals("java.lang.Integer cannot be cast to java.lang.String", e.getMessage());
+        }
+
+        // onError can throw exception
+        final String[] arr = {""};
+        try {
+            String result = client.get("local.test")
+                    .onError((requestParameters, response, e) -> {arr[0]="POW!"; throw e;})
+                    .execute(responseAsText);
+            throw new RuntimeException("For some reason there was no exception");
+        } catch (Exception e) {
+            assertEquals("POW!", arr[0]);
+            assertEquals(RuntimeException.class, e.getClass());
+            assertEquals("Unexpected response status: 404 Expected: any 2xx code Url: http://localhost:"+mockServerRule.getPort()+"/test", e.getMessage());
+        }
+
+        // handleManually supports onError
+        arr[0]="";
+        try {
+            assertEquals("Exception: Unexpected response status: 404 Expected: any 2xx code Url: http://localhost:"+mockServerRule.getPort()+"/test",
+                    client.get("local.test")
+                            .onError((requestParameters, response, e) -> {arr[0]="POW!"; throw e;})
+                            .handleManually());
+            throw new RuntimeException("For some reason there was no exception");
+        } catch (IOException e) {
+            throw new RuntimeException("There should have not been an IOException");
+        } catch (RuntimeException e) {
+            assertEquals("POW!", arr[0]);
+            assertEquals(e.getMessage(), "Unexpected response status: 404 Expected: any 2xx code Url: http://localhost:"+mockServerRule.getPort()+"/test", e.getMessage());
+        }
+
+    }
+
     private static void assertContains(String from, String... args) {
         for (String arg : args) {
             Assert.assertTrue("String " + arg + " not found from: " + from, from.contains(arg));

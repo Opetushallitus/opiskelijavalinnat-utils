@@ -100,4 +100,24 @@ class OphRequestParameterAccessors<T> {
         requestParameters.skipResponseAssertions = true;
         return thisParams;
     }
+
+    /**
+     * Add errorHandler that is called when an exception is thrown.
+     *
+     * note1: It should either throw an exception or return an object of correct type (= of the same type as execute returns). Otherwise you'll get a class cast exception if the code uses the returned value.
+     *
+     * note 2: errorHandler.handleError() needs to handle cases where response is null.
+     *
+     * note 3: If your execute method throws an exception by itself, onError will catch it.
+     *
+     * note 4: Per request, there can be only one onError handler.
+     *
+     * @param errorHandler
+     * @return
+     */
+    public T onError(OphHttpRequestErrorHandler errorHandler) {
+        checkEditMode();
+        requestParameters.onError = errorHandler;
+        return thisParams;
+    }
 }
