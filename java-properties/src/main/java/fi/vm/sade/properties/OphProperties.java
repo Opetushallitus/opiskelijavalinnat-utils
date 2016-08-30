@@ -211,8 +211,22 @@ public class OphProperties implements PropertyResolver {
         return params;
     }
 
+    private Properties resolveRecursiveFrontProperties(Properties frontProperties) {
+        Properties resolvedFrontProperties = new Properties();
+        for(Object o: frontProperties.keySet()) {
+            String key = o.toString();
+            String value = frontProperties.getProperty(key);
+            if(value.contains("${")) {
+                resolvedFrontProperties.put(o, requireProperty(key, new Object[]{}, replacer, true, this.frontProperties, overrides, ophProperties, defaults));
+            } else {
+                resolvedFrontProperties.put(o, value);
+            }
+        }
+        return resolvedFrontProperties;
+    }
+
     public String frontPropertiesToJson() {
-        return mapToJson(frontProperties);
+        return mapToJson(resolveRecursiveFrontProperties(frontProperties));
     }
 
     public class UrlResolver extends ParamReplacer implements PropertyResolver {
