@@ -96,15 +96,17 @@ public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest>
                 }
                 header(OphHttpClient.Header.CONTENT_TYPE, contentType);
             }
-            if(!OphHttpClient.CSRF_SAFE_VERBS.contains(requestParameters.method)) {
-                header(OphHttpClient.Header.CSRF, OphHttpClient.Header.CSRF);
-            }
             if(requestParameters.acceptMediaTypes.size() > 0) {
                 header(OphHttpClient.Header.ACCEPT, join(requestParameters.acceptMediaTypes, ", "));
             }
-            if(requestParameters.clientSubSystemCode != null) {
-                header("clientSubSystemCode", requestParameters.clientSubSystemCode);
-            }
+            if(requestParameters.sendOphHeaders) {
+                if(!OphHttpClient.CSRF_SAFE_VERBS.contains(requestParameters.method)) {
+                    header(OphHttpClient.Header.CSRF, OphHttpClient.Header.CSRF);
+                }
+                if(requestParameters.clientSubSystemCode != null) {
+                    header("clientSubSystemCode", requestParameters.clientSubSystemCode);
+                }
+                }
             if(requestParameters.url == null) {
                 requestParameters.url = createUrl(requestParameters);
             }

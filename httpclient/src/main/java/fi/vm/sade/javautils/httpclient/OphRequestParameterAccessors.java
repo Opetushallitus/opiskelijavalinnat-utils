@@ -126,4 +126,10 @@ class OphRequestParameterAccessors<T> {
         requestParameters.throwOnlyOnErrorExceptions = true;
         return thisParams;
     }
+
+    public T doNotSendOphHeaders() {
+        checkEditMode();
+        requestParameters.sendOphHeaders = false;
+        return thisParams;
+    }
 }

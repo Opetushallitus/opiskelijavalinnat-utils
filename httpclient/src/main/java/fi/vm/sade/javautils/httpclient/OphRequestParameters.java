@@ -28,6 +28,7 @@ public class OphRequestParameters implements Cloneable {
     public boolean skipResponseAssertions = false;
     public OphHttpRequestErrorHandler onError;
     public boolean throwOnlyOnErrorExceptions = false;
+    public boolean sendOphHeaders = true;
 
     public OphRequestParameters cloneParameters() {
         try {

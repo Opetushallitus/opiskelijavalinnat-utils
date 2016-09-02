@@ -59,14 +59,15 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
     /**
      * Helper methods for HttpClientBuilder.
      *
-     * 1. Use createClosableClient(), createCachingClient() or setHttpClientBuilder() to initialize httpBuilder
+     * 1. By default uses closable HttpClientBuilder, use createCachingClient() or setHttpClientBuilder() to initialize another kind of apache httpclient httpBuilder
      *
      * 2. Call helper methods to configure httpBuilder
      *
      * 3. Call build() and create OphHttpClient
      */
     public static class ApacheHttpClientBuilder {
-        public HttpClientBuilder httpBuilder = null;
+        // default to non-caching closableClient
+        public HttpClientBuilder httpBuilder = HttpClientBuilder.create();
         public CookieStore cookieStore = null;
 
         public ApacheOphHttpClient build() {
@@ -79,7 +80,7 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
             return this;
         }
 
-        // good values could be 50 * 1000 and 10 * 1024 * 1024
+        // good values could be 50 * 1000 (50000) and 10 * 1024 * 1024 (10MB)
         public ApacheHttpClientBuilder createCachingClient(int maxCacheEntries, int maxObjectSize) {
             CachingHttpClientBuilder builder = CachingHttpClientBuilder.create();
             CacheConfig cacheConfig = CacheConfig.custom().
