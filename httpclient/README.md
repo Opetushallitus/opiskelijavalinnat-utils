@@ -26,12 +26,12 @@ By default the client expects the status code to be 2xx.
     <dependency>
         <groupId>fi.vm.sade.java-utils</groupId>
         <artifactId>httpclient</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.1.0-SNAPSHOT</version>
     </dependency>
 
 ## SBT
 
-    "fi.vm.sade.java-utils" %% "httpclient" % "0.0.1-SNAPSHOT"
+    "fi.vm.sade.java-utils" %% "httpclient" % "0.1.0-SNAPSHOT"
 
 ## Initializing a client
 
