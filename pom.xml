@@ -12,6 +12,7 @@
         <module>tcp-utils</module>
         <module>jetty-test-utils</module>
         <module>java-cas</module>
+        <module>java-ldap</module>
         <module>java-cxf</module>
         <module>httpclient</module>
         <module>embedded-tomcat</module>
