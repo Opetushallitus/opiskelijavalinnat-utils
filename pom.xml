@@ -15,6 +15,7 @@
         <module>java-ldap</module>
         <module>java-cxf</module>
         <module>httpclient</module>
+        <module>url-connection-tester</module>
         <module>embedded-tomcat</module>
         <module>opintopolku-cas-servlet-filter</module>
     </modules>
