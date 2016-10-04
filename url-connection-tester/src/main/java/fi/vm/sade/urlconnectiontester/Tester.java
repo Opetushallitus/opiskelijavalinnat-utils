@@ -25,7 +25,7 @@ public class Tester {
                 try {
                     Thread.currentThread().sleep(slowTresholdSecs / 2);
                     currentTime += slowTresholdSecs / 2;
-                    if(currentTime > slowTresholdSecs) {
+                    if(currentTime >= slowTresholdSecs) {
                         logger.warn("Slow request underway: allready {} seconds", currentTime / 1000.0);
                     }
                 } catch (InterruptedException e) {
