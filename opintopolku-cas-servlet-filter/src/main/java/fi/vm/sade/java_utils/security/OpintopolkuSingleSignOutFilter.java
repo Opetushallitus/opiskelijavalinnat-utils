@@ -5,15 +5,18 @@ import org.jasig.cas.client.session.SingleSignOutFilter;
 
 import javax.servlet.*;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 public class OpintopolkuSingleSignOutFilter implements Filter {
     private final static String WEB_URL_CAS = "web.url.cas";
     private final SingleSignOutFilter singleSignOutFilter;
 
     public OpintopolkuSingleSignOutFilter() {
-        OphProperties ophProperties = new OphProperties();
+        final String userHome = System.getProperties().getProperty("user.home");
+        OphProperties ophProperties = new OphProperties()
+                .addOptionalFiles(Paths.get(userHome, "/oph-configuration/common.properties").toString());
         this.singleSignOutFilter = new SingleSignOutFilter();
-        this.singleSignOutFilter.setCasServerUrlPrefix(ophProperties.getProperty(WEB_URL_CAS));
+        this.singleSignOutFilter.setCasServerUrlPrefix(ophProperties.require(WEB_URL_CAS));
     }
 
     @Override
