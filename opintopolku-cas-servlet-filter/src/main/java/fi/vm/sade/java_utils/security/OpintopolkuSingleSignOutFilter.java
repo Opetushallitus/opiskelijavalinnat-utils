@@ -9,18 +9,15 @@ import java.nio.file.Paths;
 
 public class OpintopolkuSingleSignOutFilter implements Filter {
     private final static String WEB_URL_CAS = "web.url.cas";
-    private final SingleSignOutFilter singleSignOutFilter;
-
-    public OpintopolkuSingleSignOutFilter() {
-        final String userHome = System.getProperties().getProperty("user.home");
-        OphProperties ophProperties = new OphProperties()
-                .addOptionalFiles(Paths.get(userHome, "/oph-configuration/common.properties").toString());
-        this.singleSignOutFilter = new SingleSignOutFilter();
-        this.singleSignOutFilter.setCasServerUrlPrefix(ophProperties.require(WEB_URL_CAS));
-    }
+    private SingleSignOutFilter singleSignOutFilter;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        final String userHome = System.getProperty("user.home");
+        OphProperties ophProperties = new OphProperties()
+                .addFiles(Paths.get(userHome, "/oph-configuration/common.properties").toString());
+        this.singleSignOutFilter = new SingleSignOutFilter();
+        this.singleSignOutFilter.setCasServerUrlPrefix(ophProperties.require(WEB_URL_CAS));
         this.singleSignOutFilter.init(filterConfig);
     }
 
