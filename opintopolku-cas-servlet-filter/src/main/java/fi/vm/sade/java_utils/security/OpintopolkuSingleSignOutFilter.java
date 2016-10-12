@@ -1,6 +1,8 @@
 package fi.vm.sade.java_utils.security;
 
 import fi.vm.sade.properties.OphProperties;
+import org.jasig.cas.client.Protocol;
+import org.jasig.cas.client.configuration.ConfigurationKeys;
 import org.jasig.cas.client.session.SingleSignOutFilter;
 
 import javax.servlet.*;
@@ -14,12 +16,15 @@ public class OpintopolkuSingleSignOutFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         final String userHome = System.getProperty("user.home");
-        if(userHome == null) throw new IllegalStateException("System property 'user.home' is mandatory!");
         final OphProperties ophProperties = new OphProperties()
                 .addFiles(Paths.get(userHome, "/oph-configuration/common.properties").toString());
         final String webUrlCas = ophProperties.require(WEB_URL_CAS);
-        if(webUrlCas == null) throw new IllegalStateException("Common property 'web.url.cas' is mandatory!");
         this.singleSignOutFilter = new SingleSignOutFilter();
+        this.singleSignOutFilter.setIgnoreInitConfiguration(true);
+        this.singleSignOutFilter.setArtifactParameterName(Protocol.CAS2.getArtifactParameterName());
+        this.singleSignOutFilter.setLogoutParameterName("logoutRequest");
+        this.singleSignOutFilter.setFrontLogoutParameterName("SAMLRequest");
+        this.singleSignOutFilter.setRelayStateParameterName("RelayState");
         this.singleSignOutFilter.setCasServerUrlPrefix(webUrlCas);
         this.singleSignOutFilter.init(filterConfig);
     }
