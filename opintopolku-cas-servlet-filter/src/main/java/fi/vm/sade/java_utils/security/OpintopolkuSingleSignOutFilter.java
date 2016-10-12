@@ -14,10 +14,13 @@ public class OpintopolkuSingleSignOutFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         final String userHome = System.getProperty("user.home");
-        OphProperties ophProperties = new OphProperties()
+        if(userHome == null) throw new IllegalStateException("System property 'user.home' is mandatory!");
+        final OphProperties ophProperties = new OphProperties()
                 .addFiles(Paths.get(userHome, "/oph-configuration/common.properties").toString());
+        final String webUrlCas = ophProperties.require(WEB_URL_CAS);
+        if(webUrlCas == null) throw new IllegalStateException("Common property 'web.url.cas' is mandatory!");
         this.singleSignOutFilter = new SingleSignOutFilter();
-        this.singleSignOutFilter.setCasServerUrlPrefix(ophProperties.require(WEB_URL_CAS));
+        this.singleSignOutFilter.setCasServerUrlPrefix(webUrlCas);
         this.singleSignOutFilter.init(filterConfig);
     }
 
