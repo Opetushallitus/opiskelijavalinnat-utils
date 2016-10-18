@@ -26,9 +26,15 @@
 * Backend override properties can be loaded from files with command line. These will override values loaded with code
   * `-Doph-properties=file1.properties,file2.properties` - for properties (url. and front. filtering is applied to get front properties)
   * `-Doph-front=file3.properties,file4.properties` - for front only properties
-* Easily modify base urls. URL resolving looks for "*service*.baseUrl" and "baseUrl" to resolve the whole url: "*suoritusrekisteri*.info"
+* Easily redirect urls generated with `url()` by defining baseUrl:
+  * After the url is created from properties URL resolving looks for "*service*.baseUrl" and "baseUrl".
+  *  Base url is appended to the beginning of the resolved url. If the original url contains protocol, server and port they are removed.
   * `-Dsuoritusrekisteri.baseUrl=https://testserver/suoritusrekisteri` - for suoritusrekisteri urls
   * `-DbaseUrl=https://testserver/suoritusrekisteri` - for all urls
+
+            /path/123 + baseUrl /foo -> /foo/path/123
+            https://www.oph.fi/path/123 + baseUrl http://localhost -> http://localhost/path/123
+
 * Debug-mode for showing how application works: `-DOphProperties.debug=true`
 * [project_info_server](https://github.com/Opetushallitus/dokumentaatio/tree/master/project_info)
 parses the configuration files and is able to generate reports from the data.
