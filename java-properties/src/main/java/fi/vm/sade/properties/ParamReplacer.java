@@ -13,7 +13,7 @@ public class ParamReplacer {
                 Map paramMap = (Map) param;
                 for (Object key : paramMap.keySet()) {
                     Object value = paramMap.get(key);
-                    for(Object o: value instanceof List ? (List)value: Arrays.asList(value) ) {
+                    for(Object o: ensureValueIsList(value)) {
                         String str = enc(o);
                         String keyString = enc(key);
                         String tmpUrl = url.replace("$" + keyString, str);
@@ -28,6 +28,16 @@ public class ParamReplacer {
             }
         }
         return url + queryString;
+    }
+
+    private List ensureValueIsList(Object value) {
+        if(value instanceof List) {
+            return (List)value;
+        } else if(value instanceof Object[]) {
+            return Arrays.asList((Object[])value);
+        } else {
+            return Arrays.asList(value);
+        }
     }
 
     String extraParam(String queryString, String keyString, String value) {

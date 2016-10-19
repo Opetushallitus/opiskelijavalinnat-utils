@@ -113,11 +113,15 @@ public class OphPropertiesTest {
                         }})
         );
         // extra named parameters go to queryString
-        assertEquals("/b/pow?queryParameter=123&queryParameter=34&queryParameter2=123", ctx.url("b.b",
+        assertEquals("/b/pow?a=123&a=34&b=123&d=8&e=9&e=10", ctx.url("b.b",
                         new LinkedHashMap() {{
                             put("param", "pow");
-                            put("queryParameter", Arrays.asList("123", "34"));
-                            put("queryParameter2", "123");
+                            put("a", Arrays.asList("123", "34"));
+                            put("b", "123");
+                            String[] singleString = {"8"};
+                            String[] multipleString = {"9","10"};
+                            put("d", singleString);
+                            put("e", multipleString);
                         }})
         );
     }

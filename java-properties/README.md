@@ -53,11 +53,19 @@ See implementation and usage in following projects
 
 ## Configuration
 
-### Maven
+### Maven, for Java
 
     <dependency>
         <groupId>fi.vm.sade.java-utils</groupId>
         <artifactId>java-properties</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+
+### Maven, for Scala
+
+    <dependency>
+        <groupId>fi.vm.sade</groupId>
+        <artifactId>scala-properties_2.11</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </dependency>
 
