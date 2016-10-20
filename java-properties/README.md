@@ -120,17 +120,19 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
             "service.key": "value"
         }
 
-* .js which is loaded with a script tag after including oph_urls.js can set properties directly to window.urls.XX (front)
+* javascript file can use `window.urls.addProperties()`.
+  `window.urls.addOverride()` and `window.urls.AddDefaults()` are available but should not be used
 
-        // window.urls.override should be set with rest end point from backend application
-        window.urls.override = {
-        }
-        // window.urls.properties should be set with with static file
-        window.urls.properties = {
-        }
-        // should not be set
-        window.urls.defaults = {
-        }
+        // window.urls.properties should contain application's front urls
+        window.urls.addProperties({
+            "service.key": "value"
+        })
+        // available but should not be used
+        window.urls.addOverride({
+        }) 
+        // available but should not be used
+        window.urls.AddDefaults({
+        })
 
 * .js es6 (front)
 

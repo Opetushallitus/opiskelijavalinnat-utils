@@ -120,4 +120,14 @@ describe('oph_urls.js', function() {
         assert.equal(ctx.url("a.a",{a: "", b: null, c:undefined, d:1}), "b?a=&b=&d=1");
         assert.equal(ctx.urls().omitEmptyValuesFromQuerystring().url("a.a",{a: "", b: null, c:undefined, d:1}), "b?d=1");
     })
+
+    it("addProperties, addOverride, addDefaults work", function() {
+        ctx.urls.addDefaults({a:1})
+        ctx.urls.addOverride({b:1})
+        ctx.urls.addProperties({c:1})
+        ctx.urls.addDefaults({d:2})
+        assert.deepEqual(ctx.urls.defaults, {a:1, d:2});
+        assert.deepEqual(ctx.urls.override, {b:1});
+        assert.deepEqual(ctx.urls.properties, {c:1});
+    })
 });
