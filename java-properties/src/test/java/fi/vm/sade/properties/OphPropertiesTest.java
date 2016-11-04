@@ -228,4 +228,10 @@ public class OphPropertiesTest {
             assertEquals("\"b.b\" not defined.", e.getMessage());
         }
     }
+
+    @Test
+    public void resolveSpringValueDefault() {
+        ctx.ophProperties.put("a","a/${1:b}");
+        assertEquals("a/b", ctx.url("a", "POW!"));
+    }
 }

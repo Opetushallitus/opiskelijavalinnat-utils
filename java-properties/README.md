@@ -51,9 +51,9 @@ See implementation and usage in following projects
 * [project_info_server](https://github.com/Opetushallitus/dokumentaatio/tree/master/project_info)
 * [suoritusrekisteri](https://github.com/Opetushallitus/hakurekisteri) - uses scala-properties and oph_urls.js
 
-## Configuration
+## Configuration for JVM based languages
 
-### Maven, for Java
+### Maven, for Java @ [github.com/Opetushallitus/java-utils](https://github.com/Opetushallitus/java-utils/tree/master/java-properties)
 
     <dependency>
         <groupId>fi.vm.sade.java-utils</groupId>
@@ -61,7 +61,7 @@ See implementation and usage in following projects
         <version>0.0.1-SNAPSHOT</version>
     </dependency>
 
-### Maven, for Scala
+### Maven, for Scala @ [github.com/Opetushallitus/scala-utils](https://github.com/Opetushallitus/scala-utils/tree/master/scala-properties_2.11)
 
     <dependency>
         <groupId>fi.vm.sade</groupId>
@@ -72,23 +72,46 @@ See implementation and usage in following projects
 ### SBT
 
     "fi.vm.sade" %% "scala-properties" % "0.0.1-SNAPSHOT"
-
-### Bower, example from suoritusrekisteri
-
-* [.bowerrc](https://github.com/Opetushallitus/hakurekisteri/blob/master/.bowerrc)
-* `bower init`
-* `bower install --save https://raw.githubusercontent.com/Opetushallitus/java-utils/master/java-properties/javascript/oph_urls.js`
-* [bower.json](https://github.com/Opetushallitus/hakurekisteri/blob/master/bower.json)
-
-note: Add the file oph_urls.js to the javascript build process or refer to it in the main page with a script tag.
-
-    <script type="text/javascript" src="static/js/oph_urls.js/index.js"></script>
-
+    
 ### Java and Scala
 
+    import fi.vm.sade.properties.OphProperties // java
+    // import fi.vm.sade.scalaproperties.OphProperties // scala
+    
     // load properties by default from /suoritusrekisteri-web-oph.properties (which should be placed in class path)
     OphProperties properties = new OphProperties("/suoritusrekisteri-web-oph.properties");
     properties.url("organisaatio-service.soap");
+
+
+## Configuration for Javascript
+
+note: Add the file oph_urls.js to the javascript build process or refer to it in the main page with a script tag.
+
+### NPM @ [github.com/Opetushallitus/oph-urls-js](https://github.com/Opetushallitus/oph-urls-js)
+
+Add to _package.json_:
+
+```json
+{
+    "dependencies": {
+        "oph-urls-js": "Opetushallitus/oph-urls-js#master"
+    }
+}
+```
+
+### Bower, example from suoritusrekisteri
+
+* [.bowerrc](https://github.com/Opetushallitus/hakurekisteri/blob/master/.bowerrc) - define the directory where bower saves dependencies
+* `bower init` - creates bower.json with user defined values, example: [bower.json](https://github.com/Opetushallitus/hakurekisteri/blob/master/bower.json) 
+* `bower install --save https://raw.githubusercontent.com/Opetushallitus/oph-urls-js/master/oph_urls.js`
+
+### ES6 projects
+```javascript
+import 'oph-urls-js'  // functions (urls, url, etc.) attached to window
+```
+### HTML
+
+    <script type="text/javascript" src="static/js/oph_urls.js/index.js"></script>
 
 ### Javascript, Angular
 
@@ -101,6 +124,7 @@ note: Add the file oph_urls.js to the javascript build process or refer to it in
       })
     })
     window.url("organisaatio-service.soap")
+
 
 ### Supported property file formats
 
