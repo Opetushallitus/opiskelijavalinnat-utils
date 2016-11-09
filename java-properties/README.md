@@ -58,7 +58,7 @@ See implementation and usage in following projects
     <dependency>
         <groupId>fi.vm.sade.java-utils</groupId>
         <artifactId>java-properties</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.1.0-SNAPSHOT</version>
     </dependency>
 
 ### Maven, for Scala @ [github.com/Opetushallitus/scala-utils](https://github.com/Opetushallitus/scala-utils/tree/master/scala-properties_2.11)
@@ -73,6 +73,13 @@ See implementation and usage in following projects
 
     "fi.vm.sade" %% "scala-properties" % "0.0.1-SNAPSHOT"
     
+### Clojure / Leiningen
+
+    [fi.vm.sade.java-utils/java-properties "0.1.0-SNAPSHOT"]
+
+See an example of using this for url.properties in a [Component](https://github.com/stuartsierra/component)
+architecture: [url_helper.clj](https://github.com/Opetushallitus/oti/blob/master/src/clj/oti/component/url_helper.clj)
+
 ### Java and Scala
 
     import fi.vm.sade.properties.OphProperties // java
