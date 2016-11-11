@@ -136,8 +136,9 @@ public class OphProperties implements PropertyResolver {
             }
             String substring = value.substring(start + 2, end);
             String args[] = substring.split(":");
-            String key=args[0],defaultValue=args[1], subValue;
+            String key=args[0], subValue;
             if(args.length == 2) {
+                String defaultValue=args[1];
                 subValue = resolveProperty(key, defaultValue, new Object[0], replacer, false, properties);
             } else {
                 subValue = requireProperty(key, new Object[0], replacer, false, properties);
