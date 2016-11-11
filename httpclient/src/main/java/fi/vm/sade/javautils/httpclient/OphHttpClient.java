@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class OphHttpClient extends OphRequestParameterAccessors<OphHttpClient> implements AutoCloseable {
-    private final OphProperties urlProperties;
+    private OphProperties urlProperties;
     private OphHttpClientProxy httpAdapter;
 
     public static final class Method {
@@ -110,5 +110,10 @@ public class OphHttpClient extends OphRequestParameterAccessors<OphHttpClient> i
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public OphHttpClient setUrlProperties(OphProperties urlProperties) {
+        this.urlProperties = urlProperties;
+        return this;
     }
 }
