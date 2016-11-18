@@ -242,9 +242,9 @@ import 'oph-urls-js'  // functions (urls, url, etc.) attached to window
             UrlConfiguration urlConfiguration;
 
             @GET
-            @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+            @Produces("application/javascript" + ";charset=UTF-8")
             public String frontProperties() {
-              return "window.urls.override=" + urlConfiguration.frontPropertiesToJson();
+              return "window.urls.addOverrides(" + urlConfiguration.frontPropertiesToJson() + ")";
             }
           }
 
