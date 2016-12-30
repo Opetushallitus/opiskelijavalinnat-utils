@@ -250,9 +250,9 @@ import 'oph-urls-js'  // functions (urls, url, etc.) attached to window
 
   * If the application can be started with a method call, you can delay startup until properties are loaded with
 
-          window.urls.loadFromUrls(url1, url2).success(function() {
+          window.urls.load("test.json", {overrides: ["test_overrides.json"]}).then(function() {
               // ..
-          }
+          }, function(error) {})
 
    * If the application has many starting points it's better to include the oph_urls.js first with js script and then load the url configurations.
    This prevents the application from starting before urls are loaded.
