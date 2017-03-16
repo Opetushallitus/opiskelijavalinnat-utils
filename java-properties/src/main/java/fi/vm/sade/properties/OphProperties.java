@@ -306,7 +306,8 @@ public class OphProperties implements PropertyResolver {
             } catch (URISyntaxException e) {
                 throw new RuntimeException(e);
             }
-            return String.format("%s://%s", uri.getScheme(), uri.getHost());
+
+            return String.format("%s://%s", uri.getScheme(), uri.getAuthority());
         }
         private String stripBaseUrl(String url) {
             URI uri;
