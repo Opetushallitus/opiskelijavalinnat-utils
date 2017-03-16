@@ -290,7 +290,8 @@ public class OphProperties implements PropertyResolver {
             if (baseUrl != null) {
                 String originalUrl = url;
                 String strippedUrl = stripBaseUrl(url);
-                url = joinUrl(baseUrl.toString(), strippedUrl);
+                String baseUrlWithNoPath = stripPath(baseUrl.toString());
+                url = joinUrl(baseUrlWithNoPath, strippedUrl);
                 debug("url:", key, "with new baseUrl ->", url, "original: ", originalUrl);
             } else {
                 debug("url:", key, "->", url);
@@ -298,6 +299,15 @@ public class OphProperties implements PropertyResolver {
             return url;
         }
 
+        private String stripPath(String url) {
+            URI uri;
+            try {
+                uri = new URI(url);
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+            return String.format("%s://%s", uri.getScheme(), uri.getHost());
+        }
         private String stripBaseUrl(String url) {
             URI uri;
             try {

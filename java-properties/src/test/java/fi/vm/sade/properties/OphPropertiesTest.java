@@ -23,6 +23,14 @@ public class OphPropertiesTest {
     }
 
     @Test
+    public void getUrl() {
+        props.setProperty("service.baseUrl", "https://localhost/service");
+        props.setProperty("service.action", "${service.baseUrl}/resources/action");
+
+        assertEquals("https://localhost/service/resources/action", ctx.url("service.action"));
+    }
+
+    @Test
     public void require() {
         props.setProperty("a.b", "1");
         props.setProperty("b.b", "$1 $param");
