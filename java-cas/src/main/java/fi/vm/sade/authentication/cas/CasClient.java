@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import fi.vm.sade.javautils.httpclient.*;
+import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

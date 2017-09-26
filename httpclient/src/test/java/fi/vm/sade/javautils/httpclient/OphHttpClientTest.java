@@ -1,5 +1,6 @@
 package fi.vm.sade.javautils.httpclient;
 
+import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
 import fi.vm.sade.properties.OphProperties;
 import org.junit.*;
 import org.mockserver.client.server.MockServerClient;
