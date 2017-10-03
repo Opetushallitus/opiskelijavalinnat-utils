@@ -19,6 +19,7 @@
         <module>embedded-tomcat</module>
         <module>opintopolku-cas-servlet-filter</module>
         <module>java-auth</module>
+        <module>java-http</module>
     </modules>
     <build>
         <plugins>
