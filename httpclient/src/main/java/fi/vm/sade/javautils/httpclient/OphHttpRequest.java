@@ -125,7 +125,7 @@ public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest>
 
     private void checkResponse(OphHttpResponse response) {
         OphRequestParameters requestParameters = getRequestParameters();
-        if(requestParameters.skipResponseAssertions == false) {
+        if(!requestParameters.skipResponseAssertions) {
             String url = requestParameters.url;
             verifyStatusCode(response, requestParameters.expectStatus, url);
             verifyContentType(response, requestParameters.acceptMediaTypes, url);
@@ -217,14 +217,13 @@ public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest>
     }
 
     private static <V> V handleRetryOnError(String id, Integer maxCount, Integer delayMs, CallableWithoutException<V> callable) {
-        if(maxCount != null) {
+        if(shouldRetryOnError(maxCount)) {
             int count = 0;
             while(true) {
                 try {
                     return callable.call();
                 } catch(Exception e) {
-                    ++count;
-                    if(maxCount != -1 && maxCount == count) {
+                    if(maxCount == ++count) {
                         throw new RuntimeException("Tried " + count + " times " + id, e);
                     }
                     if(delayMs != null && delayMs > 0) {
@@ -236,9 +235,13 @@ public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest>
                     }
                 }
             }
-        } else {
-            return callable.call();
         }
+
+        return callable.call();
+    }
+
+    private static boolean shouldRetryOnError(Integer maxCount) {
+        return maxCount != null && maxCount > 0;
     }
 
     public static String join(Collection col, String sep) {
