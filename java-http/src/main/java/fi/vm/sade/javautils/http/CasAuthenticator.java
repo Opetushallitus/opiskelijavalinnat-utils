@@ -73,7 +73,7 @@ public class CasAuthenticator {
     }
 
     private void checkNotNull(String value, String name) {
-        if (value == null) throw new NullPointerException("CachingRestClient."+name+" is null, and guess what, it shouldn't!");
+        if (value == null) throw new NullPointerException("OphHttpClient." + name + " is null, and guess what, it shouldn't!");
     }
 
     private boolean useServiceAsAUserAuthentication() {
