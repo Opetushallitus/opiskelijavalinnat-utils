@@ -4,6 +4,7 @@ import fi.vm.sade.authentication.cas.CasClient;
 import fi.vm.sade.javautils.http.auth.PERA;
 import fi.vm.sade.javautils.http.auth.ProxyAuthenticator;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.springframework.security.core.Authentication;
@@ -12,48 +13,51 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.io.IOException;
 
 @Slf4j
+@Getter
+@Setter
 public class CasAuthenticator {
 
     private static final String CAS_SECURITY_TICKET = "CasSecurityTicket";
-
-    // @Value("${auth.mode:cas}")
-    private String proxyAuthMode = "dev"; // FIXME
     private ProxyAuthenticator proxyAuthenticator;
 
     private String webCasUrl;
     private String username;
     private String password;
-    @Getter
     private String casService;
     private String serviceAsAUserTicket;
+    private String proxyAuthMode;
 
     private boolean useProxyAuthentication = false;
 
-    public CasAuthenticator() {
+    public CasAuthenticator(Builder builder) {
+        webCasUrl = builder.webCasUrl;
+        casService = builder.casService;
+        username = builder.username;
+        password = builder.password;
     }
 
     protected synchronized boolean authenticate(final HttpRequestBase req) throws IOException {
         if (useServiceAsAUserAuthentication()) {
             if (serviceAsAUserTicket == null) {
-                checkNotNull(username, "username");
-                checkNotNull(password, "password");
-                checkNotNull(webCasUrl, "webCasUrl");
-                checkNotNull(casService, "casService");
+                checkNotNull(getUsername(), "username");
+                checkNotNull(getPassword(), "password");
+                checkNotNull(getWebCasUrl(), "webCasUrl");
+                checkNotNull(getCasService(), "casService");
                 serviceAsAUserTicket = obtainNewCasServiceAsAUserTicket();
-                log.info("got new serviceAsAUser ticket, service: " + casService + ", ticket: " + serviceAsAUserTicket);
+                log.info("got new serviceAsAUser ticket, service: " + getCasService() + ", ticket: " + getServiceAsAUserTicket());
             }
             req.setHeader(CAS_SECURITY_TICKET, serviceAsAUserTicket);
-            PERA.setKayttajaHeaders(req, getCurrentUser(), username);
-            log.debug("set serviceAsAUser ticket to header, service: " + casService + ", ticket: " + serviceAsAUserTicket + ", currentUser: " + getCurrentUser() + ", callAsUser: " + username);
+            PERA.setKayttajaHeaders(req, getCurrentUser(), getUsername());
+            log.debug("set serviceAsAUser ticket to header, service: " + getCasService() + ", ticket: " + getServiceAsAUserTicket() + ", currentUser: " + getCurrentUser() + ", callAsUser: " + getUsername());
             return true;
         } else if (useProxyAuthentication) {
-            checkNotNull(webCasUrl, "webCasUrl");
-            checkNotNull(casService, "casService");
+            checkNotNull(getWebCasUrl(), "webCasUrl");
+            checkNotNull(getCasService(), "casService");
             if (proxyAuthenticator == null) {
                 proxyAuthenticator = new ProxyAuthenticator();
             }
             final boolean[] gotNewProxyTicket = {false};
-            proxyAuthenticator.proxyAuthenticate(casService, proxyAuthMode, new ProxyAuthenticator.Callback() {
+            proxyAuthenticator.proxyAuthenticate(getCasService(), getProxyAuthMode(), new ProxyAuthenticator.Callback() {
                 @Override
                 public void setRequestHeader(String key, String value) {
                     req.setHeader(key, value);
@@ -119,5 +123,40 @@ public class CasAuthenticator {
         this.casService = casService;
     }
 
+    public static class Builder{
+        String webCasUrl;
+        String username;
+        String password;
+        String casService;
 
+        String proxyAuthMode;
+
+        public Builder() {
+            proxyAuthMode = "dev";
+        }
+
+        public Builder username(String username) {
+            this.username = username;
+            return this;
+        }
+
+        public Builder password(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public Builder webCasUrl(String casUrl) {
+            this.webCasUrl = casUrl;
+            return this;
+        }
+
+        public Builder casService(String casService) {
+            this.casService = casService;
+            return this;
+        }
+
+        public CasAuthenticator build() {
+            return new CasAuthenticator(this);
+        }
+    }
 }

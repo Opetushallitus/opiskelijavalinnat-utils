@@ -347,7 +347,7 @@ public class OphHttpClient { //implements HealthChecker {
             allowUrlLogging = true;
 
             jsonParser = new JsonParser();
-            casAuthenticator = new CasAuthenticator();
+            // casAuthenticator = new CasAuthenticator.Builder().build(); TODO: NoAuthenticator()
             cookieProxy = new CookieProxy();
 
             connectionManager = createConnectionManager();
