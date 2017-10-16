@@ -1,7 +1,7 @@
 package fi.vm.sade.javautils.http;
 
-// import fi.vm.sade.generic.healthcheck.HealthChecker;
-import fi.vm.sade.javautils.http.auth.ProxyAuthenticator;
+import fi.vm.sade.javautils.http.auth.Authenticator;
+import fi.vm.sade.javautils.http.refactor.ProxyAuthenticator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -50,28 +50,21 @@ public class OphHttpClient { //implements HealthChecker {
     private LogUtil logUtil;
     private HttpClient cachingClient;
     private CookieProxy cookieProxy;
-    private CasAuthenticator casAuthenticator;
+    private Authenticator authenticator;
 
     // Unchecked
     private ThreadLocal<HttpContext> localContext = ThreadLocal.withInitial(BasicHttpContext::new);
 
     private Object cacheStatus;  // used in tests
 
-    //private String webCasUrl;
-    //private String username;
-    //private String password;
-    //private String casService;
-    //protected String serviceAsAUserTicket;
-
     private String requiredVersionRegex;
-
 
     private String clientSubSystemCode;
 
     private OphHttpClient(Builder builder) {
         logUtil = new LogUtil(builder.allowUrlLogging, builder.timeoutMs);
         jsonParser = builder.jsonParser;
-        casAuthenticator = builder.casAuthenticator;
+        authenticator = builder.authenticator;
         cookieProxy = builder.cookieProxy;
 
         HttpClientBuilder clientBuilder = CachingHttpClientBuilder.create()
@@ -157,7 +150,16 @@ public class OphHttpClient { //implements HealthChecker {
     }
 
     public HttpResponse execute(HttpRequestBase req, String contentType, String postOrPutContent, int retry) throws IOException {
-        fixURI(req);
+        if (req.getURI().toString().startsWith("/")) { // TODO: handle relative urls
+            try {
+                req.setURI(new URIBuilder(authenticator.getUrlPrefix() + req.getURI().toString()).build());
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        String url = req.getURI().toString();
+        if (req.getURI().getHost() == null) throw new NullPointerException("OphHttpClient.execute ERROR! host is null, req.uri: " + url);
 
         if (contentType != null) {
             req.setHeader("Content-Type", contentType);
@@ -174,7 +176,7 @@ public class OphHttpClient { //implements HealthChecker {
 
         boolean wasJustAuthenticated = false;
         try {
-            wasJustAuthenticated = casAuthenticator.authenticate(req);
+            wasJustAuthenticated = authenticator.authenticate(req);
         } catch (ProxyAuthenticator.CasProxyAuthenticationException e) {
             if (retry == 0) {
                 log.warn("Failed to CAS authenticate. Renewing proxy ticket.");
@@ -241,18 +243,6 @@ public class OphHttpClient { //implements HealthChecker {
         return response;
     }
 
-    private void fixURI(HttpRequestBase req) {
-        if (req.getURI().toString().startsWith("/") && casAuthenticator.getCasService() != null) { // if relative url
-            try {
-                req.setURI(new URIBuilder(casAuthenticator.getCasService().replace("/j_spring_cas_security_check", "") + req.getURI().toString()).build());
-            } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        String url = req.getURI().toString();
-        if (req.getURI().getHost() == null) throw new NullPointerException("OphHttpClient.execute ERROR! host is null, req.uri: "+url);
-    }
-
     private void filterBadResponses(HttpRequestBase req, HttpResponse response) throws HttpException {
         if(response.getStatusLine().getStatusCode() == SC_FORBIDDEN) {
             logUtil.logAndThrowHttpException(req, response, "Access denied error calling REST resource");
@@ -276,64 +266,12 @@ public class OphHttpClient { //implements HealthChecker {
                 .newHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, statusCode, null), null);
     }
 
-    /*
-    @Override
-    public Object checkHealth() throws Throwable {
-        if (casService != null) {
-
-            // call target service's buildversion url (if we have credentials try the secured url)
-            String serviceUrl = casService.replace("/j_spring_cas_security_check", "");
-            final String buildversionUrl = serviceUrl + "/buildversion.txt" + (useServiceAsAUserAuthentication() ? "?auth" : "");
-            final HttpResponse result = execute(new HttpGet(buildversionUrl), null, null);
-
-            LinkedHashMap<String,Object> map = new LinkedHashMap<String,Object>() {{
-                put("url", buildversionUrl);
-                put("user", useServiceAsAUserAuthentication() ? username : useProxyAuthentication ? "proxy" : "anonymous");
-                put("status", result.getStatusLine().getStatusCode() == 200 ? "OK" : result.getStatusLine());
-                // todo: kuormitusdata?
-            }};
-
-            // kohdepalvelun healthcheck
-            try {
-                Map hc = get(serviceUrl+"/healthcheck", Map.class);
-                Object targetserviceStatus = hc.get("status");
-                if ("OK".equals(targetserviceStatus)) {
-                    map.put("targetserviceHealthcheck", "OK");
-                } else {
-                    throw new Exception("targetserviceHealthcheck error: "+targetserviceStatus);
-                }
-            } catch (HttpException e) {
-                if (e.getStatusCode() == 404) {
-                    map.put("targetserviceHealthcheck", "not found");
-                } else {
-                    throw new Exception("targetserviceHealthcheck exception: "+e.getMessage());
-                }
-            }
-
-            // mikäli kohdepalvelu ok, mutta halutaan varmistaa vielä sen versio
-            if (result.getStatusLine().getStatusCode() == 200 && requiredVersionRegex != null) {
-                Properties buildversionProps = new Properties();
-                buildversionProps.load(result.getEntity().getContent());
-                String version = buildversionProps.getProperty("version");
-                if (!version.matches(requiredVersionRegex)) {
-                    throw new Exception("wrong version: "+version+", required: "+ requiredVersionRegex+", service: "+casService);
-                }
-                map.put("version", version);
-            }
-
-            return map;
-        } else {
-            return "nothing to check, casService not configured";
-        }
-    }
-    */
-
     public static final class Builder {
         int timeoutMs;
         long connectionTTLSec;
         boolean allowUrlLogging;
         JsonParser jsonParser;
-        CasAuthenticator casAuthenticator;
+        Authenticator authenticator;
         CacheConfig cacheConfig;
         RedirectStrategy redirectStrategy;
         ConnectionKeepAliveStrategy keepAliveStrategy;
@@ -347,7 +285,7 @@ public class OphHttpClient { //implements HealthChecker {
             allowUrlLogging = true;
 
             jsonParser = new JsonParser();
-            // casAuthenticator = new CasAuthenticator.Builder().build(); TODO: NoAuthenticator()
+            authenticator = Authenticator.NONE;
             cookieProxy = new CookieProxy();
 
             connectionManager = createConnectionManager();
@@ -377,9 +315,9 @@ public class OphHttpClient { //implements HealthChecker {
             return this;
         }
 
-        public Builder casAuthenticator(CasAuthenticator authenticator) {
-            if (authenticator == null) throw new NullPointerException("CasAuthenticator == null");
-            this.casAuthenticator = authenticator;
+        public Builder authenticator(Authenticator authenticator) {
+            if (authenticator == null) throw new NullPointerException("Authenticator == null");
+            this.authenticator = authenticator;
             return this;
         }
 

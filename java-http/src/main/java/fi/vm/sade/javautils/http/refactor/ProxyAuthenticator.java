@@ -1,4 +1,4 @@
-package fi.vm.sade.javautils.http.auth;
+package fi.vm.sade.javautils.http.refactor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

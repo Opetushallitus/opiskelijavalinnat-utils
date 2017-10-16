@@ -1,6 +1,6 @@
 package fi.vm.sade.javautils.http;
 
-import fi.vm.sade.javautils.http.auth.PERA;
+import fi.vm.sade.javautils.http.refactor.PERA;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;

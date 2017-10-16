@@ -1,8 +1,8 @@
-package fi.vm.sade.javautils.http;
+package fi.vm.sade.javautils.http.auth;
 
 import fi.vm.sade.authentication.cas.CasClient;
-import fi.vm.sade.javautils.http.auth.PERA;
-import fi.vm.sade.javautils.http.auth.ProxyAuthenticator;
+import fi.vm.sade.javautils.http.refactor.PERA;
+import fi.vm.sade.javautils.http.refactor.ProxyAuthenticator;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,7 @@ import java.io.IOException;
 @Slf4j
 @Getter
 @Setter
-public class CasAuthenticator {
+public class CasAuthenticator implements Authenticator {
 
     private static final String CAS_SECURITY_TICKET = "CasSecurityTicket";
     private ProxyAuthenticator proxyAuthenticator;
@@ -23,7 +23,7 @@ public class CasAuthenticator {
     private String webCasUrl;
     private String username;
     private String password;
-    private String casService;
+    private String casServiceUrl;
     private String serviceAsAUserTicket;
     private String proxyAuthMode;
 
@@ -31,33 +31,34 @@ public class CasAuthenticator {
 
     public CasAuthenticator(Builder builder) {
         webCasUrl = builder.webCasUrl;
-        casService = builder.casService;
+        setCasServiceUrl(builder.casServiceUrl);
         username = builder.username;
         password = builder.password;
     }
 
-    protected synchronized boolean authenticate(final HttpRequestBase req) throws IOException {
+    @Override
+    public synchronized boolean authenticate(final HttpRequestBase req) throws IOException {
         if (useServiceAsAUserAuthentication()) {
             if (serviceAsAUserTicket == null) {
                 checkNotNull(getUsername(), "username");
                 checkNotNull(getPassword(), "password");
                 checkNotNull(getWebCasUrl(), "webCasUrl");
-                checkNotNull(getCasService(), "casService");
+                checkNotNull(getCasServiceUrl(), "casService");
                 serviceAsAUserTicket = obtainNewCasServiceAsAUserTicket();
-                log.info("got new serviceAsAUser ticket, service: " + getCasService() + ", ticket: " + getServiceAsAUserTicket());
+                log.info("got new serviceAsAUser ticket, service: " + getCasServiceUrl() + ", ticket: " + getServiceAsAUserTicket());
             }
             req.setHeader(CAS_SECURITY_TICKET, serviceAsAUserTicket);
             PERA.setKayttajaHeaders(req, getCurrentUser(), getUsername());
-            log.debug("set serviceAsAUser ticket to header, service: " + getCasService() + ", ticket: " + getServiceAsAUserTicket() + ", currentUser: " + getCurrentUser() + ", callAsUser: " + getUsername());
+            log.debug("set serviceAsAUser ticket to header, service: " + getCasServiceUrl() + ", ticket: " + getServiceAsAUserTicket() + ", currentUser: " + getCurrentUser() + ", callAsUser: " + getUsername());
             return true;
         } else if (useProxyAuthentication) {
             checkNotNull(getWebCasUrl(), "webCasUrl");
-            checkNotNull(getCasService(), "casService");
+            checkNotNull(getCasServiceUrl(), "casService");
             if (proxyAuthenticator == null) {
                 proxyAuthenticator = new ProxyAuthenticator();
             }
             final boolean[] gotNewProxyTicket = {false};
-            proxyAuthenticator.proxyAuthenticate(getCasService(), getProxyAuthMode(), new ProxyAuthenticator.Callback() {
+            proxyAuthenticator.proxyAuthenticate(getCasServiceUrl(), getProxyAuthMode(), new ProxyAuthenticator.Callback() {
                 @Override
                 public void setRequestHeader(String key, String value) {
                     req.setHeader(key, value);
@@ -66,7 +67,7 @@ public class CasAuthenticator {
 
                 @Override
                 public void gotNewTicket(Authentication authentication, String proxyTicket) {
-                    log.info("got new proxy ticket, service: " + casService + ", ticket: " + proxyTicket);
+                    log.info("got new proxy ticket, service: " + getCasServiceUrl() + ", ticket: " + proxyTicket);
                     gotNewProxyTicket[0] = true;
                 }
             });
@@ -74,6 +75,11 @@ public class CasAuthenticator {
         }
 
         return false;
+    }
+
+    @Override
+    public String getUrlPrefix() {
+        return getCasServiceUrl();
     }
 
     private void checkNotNull(String value, String name) {
@@ -90,7 +96,7 @@ public class CasAuthenticator {
     }
 
     private String obtainNewCasServiceAsAUserTicket() throws IOException {
-        return CasClient.getTicket(webCasUrl + "/v1/tickets", username, password, casService);
+        return CasClient.getTicket(webCasUrl + "/v1/tickets", username, password, getCasServiceUrl());
     }
 
     /** will force to get new ticket next time */
@@ -98,7 +104,7 @@ public class CasAuthenticator {
         synchronized (this) {
             serviceAsAUserTicket = null;
             if (useProxyAuthentication && proxyAuthenticator != null) {
-                proxyAuthenticator.clearTicket(casService);
+                proxyAuthenticator.clearTicket(getCasServiceUrl());
             }
         }
     }
@@ -118,16 +124,19 @@ public class CasAuthenticator {
         this.password = password;
     }
 
-    public void setCasService(String casService) {
-        clearTicket();
-        this.casService = casService;
+    public void setCasServiceUrl(String url) {
+        //clearTicket();
+        if (url != null) {
+            url = url.replace("/j_spring_cas_security_check", "");
+        }
+        this.casServiceUrl = url;
     }
 
     public static class Builder{
         String webCasUrl;
         String username;
         String password;
-        String casService;
+        String casServiceUrl;
 
         String proxyAuthMode;
 
@@ -150,8 +159,8 @@ public class CasAuthenticator {
             return this;
         }
 
-        public Builder casService(String casService) {
-            this.casService = casService;
+        public Builder casServiceUrl(String url) {
+            this.casServiceUrl = url;
             return this;
         }
 
