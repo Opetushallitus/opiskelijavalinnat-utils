@@ -1,16 +1,12 @@
 package fi.vm.sade.javautils.http.auth;
 
 import fi.vm.sade.authentication.cas.CasClient;
-import fi.vm.sade.javautils.http.refactor.PERA;
-import fi.vm.sade.javautils.http.refactor.ProxyAuthenticator;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import java.io.IOException;
 
 @Slf4j
 @Getter
@@ -18,16 +14,15 @@ import java.io.IOException;
 public class CasAuthenticator implements Authenticator {
 
     private static final String CAS_SECURITY_TICKET = "CasSecurityTicket";
-    private ProxyAuthenticator proxyAuthenticator;
+    // PERA
+    public static final String X_KUTSUKETJU_ALOITTAJA_KAYTTAJA_TUNNUS = "X-Kutsuketju.Aloittaja.KayttajaTunnus";
+    public static final String X_PALVELUKUTSU_LAHETTAJA_KAYTTAJA_TUNNUS = "X-Palvelukutsu.Lahettaja.KayttajaTunnus";
 
     private String webCasUrl;
     private String username;
     private String password;
     private String casServiceUrl;
     private String serviceAsAUserTicket;
-    private String proxyAuthMode;
-
-    private boolean useProxyAuthentication = false;
 
     public CasAuthenticator(Builder builder) {
         webCasUrl = builder.webCasUrl;
@@ -37,44 +32,19 @@ public class CasAuthenticator implements Authenticator {
     }
 
     @Override
-    public synchronized boolean authenticate(final HttpRequestBase req) throws IOException {
-        if (useServiceAsAUserAuthentication()) {
-            if (serviceAsAUserTicket == null) {
-                checkNotNull(getUsername(), "username");
-                checkNotNull(getPassword(), "password");
-                checkNotNull(getWebCasUrl(), "webCasUrl");
-                checkNotNull(getCasServiceUrl(), "casService");
-                serviceAsAUserTicket = obtainNewCasServiceAsAUserTicket();
-                log.info("got new serviceAsAUser ticket, service: " + getCasServiceUrl() + ", ticket: " + getServiceAsAUserTicket());
-            }
-            req.setHeader(CAS_SECURITY_TICKET, serviceAsAUserTicket);
-            PERA.setKayttajaHeaders(req, getCurrentUser(), getUsername());
-            log.debug("set serviceAsAUser ticket to header, service: " + getCasServiceUrl() + ", ticket: " + getServiceAsAUserTicket() + ", currentUser: " + getCurrentUser() + ", callAsUser: " + getUsername());
-            return true;
-        } else if (useProxyAuthentication) {
+    public synchronized boolean authenticate(final HttpUriRequest req) {
+        if (serviceAsAUserTicket == null) {
+            checkNotNull(getUsername(), "username");
+            checkNotNull(getPassword(), "password");
             checkNotNull(getWebCasUrl(), "webCasUrl");
             checkNotNull(getCasServiceUrl(), "casService");
-            if (proxyAuthenticator == null) {
-                proxyAuthenticator = new ProxyAuthenticator();
-            }
-            final boolean[] gotNewProxyTicket = {false};
-            proxyAuthenticator.proxyAuthenticate(getCasServiceUrl(), getProxyAuthMode(), new ProxyAuthenticator.Callback() {
-                @Override
-                public void setRequestHeader(String key, String value) {
-                    req.setHeader(key, value);
-                    log.debug("set http header: " + key + "=" + value);
-                }
-
-                @Override
-                public void gotNewTicket(Authentication authentication, String proxyTicket) {
-                    log.info("got new proxy ticket, service: " + getCasServiceUrl() + ", ticket: " + proxyTicket);
-                    gotNewProxyTicket[0] = true;
-                }
-            });
-            return gotNewProxyTicket[0];
+            serviceAsAUserTicket = obtainNewCasServiceAsAUserTicket();
+            log.info("got new serviceAsAUser ticket, service: " + getCasServiceUrl() + ", ticket: " + getServiceAsAUserTicket());
         }
-
-        return false;
+        req.setHeader(CAS_SECURITY_TICKET, serviceAsAUserTicket);
+        setKayttajaHeaders(req, getCurrentUser(), getUsername());
+        log.debug("set serviceAsAUser ticket to header, service: " + getCasServiceUrl() + ", ticket: " + getServiceAsAUserTicket() + ", currentUser: " + getCurrentUser() + ", callAsUser: " + getUsername());
+        return true;
     }
 
     @Override
@@ -83,11 +53,7 @@ public class CasAuthenticator implements Authenticator {
     }
 
     private void checkNotNull(String value, String name) {
-        if (value == null) throw new NullPointerException("OphHttpClient." + name + " is null, and guess what, it shouldn't!");
-    }
-
-    private boolean useServiceAsAUserAuthentication() {
-        return username != null;
+        if (value == null) throw new NullPointerException(String.format("CasAuthenticator.%s is null, and guess what, it shouldn't!", name));
     }
 
     private String getCurrentUser() {
@@ -95,41 +61,13 @@ public class CasAuthenticator implements Authenticator {
         return authentication != null ? authentication.getName() : null;
     }
 
-    private String obtainNewCasServiceAsAUserTicket() throws IOException {
+    private String obtainNewCasServiceAsAUserTicket() {
         return CasClient.getTicket(webCasUrl + "/v1/tickets", username, password, getCasServiceUrl());
     }
 
-    /** will force to get new ticket next time */
-    public void clearTicket() {
-        synchronized (this) {
-            serviceAsAUserTicket = null;
-            if (useProxyAuthentication && proxyAuthenticator != null) {
-                proxyAuthenticator.clearTicket(getCasServiceUrl());
-            }
-        }
-    }
-
-    public void setWebCasUrl(String webCasUrl) {
-        clearTicket();
-        this.webCasUrl = webCasUrl;
-    }
-
-    public void setUsername(String username) {
-        clearTicket();
-        this.username = username;
-    }
-
-    public void setPassword(String password) {
-        clearTicket();
-        this.password = password;
-    }
-
-    public void setCasServiceUrl(String url) {
-        //clearTicket();
-        if (url != null) {
-            url = url.replace("/j_spring_cas_security_check", "");
-        }
-        this.casServiceUrl = url;
+    private static void setKayttajaHeaders(HttpUriRequest req, String currentUser, String callAsUser) {
+        req.setHeader(X_KUTSUKETJU_ALOITTAJA_KAYTTAJA_TUNNUS, currentUser);
+        req.setHeader(X_PALVELUKUTSU_LAHETTAJA_KAYTTAJA_TUNNUS, callAsUser);
     }
 
     public static class Builder{
@@ -138,11 +76,7 @@ public class CasAuthenticator implements Authenticator {
         String password;
         String casServiceUrl;
 
-        String proxyAuthMode;
-
-        public Builder() {
-            proxyAuthMode = "dev";
-        }
+        public Builder() {}
 
         public Builder username(String username) {
             this.username = username;
@@ -160,6 +94,9 @@ public class CasAuthenticator implements Authenticator {
         }
 
         public Builder casServiceUrl(String url) {
+            if (url != null) {
+                url = url.replace("/j_spring_cas_security_check", "");
+            }
             this.casServiceUrl = url;
             return this;
         }
