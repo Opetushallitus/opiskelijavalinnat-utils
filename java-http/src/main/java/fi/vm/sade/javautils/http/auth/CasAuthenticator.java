@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 @Slf4j
 @Getter
@@ -42,8 +40,8 @@ public class CasAuthenticator implements Authenticator {
             log.info("got new serviceAsAUser ticket, service: " + getCasServiceUrl() + ", ticket: " + getServiceAsAUserTicket());
         }
         req.setHeader(CAS_SECURITY_TICKET, serviceAsAUserTicket);
-        setKayttajaHeaders(req, getCurrentUser(), getUsername());
-        log.debug("set serviceAsAUser ticket to header, service: " + getCasServiceUrl() + ", ticket: " + getServiceAsAUserTicket() + ", currentUser: " + getCurrentUser() + ", callAsUser: " + getUsername());
+        setKayttajaHeaders(req, getUsername(), getUsername());
+        log.debug("set serviceAsAUser ticket to header, service: " + getCasServiceUrl() + ", ticket: " + getServiceAsAUserTicket() + ", currentUser: " + getUsername() + ", callAsUser: " + getUsername());
         return true;
     }
 
@@ -54,11 +52,6 @@ public class CasAuthenticator implements Authenticator {
 
     private void checkNotNull(String value, String name) {
         if (value == null) throw new NullPointerException(String.format("CasAuthenticator.%s is null, and guess what, it shouldn't!", name));
-    }
-
-    private String getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext() != null ? SecurityContextHolder.getContext().getAuthentication() : null;
-        return authentication != null ? authentication.getName() : null;
     }
 
     private String obtainNewCasServiceAsAUserTicket() {
