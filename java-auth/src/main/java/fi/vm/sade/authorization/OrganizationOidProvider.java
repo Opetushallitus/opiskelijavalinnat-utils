@@ -1,6 +1,6 @@
 package fi.vm.sade.authorization;
 
-import fi.vm.sade.javautils.httpclient.ApacheOphHttpClient;
+import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
 import fi.vm.sade.javautils.httpclient.OphHttpClient;
 import fi.vm.sade.javautils.httpclient.OphHttpResponse;
 import org.slf4j.Logger;

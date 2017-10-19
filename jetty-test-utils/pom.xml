@@ -4,7 +4,7 @@
     <parent>
         <groupId>fi.vm.sade.java-utils</groupId>
         <artifactId>java-utils</artifactId>
-        <version>0.2.0-SNAPSHOT</version>
+        <version>0.2.1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>jetty-test-utils</artifactId>

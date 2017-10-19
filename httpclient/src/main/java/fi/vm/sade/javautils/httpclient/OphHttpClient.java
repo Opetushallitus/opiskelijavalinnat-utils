@@ -34,6 +34,10 @@ public class OphHttpClient extends OphRequestParameterAccessors<OphHttpClient> i
 
     public static final List<String> CSRF_SAFE_VERBS = Arrays.asList(Method.GET, Method.HEAD, Method.OPTIONS);
 
+    public OphHttpClient(OphHttpClientProxy httpAdapter) {
+        this.httpAdapter = httpAdapter;
+    }
+
     /**
      * Resolve urls through urlProperties
      * @param httpAdapter

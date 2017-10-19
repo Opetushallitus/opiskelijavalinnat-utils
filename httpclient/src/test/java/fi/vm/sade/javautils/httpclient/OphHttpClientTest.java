@@ -1,5 +1,6 @@
 package fi.vm.sade.javautils.httpclient;
 
+import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
 import fi.vm.sade.properties.OphProperties;
 import org.junit.*;
 import org.mockserver.client.server.MockServerClient;
@@ -30,11 +31,11 @@ public class OphHttpClientTest {
     @Before
     public void setUp() throws Exception {
         properties = new OphProperties();
-        client = ApacheOphHttpClient.createDefaultOphHttpClient("TESTCLIENT", properties, 1000, 1000);
+        client = ApacheOphHttpClient.createDefaultOphClient("TESTCLIENT", properties, 1000, 1000);
         Logger.getLogger("io.netty").setLevel(Level.OFF);
         properties.addDefault("local.test", "/test");
         properties.addDefault("baseUrl", "http://localhost:" + mockServerRule.getPort());
-        clientPlainUrls = ApacheOphHttpClient.createDefaultOphHttpClient("TESTCLIENT", null, 1000, 1000);
+        clientPlainUrls = ApacheOphHttpClient.createDefaultOphClient("TESTCLIENT", null, 1000, 1000);
     }
 
     @Test
