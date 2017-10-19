@@ -1,16 +1,20 @@
 package fi.vm.sade.javautils.http;
 
-import fi.vm.sade.javautils.http.refactor.PERA;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
+
+import static org.apache.http.HttpStatus.*;
 
 @Slf4j
 class LogUtil {
 
     private static final String CAS_SECURITY_TICKET = "CasSecurityTicket";
+    // PERA
+    public static final String X_KUTSUKETJU_ALOITTAJA_KAYTTAJA_TUNNUS = "X-Kutsuketju.Aloittaja.KayttajaTunnus";
+    public static final String X_PALVELUKUTSU_LAHETTAJA_KAYTTAJA_TUNNUS = "X-Palvelukutsu.Lahettaja.KayttajaTunnus";
+
     private boolean allowUrlLogging;
     private int timeoutMs;
 
@@ -19,17 +23,33 @@ class LogUtil {
         this.timeoutMs = timeoutMs;
     }
 
-    void logAndThrowHttpException(HttpRequestBase req, HttpResponse response, final String msg) throws HttpException {
-        String message = msg + ", " + info(req, response);
-        log.error(message);
-        throw new HttpException(req, response, message);
+    void logResponse(HttpUriRequest req, HttpResponse response) {
+        if(response.getStatusLine().getStatusCode() == SC_FORBIDDEN) {
+            error(req, response, "Access denied error calling REST resource");
+        }
+
+        if(response.getStatusLine().getStatusCode() >= SC_INTERNAL_SERVER_ERROR) {
+            error(req, response, "Internal error calling REST resource");
+        }
+
+        if(response.getStatusLine().getStatusCode() >= SC_NOT_FOUND) {
+            error(req, response, "Not found error calling REST resource");
+        }
+
+        if(response.getStatusLine().getStatusCode() == SC_BAD_REQUEST) {
+            error(req, response, "Bad request error calling REST resource");
+        }
     }
 
-    String info(HttpUriRequest req, HttpResponse response, boolean wasJustAuthenticated, boolean isRedirCas, boolean wasRedirCas, int retry) {
+    void error(HttpUriRequest req, HttpResponse response, final String msg) {
+        String message = msg + ", " + info(req, response);
+        log.error(message);
+    }
+
+    String info(HttpUriRequest req, HttpResponse response, boolean isRedirCas, boolean wasRedirCas, boolean retry) {
         return info(req, response)
                 + ", isredircas: " + isRedirCas
                 + ", wasredircas: " + wasRedirCas
-                + ", wasJustAuthenticated: " + wasJustAuthenticated
                 + ", retry: " + retry;
     }
 
@@ -42,9 +62,8 @@ class LogUtil {
     }
 
     private String getUserInfo(HttpUriRequest req) {
-        return header(req, "current", PERA.X_KUTSUKETJU_ALOITTAJA_KAYTTAJA_TUNNUS)
-                + header(req, "caller", PERA.X_PALVELUKUTSU_LAHETTAJA_KAYTTAJA_TUNNUS)
-                + header(req, "proxy", PERA.X_PALVELUKUTSU_LAHETTAJA_PROXY_AUTH)
+        return header(req, "current", X_KUTSUKETJU_ALOITTAJA_KAYTTAJA_TUNNUS)
+                + header(req, "caller", X_PALVELUKUTSU_LAHETTAJA_KAYTTAJA_TUNNUS)
                 + header(req, "ticket", CAS_SECURITY_TICKET);
     }
 

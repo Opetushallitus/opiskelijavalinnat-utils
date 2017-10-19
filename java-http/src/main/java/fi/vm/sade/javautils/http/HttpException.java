@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
 
 import java.io.IOException;
 
@@ -16,7 +15,7 @@ public class HttpException extends IOException {
     private String statusMsg;
     private String errorContent;
 
-    public HttpException(HttpRequestBase req, HttpResponse response, String message) {
+    public HttpException(HttpResponse response, String message) {
         super(message);
         this.statusCode = response.getStatusLine().getStatusCode();
         this.statusMsg = response.getStatusLine().getReasonPhrase();

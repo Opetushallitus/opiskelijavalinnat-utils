@@ -42,7 +42,7 @@ public class JsonParser {
         }
     }
 
-    private XMLGregorianCalendar parseXmlGregorianCalendar(String string) {
+    private static XMLGregorianCalendar parseXmlGregorianCalendar(String string) {
         if (string == null || string.isEmpty()) {
             log.debug("Error parsing json to XMLGregorianCalendar. String was null or empty!");
             return null;
