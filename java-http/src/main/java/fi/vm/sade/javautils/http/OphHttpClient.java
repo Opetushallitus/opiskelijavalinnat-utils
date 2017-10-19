@@ -41,7 +41,6 @@ public class OphHttpClient {
     private static final String CACHE_RESPONSE_STATUS = "http.cache.response.status";
     private static final String CSRF = "CachingRestClient";
 
-    private JsonParser jsonParser;
     private LogUtil logUtil;
     private HttpClient cachingClient;
     private CookieStore cookieStore;
@@ -53,7 +52,6 @@ public class OphHttpClient {
 
     private OphHttpClient(Builder builder) {
         logUtil = new LogUtil(builder.allowUrlLogging, builder.timeoutMs);
-        jsonParser = builder.jsonParser;
         authenticator = builder.authenticator;
         cookieStore = builder.cookieStore;
         clientSubSystemCode = builder.clientSubSystemCode;
@@ -153,7 +151,6 @@ public class OphHttpClient {
         long connectionTTLSec;
         boolean allowUrlLogging;
         String clientSubSystemCode;
-        JsonParser jsonParser;
         Authenticator authenticator;
         CacheConfig cacheConfig;
         RedirectStrategy redirectStrategy;
@@ -168,7 +165,6 @@ public class OphHttpClient {
             allowUrlLogging = true;
             clientSubSystemCode = "DefaultClient";
 
-            jsonParser = new JsonParser();
             authenticator = Authenticator.NONE;
             cookieStore = new BasicCookieStore();
 
