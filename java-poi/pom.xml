@@ -10,10 +10,6 @@
     <relativePath>..</relativePath>
   </parent>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
   <artifactId>java-poi</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <dependencies>
