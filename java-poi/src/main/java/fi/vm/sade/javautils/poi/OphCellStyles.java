@@ -37,6 +37,14 @@ public abstract class OphCellStyles<S extends CellStyle, C extends Cell> {
         visitor.accept(unsafeStyle);
     }
 
+    public S getQuotePrefixStyle() {
+        return quotePrefixStyle;
+    }
+
+    public S getUnsafeStyle() {
+        return unsafeStyle;
+    }
+
     public static class OphHssfCellStyles extends OphCellStyles<HSSFCellStyle, HSSFCell> {
         public OphHssfCellStyles(HSSFWorkbook workbook) {
             super(workbook.createCellStyle(), workbook.createCellStyle());
