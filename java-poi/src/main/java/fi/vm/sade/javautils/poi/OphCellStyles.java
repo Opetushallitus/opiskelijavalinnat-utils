@@ -10,6 +10,8 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.util.function.Consumer;
+
 public abstract class OphCellStyles<S extends CellStyle, C extends Cell> {
     private final S quotePrefixStyle;
     private final S unsafeStyle;
@@ -28,6 +30,11 @@ public abstract class OphCellStyles<S extends CellStyle, C extends Cell> {
             cell.setCellStyle(unsafeStyle);
         }
         return cell;
+    }
+
+    public void visit(Consumer<S> visitor) {
+        visitor.accept(quotePrefixStyle);
+        visitor.accept(unsafeStyle);
     }
 
     public static class OphHssfCellStyles extends OphCellStyles<HSSFCellStyle, HSSFCell> {
