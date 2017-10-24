@@ -12,6 +12,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -46,6 +47,11 @@ public abstract class OphCellStyles<S extends CellStyle, C extends Cell> {
             }
         }
         return cell;
+    }
+
+    public Row apply(Row row) {
+        row.setRowStyle(unsafeStyle); // This should affect only new cells, not override single cell styles
+        return row;
     }
 
     public void visit(Consumer<S> visitor) {
