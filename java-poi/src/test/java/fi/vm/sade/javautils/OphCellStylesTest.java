@@ -2,6 +2,7 @@ package fi.vm.sade.javautils;
 
 import static org.apache.poi.ss.usermodel.HorizontalAlignment.GENERAL;
 import static org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT;
+import static org.apache.poi.ss.usermodel.HorizontalAlignment.RIGHT;
 
 import fi.vm.sade.javautils.poi.OphCellStyles;
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -97,6 +98,22 @@ public class OphCellStylesTest {
         cellStyles.apply(cell);
         Assert.assertEquals(LEFT, cell.getCellStyle().getAlignmentEnum());
         Assert.assertFalse(cell.getCellStyle().getQuotePrefixed());
+    }
+
+    @Test
+    public void settingRowStyleDoesNotOverrideSingleCellStyles() {
+        cellStyles.visit(s -> s.setAlignment(LEFT));
+        HSSFCell cell = row.createCell(2);
+        cellStyles.apply(cell);
+
+        OphCellStyles.OphHssfCellStyles rowStyles = new OphCellStyles.OphHssfCellStyles(workbook);
+        rowStyles.visit(rs -> rs.setAlignment(RIGHT));
+        rowStyles.apply(row);
+
+        Assert.assertEquals(LEFT, cell.getCellStyle().getAlignmentEnum());
+
+        HSSFCell cell2 = row.createCell(2);
+        Assert.assertEquals(GENERAL, cell2.getCellStyle().getAlignmentEnum());
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -50,7 +50,7 @@ public abstract class OphCellStyles<S extends CellStyle, C extends Cell> {
     }
 
     public Row apply(Row row) {
-        row.setRowStyle(unsafeStyle); // This should affect only new cells, not override single cell styles
+        row.setRowStyle(unsafeStyle); // This should affect only new cells when workbook is created, not override single cell styles
         return row;
     }
 
