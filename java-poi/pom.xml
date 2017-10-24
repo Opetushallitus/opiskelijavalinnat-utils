@@ -10,6 +10,10 @@
     <relativePath>..</relativePath>
   </parent>
 
+  <properties>
+    <poi.version>3.17</poi.version>
+  </properties>
+
   <artifactId>java-poi</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <dependencies>
@@ -22,7 +26,17 @@
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi</artifactId>
-      <version>3.17</version>
+      <version>${poi.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>${poi.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.6</version>
     </dependency>
   </dependencies>
 </project>
