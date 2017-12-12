@@ -100,6 +100,7 @@ public class OphHttpClient {
                 log.warn("Redirected to CAS or 401 unauthorized, retrieving ticket again and retrying request");
                 log.debug("Set redirected_to_cas=false");
                 localContext.get().removeAttribute(CasUtil.getCasAttributeName());
+                this.authenticator.clearSession();
                 return execute(request, false);
             } else {
                 logUtil.error(request, response, "Was redirected to CAS or received 401 unauthorized error.");

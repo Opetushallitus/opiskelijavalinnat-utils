@@ -30,6 +30,11 @@ public class CasAuthenticator implements Authenticator {
     }
 
     @Override
+    public void clearSession() {
+        serviceAsAUserTicket = null;
+    }
+
+    @Override
     public synchronized boolean authenticate(final HttpUriRequest req) {
         if (serviceAsAUserTicket == null) {
             checkNotNull(getUsername(), "username");

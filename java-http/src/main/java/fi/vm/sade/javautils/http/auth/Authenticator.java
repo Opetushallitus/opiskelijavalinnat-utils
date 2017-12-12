@@ -8,6 +8,10 @@ public interface Authenticator {
 
     Authenticator NONE = new Authenticator() {
         @Override
+        public void clearSession() {
+        }
+
+        @Override
         public boolean authenticate(HttpUriRequest request) {
             return false;
         }
@@ -16,7 +20,11 @@ public interface Authenticator {
         public String getUrlPrefix() {
             return "";
         }
+
+
     };
+
+    void clearSession();
 
     boolean authenticate(HttpUriRequest request);
 
