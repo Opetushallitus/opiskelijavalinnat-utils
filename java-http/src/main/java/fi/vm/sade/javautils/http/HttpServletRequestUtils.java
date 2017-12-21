@@ -24,12 +24,17 @@ public class HttpServletRequestUtils {
     }
 
     public static String getRemoteAddress(HttpServletRequest httpServletRequest) {
-        String xRealIp = httpServletRequest.getHeader("X-Real-IP");
+        return getRemoteAddress(httpServletRequest.getHeader("X-Real-IP"),
+            httpServletRequest.getHeader("X-Forwarded-For"),
+            httpServletRequest.getRemoteAddr(),
+            httpServletRequest.getRequestURI());
+    }
+
+    public static String getRemoteAddress(String xRealIp, String xForwardedFor, String remoteAddr, String requestURI) {
         Predicate<String> isNotBlank = (String txt) -> txt != null && !txt.isEmpty();
         if (isNotBlank.test(xRealIp)) {
             return xRealIp;
         }
-        String xForwardedFor = httpServletRequest.getHeader("X-Forwarded-For");
         if (isNotBlank.test(xForwardedFor)) {
             if (xForwardedFor.contains(",")) {
                 LOGGER.error("Could not find X-Real-IP header, but X-Forwarded-For contains multiple values: {}, " +
@@ -37,10 +42,9 @@ public class HttpServletRequestUtils {
             }
             return xForwardedFor;
         }
-        String requestURI = httpServletRequest.getRequestURI();
         if (!HARMLESS_URLS.contains(requestURI)) {
             LOGGER.warn(String.format("X-Real-IP or X-Forwarded-For was not set. Are we not running behind a load balancer? Request URI is '%s'", requestURI));
         }
-        return httpServletRequest.getRemoteAddr();
+        return remoteAddr;
     }
 }
