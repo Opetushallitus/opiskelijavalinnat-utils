@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.List;
 
 import fi.vm.sade.javautils.httpclient.*;
+import fi.vm.sade.javautils.httpclient.apache.ApacheHttpClientBuilder;
 import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.cookie.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +62,21 @@ public final class CasClient {
             return getServiceTicket(server, username, password, service, client);
         }
     }
+
+    public static Cookie initServiceSession(String casServiceSessionInitUrl, String serviceTicket, String cookieName) {
+        ApacheOphHttpClient apacheClient = ApacheOphHttpClient.createCustomBuilder().createClosableClient().setDefaultConfiguration(10000, 60).build();
+        OphHttpClient client = new OphHttpClient(apacheClient, "CasClient");
+
+        return client.get(casServiceSessionInitUrl + "?" + "ticket="+serviceTicket).skipResponseAssertions().execute(r -> {
+            for(Cookie cookie : apacheClient.getCookieStore().getCookies()) {
+                if(cookieName.equals(cookie.getName())) {
+                    return cookie;
+                }
+            }
+            throw new RuntimeException("failed to init session to target service, response code: " + r.getStatusCode() + ", casServiceSessionInitUrl: " + casServiceSessionInitUrl + ", serviceTicket: " + serviceTicket);
+        });
+    }
+
 
     private static String getServiceTicket(final String server, String username, String password, final String service, OphHttpClient client) {
         final String ticketGrantingTicket = getTicketGrantingTicket(server, username, password, client);

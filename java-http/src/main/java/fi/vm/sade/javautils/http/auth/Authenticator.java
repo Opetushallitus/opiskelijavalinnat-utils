@@ -1,5 +1,6 @@
 package fi.vm.sade.javautils.http.auth;
 
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import java.io.IOException;
@@ -12,7 +13,7 @@ public interface Authenticator {
         }
 
         @Override
-        public boolean authenticate(HttpUriRequest request) {
+        public boolean authenticate(HttpUriRequest request, CookieStore cookieStore) {
             return false;
         }
 
@@ -26,7 +27,7 @@ public interface Authenticator {
 
     void clearSession();
 
-    boolean authenticate(HttpUriRequest request);
+    boolean authenticate(HttpUriRequest request, CookieStore cookieStore);
 
     String getUrlPrefix();
 

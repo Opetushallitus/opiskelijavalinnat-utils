@@ -34,6 +34,10 @@ public class ApacheOphHttpClient extends OphHttpClientProxy {
         return new ApacheHttpClientBuilder();
     }
 
+    public CookieStore getCookieStore() {
+        return this.cookieStore;
+    }
+
     public void close() {
         try {
             httpClient.close();

@@ -1,6 +1,7 @@
 package fi.vm.sade.javautils.http;
 
 import fi.vm.sade.javautils.http.auth.Authenticator;
+import fi.vm.sade.javautils.http.auth.CasAuthenticator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.*;
@@ -49,6 +50,44 @@ public class OphHttpClient {
 
     private ThreadLocal<HttpContext> localContext = ThreadLocal.withInitial(BasicHttpContext::new);
     private HashMap<String, Boolean> csrfCookiesCreateForHost = new HashMap<>();
+
+    public static void main(String[] args) throws InterruptedException {
+        CasAuthenticator authenticator = new CasAuthenticator.Builder()
+                .username("XXXXX")
+                .password("YYYYY")
+                .webCasUrl("https://testi.virkailija.opintopolku.fi/cas")
+                .casServiceUrl("https://testi.virkailija.opintopolku.fi/lomake-editori/auth/cas")
+                .addSpringSecSuffix(false)
+                .casServiceSessionInitUrl("https://testi.virkailija.opintopolku.fi/lomake-editori/auth/cas")
+                .sessionCookieName("ring-session")
+                .build();
+
+        OphHttpClient testClient = new OphHttpClient.Builder().authenticator(authenticator).build();
+
+        OphHttpResponse response = testClient.execute(OphHttpRequest.Builder
+                .get("https://testi.virkailija.opintopolku.fi/lomake-editori/api/forms")
+                .build());
+        System.out.println(response.asText());
+
+        Thread.sleep(5000);
+
+        response = testClient.execute(OphHttpRequest.Builder
+                .get("https://testi.virkailija.opintopolku.fi/lomake-editori/api/forms")
+                .build());
+        System.out.println(response.asText());
+
+        // Ataru has 10 hours of timeout
+        Thread.sleep(10*60*60*1000);
+
+        response = testClient.execute(OphHttpRequest.Builder
+                .get("https://testi.virkailija.opintopolku.fi/lomake-editori/api/forms")
+                .build());
+        System.out.println(response.asText());
+
+
+    }
+
+
 
     private OphHttpClient(Builder builder) {
         logUtil = new LogUtil(builder.allowUrlLogging, builder.timeoutMs);
@@ -101,6 +140,9 @@ public class OphHttpClient {
                 log.debug("Set redirected_to_cas=false");
                 localContext.get().removeAttribute(CasUtil.getCasAttributeName());
                 this.authenticator.clearSession();
+                cookieStore = new BasicCookieStore();
+                csrfCookiesCreateForHost = new HashMap<>();
+
                 return execute(request, false);
             } else {
                 logUtil.error(request, response, "Was redirected to CAS or received 401 unauthorized error.");
@@ -124,7 +166,7 @@ public class OphHttpClient {
 
     private boolean authenticate(HttpUriRequest request, boolean retry) {
         try {
-            return authenticator.authenticate(request);
+            return authenticator.authenticate(request, this.cookieStore);
         } catch (Exception e) {
             if (retry) {
                 log.warn("Failed to CAS authenticate. Renewing proxy ticket.");
