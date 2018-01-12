@@ -1,12 +1,13 @@
 package fi.vm.sade.javautils.http;
 
 import lombok.Getter;
+import org.apache.http.entity.ContentType;
 
 @Getter
 public class OphHttpEntity {
 
     private String content;
-    private String contentType;
+    private ContentType contentType;
 
     private OphHttpEntity(Builder builder) {
         content = builder.content;
@@ -15,11 +16,12 @@ public class OphHttpEntity {
 
     public static final class Builder {
         private String content;
-        private String contentType;
+        private ContentType contentType;
 
         public Builder() {
             content = "";
-            contentType = "application/json";
+            // "application/json", Consts.UTF_8
+            contentType = ContentType.APPLICATION_JSON;
         }
 
         public Builder content(String content) {
@@ -27,8 +29,13 @@ public class OphHttpEntity {
             return this;
         }
 
-        public Builder contentType(String contentType) {
+        public Builder contentType(ContentType contentType) {
             this.contentType = contentType;
+            return this;
+        }
+
+        public Builder contentType(String mimeType, String charset) {
+            this.contentType = ContentType.create(mimeType, charset);
             return this;
         }
 

@@ -7,6 +7,7 @@ import org.apache.http.entity.StringEntity;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
 
 /**
  * Wrapper for Apache HttpRequest.
@@ -57,7 +58,7 @@ public class OphHttpRequest {
         }
 
         public Builder setEntity(OphHttpEntity entity) {
-            requestBuilder.setEntity(new StringEntity(entity.getContent(), ContentType.create(entity.getContentType())));
+            requestBuilder.setEntity(new StringEntity(entity.getContent(), entity.getContentType()));
             return this;
         }
 
