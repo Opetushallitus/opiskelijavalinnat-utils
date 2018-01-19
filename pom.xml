@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fi.vm.sade.java-utils</groupId>
     <artifactId>java-utils</artifactId>
-    <version>0.2.1-SNAPSHOT</version>
+    <version>0.2.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>java-properties</module>
@@ -20,7 +20,11 @@
         <module>opintopolku-cas-servlet-filter</module>
         <module>java-auth</module>
         <module>java-http</module>
+        <module>java-poi</module>
     </modules>
+    <properties>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
     <build>
         <plugins>
             <plugin>
@@ -57,6 +61,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
