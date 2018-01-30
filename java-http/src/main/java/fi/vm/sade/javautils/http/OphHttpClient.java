@@ -104,7 +104,7 @@ public class OphHttpClient {
                 log.debug("Set redirected_to_cas=false");
                 localContext.get().removeAttribute(CasUtil.getCasAttributeName());
                 this.authenticator.clearSession();
-                cookieStore = new BasicCookieStore();
+                cookieStore.clear();
                 csrfCookiesCreateForHost = new HashMap<>();
 
                 try { response.close(); } catch (IOException e) { throw new RuntimeException(e); }
