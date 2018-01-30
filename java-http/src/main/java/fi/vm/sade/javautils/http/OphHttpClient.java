@@ -15,10 +15,12 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.RedirectLocations;
 import org.apache.http.impl.client.cache.CacheConfig;
+import org.apache.http.impl.client.cache.CachingHttpClient;
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.cookie.BasicClientCookie;
@@ -43,7 +45,7 @@ public class OphHttpClient {
     private static final String CSRF = "CachingRestClient";
 
     private LogUtil logUtil;
-    private HttpClient cachingClient;
+    private CloseableHttpClient cachingClient;
     private CookieStore cookieStore;
     private Authenticator authenticator;
     private String clientSubSystemCode;
@@ -79,7 +81,7 @@ public class OphHttpClient {
 
         boolean wasJustAuthenticated = authenticate(request, retry);
 
-        HttpResponse response = performRequest(request);
+        CloseableHttpResponse response = performRequest(request);
 
         // logging
         boolean isRedirCas = CasUtil.isRedirectToCas(response); // this response is 302 with location header pointing to cas
@@ -105,6 +107,7 @@ public class OphHttpClient {
                 cookieStore = new BasicCookieStore();
                 csrfCookiesCreateForHost = new HashMap<>();
 
+                try { response.close(); } catch (IOException e) { throw new RuntimeException(e); }
                 return execute(request, false);
             } else {
                 logUtil.error(request, response, "Was redirected to CAS or received 401 unauthorized error.");
@@ -142,7 +145,7 @@ public class OphHttpClient {
         }
     }
 
-    private HttpResponse performRequest(HttpUriRequest request) {
+    private CloseableHttpResponse performRequest(HttpUriRequest request) {
         try {
             return cachingClient.execute(request, localContext.get());
         } catch (IOException e) {
