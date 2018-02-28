@@ -63,12 +63,8 @@ public class OphHttpResponseImpl implements OphHttpResponse {
     }
 
     @Override
-    public void close() throws Exception {
-        try {
-            ((CloseableHttpResponse)response).close();
-        } catch (IOException e) {
-            throw new RuntimeException("Error closing connection: ", e);
-        }
+    public void close() throws IOException {
+        ((CloseableHttpResponse)response).close();
     }
 
     private static String toString(InputStream stream) throws IOException { // IO

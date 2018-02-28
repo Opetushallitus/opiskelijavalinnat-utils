@@ -1,5 +1,6 @@
 package fi.vm.sade.javautils.http;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -14,5 +15,7 @@ public interface OphHttpResponse extends AutoCloseable {
     List<String> getHeaderKeys();
 
     String asText();
+
+    void close() throws IOException;
 
 }
