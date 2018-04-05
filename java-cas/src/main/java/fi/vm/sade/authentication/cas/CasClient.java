@@ -1,18 +1,18 @@
 package fi.vm.sade.authentication.cas;
 
-import java.io.IOException;
-import java.util.List;
+import static fi.vm.sade.javautils.httpclient.OphHttpClient.FORM_URLENCODED;
+import static fi.vm.sade.javautils.httpclient.OphHttpClient.UTF8;
 
-import fi.vm.sade.javautils.httpclient.*;
-import fi.vm.sade.javautils.httpclient.apache.ApacheHttpClientBuilder;
+import fi.vm.sade.javautils.httpclient.OphHttpClient;
+import fi.vm.sade.javautils.httpclient.OphHttpResponse;
+import fi.vm.sade.javautils.httpclient.OphRequestParameters;
 import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.cookie.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static fi.vm.sade.javautils.httpclient.OphHttpClient.FORM_URLENCODED;
-import static fi.vm.sade.javautils.httpclient.OphHttpClient.UTF8;
+import java.util.List;
 
 /**
  * An example Java client to authenticate against CAS using REST services.
@@ -44,7 +44,7 @@ public final class CasClient {
      */
     public static String getTicket(String server, final String username, final String password, String service, boolean addSuffix) {
 
-        logger.debug("getTicket for server:{}, username:{}, service::{} ", new Object[]{server, username, service});
+        logger.debug("getTicket for server:{}, username:{}, service::{} ", server, username, service);
 
         notNull(server, "server must not be null");
         notNull(username, "username must not be null");
@@ -81,7 +81,7 @@ public final class CasClient {
     private static String getServiceTicket(final String server, String username, String password, final String service, OphHttpClient client) {
         final String ticketGrantingTicket = getTicketGrantingTicket(server, username, password, client);
 
-        logger.debug("getServiceTicket: server:'{}', ticketGrantingTicket:'{}', service:'{}'", new Object[]{server, ticketGrantingTicket, service});
+        logger.debug("getServiceTicket: server:'{}', ticketGrantingTicket:'{}', service:'{}'", server, ticketGrantingTicket, service);
 
         try {
             return client.post(server + "/" + ticketGrantingTicket).
@@ -189,7 +189,7 @@ public final class CasClient {
         return url;
     }
 
-    private static void printTraceResponse(final OphHttpResponse response, final String responseTxt) throws IOException {
+    private static void printTraceResponse(final OphHttpResponse response, final String responseTxt) {
 
         if (!logger.isTraceEnabled()) return;
 
