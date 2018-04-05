@@ -65,16 +65,16 @@ public final class CasClient {
 
     public static Cookie initServiceSession(String casServiceSessionInitUrl, String serviceTicket, String cookieName) {
         ApacheOphHttpClient apacheClient = ApacheOphHttpClient.createCustomBuilder().createClosableClient().setDefaultConfiguration(10000, 60).build();
-        OphHttpClient client = new OphHttpClient(apacheClient, "CasClient");
-
-        return client.get(casServiceSessionInitUrl + "?" + "ticket="+serviceTicket).skipResponseAssertions().execute(r -> {
-            for(Cookie cookie : apacheClient.getCookieStore().getCookies()) {
-                if(cookieName.equals(cookie.getName())) {
-                    return cookie;
+        try (OphHttpClient client = new OphHttpClient(apacheClient, "CasClient")) {
+            return client.get(casServiceSessionInitUrl + "?" + "ticket=" + serviceTicket).skipResponseAssertions().execute(r -> {
+                for (Cookie cookie : apacheClient.getCookieStore().getCookies()) {
+                    if (cookieName.equals(cookie.getName())) {
+                        return cookie;
+                    }
                 }
-            }
-            throw new RuntimeException("failed to init session to target service, response code: " + r.getStatusCode() + ", casServiceSessionInitUrl: " + casServiceSessionInitUrl + ", serviceTicket: " + serviceTicket);
-        });
+                throw new RuntimeException("failed to init session to target service, response code: " + r.getStatusCode() + ", casServiceSessionInitUrl: " + casServiceSessionInitUrl + ", serviceTicket: " + serviceTicket);
+            });
+        }
     }
 
 
