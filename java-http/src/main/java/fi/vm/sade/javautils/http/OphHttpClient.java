@@ -8,8 +8,11 @@ import org.apache.http.*;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.RedirectStrategy;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.config.ConnectionConfig;
+import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
@@ -58,9 +61,17 @@ public class OphHttpClient {
         authenticator = builder.authenticator;
         cookieStore = builder.cookieStore;
         clientSubSystemCode = builder.clientSubSystemCode;
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectTimeout(builder.timeoutMs)
+                .build();
+        SocketConfig socketConfig = SocketConfig.custom()
+                .setSoTimeout(builder.timeoutMs)
+                .build();
 
         HttpClientBuilder clientBuilder = CachingHttpClientBuilder.create()
             .setCacheConfig(builder.cacheConfig)
+            .setDefaultRequestConfig(requestConfig)
+            .setDefaultSocketConfig(socketConfig)
             .setConnectionManager(builder.connectionManager)
             .setKeepAliveStrategy(builder.keepAliveStrategy)
             .setDefaultCookieStore(cookieStore)
@@ -168,7 +179,7 @@ public class OphHttpClient {
         CookieStore cookieStore;
 
         public Builder() {
-            timeoutMs = 5 * 60 * 1000; // 5min
+            timeoutMs = 10000; // 10s
             connectionTTLSec = 60; // infran palomuuri katkoo monta minuuttia makaavat connectionit
             allowUrlLogging = true;
             clientSubSystemCode = "DefaultClient";
