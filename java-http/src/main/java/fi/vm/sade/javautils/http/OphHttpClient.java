@@ -1,29 +1,25 @@
 package fi.vm.sade.javautils.http;
 
 import fi.vm.sade.javautils.http.auth.Authenticator;
-import fi.vm.sade.javautils.http.auth.CasAuthenticator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.*;
+import org.apache.http.ConnectionReuseStrategy;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolException;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.config.ConnectionConfig;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.NoConnectionReuseStrategy;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultRedirectStrategy;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.RedirectLocations;
+import org.apache.http.impl.client.*;
 import org.apache.http.impl.client.cache.CacheConfig;
-import org.apache.http.impl.client.cache.CachingHttpClient;
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.cookie.BasicClientCookie;
@@ -33,10 +29,10 @@ import org.apache.http.protocol.HttpContext;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
-import static org.apache.http.HttpStatus.*;
+import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
 
 @Getter
 @Slf4j
