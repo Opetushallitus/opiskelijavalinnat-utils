@@ -1,26 +1,25 @@
 package fi.vm.sade.javautils.http;
 
 import fi.vm.sade.javautils.http.auth.Authenticator;
-import fi.vm.sade.javautils.http.auth.CasAuthenticator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.*;
+import org.apache.http.ConnectionReuseStrategy;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolException;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.RedirectStrategy;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.NoConnectionReuseStrategy;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultRedirectStrategy;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.RedirectLocations;
+import org.apache.http.impl.client.*;
 import org.apache.http.impl.client.cache.CacheConfig;
-import org.apache.http.impl.client.cache.CachingHttpClient;
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.cookie.BasicClientCookie;
@@ -30,10 +29,10 @@ import org.apache.http.protocol.HttpContext;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
-import static org.apache.http.HttpStatus.*;
+import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
 
 @Getter
 @Slf4j
@@ -54,13 +53,21 @@ public class OphHttpClient {
     private HashMap<String, Boolean> csrfCookiesCreateForHost = new HashMap<>();
 
     private OphHttpClient(Builder builder) {
-        logUtil = new LogUtil(builder.allowUrlLogging, builder.timeoutMs);
+        logUtil = new LogUtil(builder.allowUrlLogging, builder.connectionTimeoutMs, builder.socketTimeoutMs);
         authenticator = builder.authenticator;
         cookieStore = builder.cookieStore;
         clientSubSystemCode = builder.clientSubSystemCode;
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectTimeout(builder.connectionTimeoutMs)
+                .build();
+        SocketConfig socketConfig = SocketConfig.custom()
+                .setSoTimeout(builder.socketTimeoutMs)
+                .build();
 
         HttpClientBuilder clientBuilder = CachingHttpClientBuilder.create()
             .setCacheConfig(builder.cacheConfig)
+            .setDefaultRequestConfig(requestConfig)
+            .setDefaultSocketConfig(socketConfig)
             .setConnectionManager(builder.connectionManager)
             .setKeepAliveStrategy(builder.keepAliveStrategy)
             .setDefaultCookieStore(cookieStore)
@@ -155,7 +162,8 @@ public class OphHttpClient {
     }
 
     public static final class Builder {
-        int timeoutMs;
+        int connectionTimeoutMs;
+        int socketTimeoutMs;
         long connectionTTLSec;
         boolean allowUrlLogging;
         String clientSubSystemCode;
@@ -168,7 +176,8 @@ public class OphHttpClient {
         CookieStore cookieStore;
 
         public Builder() {
-            timeoutMs = 5 * 60 * 1000; // 5min
+            connectionTimeoutMs = 10000; // 10s
+            socketTimeoutMs = 10000; // 10s
             connectionTTLSec = 60; // infran palomuuri katkoo monta minuuttia makaavat connectionit
             allowUrlLogging = true;
             clientSubSystemCode = "DefaultClient";
@@ -183,8 +192,23 @@ public class OphHttpClient {
             cacheConfig = createCacheConfig();
         }
 
+        /**
+         * Set connection timeout.
+         * @param timeout The time given to create connection before timing out.
+         * @return builder
+         */
         public Builder timeoutMs(int timeout) {
-            this.timeoutMs = timeout;
+            this.connectionTimeoutMs = timeout;
+            return this;
+        }
+
+        /**
+         * Set socket timeout. Note this is between packets not requests.
+         * @param socketTimeoutMs The time to wait for a package before connection timeout
+         * @return builder
+         */
+        public Builder setSocketTimeoutMs(int socketTimeoutMs) {
+            this.socketTimeoutMs = socketTimeoutMs;
             return this;
         }
 

@@ -16,11 +16,13 @@ class LogUtil {
     public static final String X_PALVELUKUTSU_LAHETTAJA_KAYTTAJA_TUNNUS = "X-Palvelukutsu.Lahettaja.KayttajaTunnus";
 
     private boolean allowUrlLogging;
-    private int timeoutMs;
+    private int connectionTimeoutMs;
+    private int socketTimeoutMs;
 
-    LogUtil(boolean allowUrlLogging, int timeoutMs) {
+    LogUtil(boolean allowUrlLogging, int connectionTimeoutMs, int socketTimeoutMs) {
         this.allowUrlLogging = allowUrlLogging;
-        this.timeoutMs = timeoutMs;
+        this.connectionTimeoutMs = connectionTimeoutMs;
+        this.socketTimeoutMs = socketTimeoutMs;
     }
 
     void logResponse(HttpUriRequest req, HttpResponse response) {
@@ -58,7 +60,9 @@ class LogUtil {
                 + ", method: " + req.getMethod()
                 + ", status: " + (response != null && response.getStatusLine() != null ? response.getStatusLine().getStatusCode() : "?")
                 + ", userInfo: " + getUserInfo(req)
-                + ", timeoutMs: " + timeoutMs;
+                + ", connectionTimeoutMs: " + connectionTimeoutMs
+                + ", socketTimeoutMs: " + socketTimeoutMs
+                ;
     }
 
     private String getUserInfo(HttpUriRequest req) {
