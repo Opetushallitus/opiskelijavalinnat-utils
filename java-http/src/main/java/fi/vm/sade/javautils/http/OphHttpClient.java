@@ -53,15 +53,15 @@ public class OphHttpClient {
     private HashMap<String, Boolean> csrfCookiesCreateForHost = new HashMap<>();
 
     private OphHttpClient(Builder builder) {
-        logUtil = new LogUtil(builder.allowUrlLogging, builder.timeoutMs);
+        logUtil = new LogUtil(builder.allowUrlLogging, builder.connectionTimeoutMs, builder.socketTimeoutMs);
         authenticator = builder.authenticator;
         cookieStore = builder.cookieStore;
         clientSubSystemCode = builder.clientSubSystemCode;
         RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(builder.timeoutMs)
+                .setConnectTimeout(builder.connectionTimeoutMs)
                 .build();
         SocketConfig socketConfig = SocketConfig.custom()
-                .setSoTimeout(builder.timeoutMs)
+                .setSoTimeout(builder.socketTimeoutMs)
                 .build();
 
         HttpClientBuilder clientBuilder = CachingHttpClientBuilder.create()
@@ -162,7 +162,8 @@ public class OphHttpClient {
     }
 
     public static final class Builder {
-        int timeoutMs;
+        int connectionTimeoutMs;
+        int socketTimeoutMs;
         long connectionTTLSec;
         boolean allowUrlLogging;
         String clientSubSystemCode;
@@ -175,7 +176,8 @@ public class OphHttpClient {
         CookieStore cookieStore;
 
         public Builder() {
-            timeoutMs = 10000; // 10s
+            connectionTimeoutMs = 10000; // 10s
+            socketTimeoutMs = 10000; // 10s
             connectionTTLSec = 60; // infran palomuuri katkoo monta minuuttia makaavat connectionit
             allowUrlLogging = true;
             clientSubSystemCode = "DefaultClient";
@@ -190,8 +192,23 @@ public class OphHttpClient {
             cacheConfig = createCacheConfig();
         }
 
+        /**
+         * Set connection timeout.
+         * @param timeout The time given to create connection before timing out.
+         * @return builder
+         */
         public Builder timeoutMs(int timeout) {
-            this.timeoutMs = timeout;
+            this.connectionTimeoutMs = timeout;
+            return this;
+        }
+
+        /**
+         * Set socket timeout. Note this is between packets not requests.
+         * @param socketTimeoutMs The time to wait for a package before connection timeout
+         * @return builder
+         */
+        public Builder setSocketTimeoutMs(int socketTimeoutMs) {
+            this.socketTimeoutMs = socketTimeoutMs;
             return this;
         }
 
