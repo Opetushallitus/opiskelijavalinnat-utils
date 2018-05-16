@@ -21,6 +21,7 @@
         <module>java-auth</module>
         <module>java-http</module>
         <module>java-poi</module>
+        <module>opintopolku-user-details-service</module>
     </modules>
     <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
