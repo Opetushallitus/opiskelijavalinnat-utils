@@ -2,6 +2,8 @@ package fi.vm.sade.javautils.kayttooikeusclient;
 
 import com.google.gson.Gson;
 import fi.vm.sade.javautils.httpclient.OphHttpClient;
+import fi.vm.sade.javautils.httpclient.OphHttpResponse;
+import fi.vm.sade.javautils.httpclient.OphHttpResponseHandler;
 import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
 import fi.vm.sade.properties.OphProperties;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,12 +37,15 @@ public class OphUserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return httpClient.get("kayttooikeus-service.userDetails.byUsername", username)
                 .expectStatus(200, 404)
-                .execute(response -> {
-                    if (response.getStatusCode() == 404) {
-                        throw new UsernameNotFoundException(String.format("Käyttäjää ei löytynyt käyttäjätunnuksella '%s'", username));
-                    }
-                    return new Gson().fromJson(new InputStreamReader(response.asInputStream()), UserDetailsImpl.class);
-                });
+                .execute(new OphHttpResponseHandler<UserDetailsImpl>() {
+                     @Override
+                     public UserDetailsImpl handleResponse(OphHttpResponse response) {
+                         if (response.getStatusCode() == 404) {
+                             throw new UsernameNotFoundException(String.format("Käyttäjää ei löytynyt käyttäjätunnuksella '%s'", username));
+                         }
+                         return new Gson().fromJson(new InputStreamReader(response.asInputStream()), UserDetailsImpl.class);
+                     }
+                 });
     }
 
     private static final class UserDetailsImpl implements UserDetails {
