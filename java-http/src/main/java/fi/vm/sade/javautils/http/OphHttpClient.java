@@ -1,5 +1,6 @@
 package fi.vm.sade.javautils.http;
 
+import com.google.gson.Gson;
 import fi.vm.sade.javautils.http.auth.Authenticator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -48,11 +50,14 @@ public class OphHttpClient {
     private CookieStore cookieStore;
     private Authenticator authenticator;
     private String clientSubSystemCode;
+    private final Gson gson;
 
     private ThreadLocal<HttpContext> localContext = ThreadLocal.withInitial(BasicHttpContext::new);
     private HashMap<String, Boolean> csrfCookiesCreateForHost = new HashMap<>();
 
     private OphHttpClient(Builder builder) {
+        this.gson = new Gson();
+
         logUtil = new LogUtil(builder.allowUrlLogging, builder.connectionTimeoutMs, builder.socketTimeoutMs);
         authenticator = builder.authenticator;
         cookieStore = builder.cookieStore;
@@ -78,11 +83,12 @@ public class OphHttpClient {
         cachingClient = clientBuilder.build();
     }
 
-    public OphHttpResponse execute(OphHttpRequest request) {
-        return new OphHttpResponseImpl(execute(request.getHttpUriRequest(), true));
+    public OphHttpResponse execute(OphHttpRequest request, Type returnType) {
+        CloseableHttpResponse httpResponse = execute(request.getHttpUriRequest(), true);
+        return new OphHttpResponseImpl(httpResponse, gson, returnType);
     }
 
-    private HttpResponse execute(HttpUriRequest request, boolean retry) {
+    private CloseableHttpResponse execute(HttpUriRequest request, boolean retry) {
         ensureCSRFCookie(request.getURI().getHost());
         request.addHeader("CSRF", CSRF);
 

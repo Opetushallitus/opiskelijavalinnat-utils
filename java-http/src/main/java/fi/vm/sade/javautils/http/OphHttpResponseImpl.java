@@ -1,70 +1,56 @@
 package fi.vm.sade.javautils.http;
 
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
+import com.google.gson.Gson;
+import fi.vm.sade.javautils.http.exceptions.UnhandledHttpStatusCodeException;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.entity.ContentType;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.reflect.Type;
+import java.util.*;
+import java.util.function.Function;
 
-public class OphHttpResponseImpl implements OphHttpResponse {
+import static fi.vm.sade.javautils.httpclient.OphHttpClient.Header.CONTENT_TYPE;
 
-    private HttpResponse response;
+public class OphHttpResponseImpl<T> implements OphHttpResponse<T> {
 
-    OphHttpResponseImpl(HttpResponse response) {
+    private final Gson gson;
+
+    private final CloseableHttpResponse response;
+    private final Type returnType;
+
+    private Set<OphHttpCallBack<T>> ophHttpCallBackSet;
+
+    private final String responseMessage;
+
+    OphHttpResponseImpl(CloseableHttpResponse response, Gson gson, Type returnType) {
         this.response = response;
-    }
+        this.gson = gson;
+        this.ophHttpCallBackSet = new HashSet<>();
+        this.returnType = returnType;
 
-    @Override
-    public InputStream asInputStream() {
-        try {
-            return response.getEntity().getContent();
+        try (InputStream inputStream = response.getEntity().getContent()) {
+            this.responseMessage = toString(inputStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            close();
         }
     }
 
-    @Override
-    public int getStatusCode() {
+    private int getStatusCode() {
         return response.getStatusLine().getStatusCode();
     }
 
-    @Override
-    public List<String> getHeaderValues(String key) {
-        List<String> ret = new ArrayList<>();
-        for(Header h: response.getHeaders(key)) {
-            ret.add(h.getValue());
-        }
-        return ret;
-    }
-
-    @Override
-    public List<String> getHeaderKeys() {
-        List<String> ret = new ArrayList<>();
-        for(Header h: response.getAllHeaders()) {
-            if(!ret.contains(h.getName())) {
-                ret.add(h.getName());
-            }
-        }
-        return ret;
-    }
-
-    @Override
-    public String asText() {
+    private void close() {
         try {
-            return toString(asInputStream());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            response.close();
+        } catch (IOException ioe) {
+            throw new RuntimeException(ioe);
         }
-    }
-
-    @Override
-    public void close() throws IOException {
-        ((CloseableHttpResponse)response).close();
     }
 
     private static String toString(InputStream stream) throws IOException { // IO
@@ -77,5 +63,55 @@ public class OphHttpResponseImpl implements OphHttpResponse {
             result = bis.read();
         }
         return buf.toString();
+    }
+
+    @Override
+    public OphHttpCallBack handleErrorStatus(int... statusArray) {
+        if (this.ophHttpCallBackSet == null) {
+            this.ophHttpCallBackSet = new HashSet<>();
+        }
+        OphHttpCallBack<T> ophHttpCallBack = new OphHttpCallBackImpl<>(statusArray, this);
+        this.ophHttpCallBackSet.add(ophHttpCallBack);
+        return ophHttpCallBack;
+    }
+
+    @Override
+    public Optional<T> expectedStatus(int... statusArray) {
+        // Expected status code received
+        if (Arrays.stream(statusArray).anyMatch(status -> status == this.getStatusCode()) ) {
+            return this.convertJsonToObject();
+        }
+        // Handled error code received
+        Function<String, Optional<T>> callBack = this.ophHttpCallBackSet.stream()
+                .filter(ophHttpCallBack -> ((OphHttpCallBackImpl<T>)ophHttpCallBack).getStatusCode()
+                        .contains(this.response.getStatusLine().getStatusCode()))
+                .findFirst()
+                .map(ophHttpCallBack -> ((OphHttpCallBackImpl<T>)ophHttpCallBack).getCallBack())
+                .orElseThrow(() -> new UnhandledHttpStatusCodeException("Server returned unhandled status code"));
+        return callBack.apply(this.responseMessage);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Optional<T> convertJsonToObject() {
+        T object;
+        if (Void.class.getCanonicalName().equals(this.returnType.getTypeName())) {
+            object = null;
+        }
+        else if (String.class.getCanonicalName().equals(this.returnType.getTypeName())
+                && this.responseHasContentType(ContentType.TEXT_PLAIN)) {
+            object = (T)this.responseMessage;
+        }
+        else if (this.responseHasContentType(ContentType.APPLICATION_JSON)) {
+            object = this.gson.fromJson(this.responseMessage, this.returnType);
+        }
+        else {
+            throw new IllegalStateException("Unsupported content type.");
+        }
+        return Optional.ofNullable(object);
+    }
+
+    private boolean responseHasContentType(ContentType contentType) {
+        return Arrays.stream(response.getHeaders(CONTENT_TYPE))
+                .anyMatch(header -> header.getValue().startsWith(contentType.getMimeType()));
     }
 }
