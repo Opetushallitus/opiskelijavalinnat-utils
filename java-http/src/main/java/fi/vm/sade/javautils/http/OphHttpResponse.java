@@ -20,6 +20,7 @@ public interface OphHttpResponse<T> {
 
     /**
      * Convert result to given type on status ccdes provided as argument.
+     * If no custom handler is provided for 404 Optional.empty is returned.
      * @param status Any number of status codes
      * @return Server result converted to given type. Empty if error is handled by user.
      * @throws UnhandledHttpStatusCodeException Containing error message from server
