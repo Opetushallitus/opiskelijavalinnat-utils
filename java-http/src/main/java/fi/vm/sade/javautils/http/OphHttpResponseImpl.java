@@ -10,10 +10,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import static fi.vm.sade.javautils.httpclient.OphHttpClient.Header.CONTENT_TYPE;
+import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 
 public class OphHttpResponseImpl<T> implements OphHttpResponse<T> {
 
@@ -82,13 +85,18 @@ public class OphHttpResponseImpl<T> implements OphHttpResponse<T> {
             return this.convertJsonToObject();
         }
         // Handled error code received
-        return this.ophHttpCallBackSet.stream()
+        Optional<OphHttpCallBack<T>> callBackOptional = this.ophHttpCallBackSet.stream()
                 .filter(ophHttpCallBack -> ((OphHttpCallBackImpl<T>)ophHttpCallBack).getStatusCode()
                         .contains(this.response.getStatusLine().getStatusCode()))
-                .findFirst()
+                .findFirst();
+        // If user has not handled 404 assume it means empty resource content.
+        if (!callBackOptional.isPresent() && this.response.getStatusLine().getStatusCode() == SC_NOT_FOUND) {
+            return Optional.empty();
+        }
+        return callBackOptional
                 .map(ophHttpCallBack -> ((OphHttpCallBackImpl<T>)ophHttpCallBack).getCallBack())
-                .map(callback -> callback.apply(this.responseMessage))
-                .orElseThrow(() -> new UnhandledHttpStatusCodeException(this.responseMessage));
+                .orElseThrow(() -> new UnhandledHttpStatusCodeException(this.responseMessage))
+                .apply(this.responseMessage);
     }
 
     @SuppressWarnings("unchecked")

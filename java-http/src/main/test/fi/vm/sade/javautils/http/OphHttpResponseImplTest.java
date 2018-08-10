@@ -85,6 +85,15 @@ public class OphHttpResponseImplTest {
     }
 
     @Test
+    public void testJsonObjectNotFoundOnServer() {
+        CloseableHttpResponse httpResponse = this.mockResponse("{\"value\":\"stringvalue\"}", 404, ContentType.APPLICATION_JSON.getMimeType());
+        Type type = TypeToken.get(TestObject.class).getType();
+        OphHttpResponse<TestObject> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new Gson(), type);
+        Optional<TestObject> testObject = ophHttpResponse.expectedStatus(201);
+        assertThat(testObject).isNotPresent();
+    }
+
+    @Test
     public void testJsonCollection() {
         CloseableHttpResponse httpResponse = this.mockResponse("[\"value1\",\"value2\"]", 200, ContentType.APPLICATION_JSON.getMimeType());
         Type type = TypeToken.get(TypeToken.getParameterized(ArrayList.class, String.class).getType()).getType();
