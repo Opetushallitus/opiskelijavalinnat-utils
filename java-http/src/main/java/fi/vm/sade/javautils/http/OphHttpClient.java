@@ -99,13 +99,13 @@ public class OphHttpClient {
      * @param request Request to server
      * @return Response handling bulder
      */
-    public OphHttpResponse execute(OphHttpRequest request) {
+    public OphHttpResponse<Void> execute(OphHttpRequest request) {
         return this.execute(request, TypeToken.get(Void.class).getType());
     }
 
-    public OphHttpResponse execute(OphHttpRequest request, Type returnType) {
+    public <T> OphHttpResponse<T> execute(OphHttpRequest request, Type returnType) {
         CloseableHttpResponse httpResponse = execute(request.getHttpUriRequest(), true);
-        return new OphHttpResponseImpl(httpResponse, gson, returnType);
+        return new OphHttpResponseImpl<>(httpResponse, gson, returnType);
     }
 
     private CloseableHttpResponse execute(HttpUriRequest request, boolean retry) {

@@ -1,5 +1,7 @@
 package fi.vm.sade.javautils.http;
 
+import fi.vm.sade.javautils.http.exceptions.UnhandledHttpStatusCodeException;
+
 import java.util.Optional;
 
 /**
@@ -20,6 +22,7 @@ public interface OphHttpResponse<T> {
      * Convert result to given type on status ccdes provided as argument.
      * @param status Any number of status codes
      * @return Server result converted to given type. Empty if error is handled by user.
+     * @throws UnhandledHttpStatusCodeException Containing error message from server
      */
     Optional<T> expectedStatus(int... status);
 

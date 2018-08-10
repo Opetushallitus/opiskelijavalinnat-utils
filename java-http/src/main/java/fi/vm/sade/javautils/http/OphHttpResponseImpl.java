@@ -66,7 +66,7 @@ public class OphHttpResponseImpl<T> implements OphHttpResponse<T> {
     }
 
     @Override
-    public OphHttpCallBack handleErrorStatus(int... statusArray) {
+    public OphHttpCallBack<T> handleErrorStatus(int... statusArray) {
         if (this.ophHttpCallBackSet == null) {
             this.ophHttpCallBackSet = new HashSet<>();
         }
@@ -82,13 +82,13 @@ public class OphHttpResponseImpl<T> implements OphHttpResponse<T> {
             return this.convertJsonToObject();
         }
         // Handled error code received
-        Function<String, Optional<T>> callBack = this.ophHttpCallBackSet.stream()
+        return this.ophHttpCallBackSet.stream()
                 .filter(ophHttpCallBack -> ((OphHttpCallBackImpl<T>)ophHttpCallBack).getStatusCode()
                         .contains(this.response.getStatusLine().getStatusCode()))
                 .findFirst()
                 .map(ophHttpCallBack -> ((OphHttpCallBackImpl<T>)ophHttpCallBack).getCallBack())
-                .orElseThrow(() -> new UnhandledHttpStatusCodeException("Server returned unhandled status code"));
-        return callBack.apply(this.responseMessage);
+                .map(callback -> callback.apply(this.responseMessage))
+                .orElseThrow(() -> new UnhandledHttpStatusCodeException(this.responseMessage));
     }
 
     @SuppressWarnings("unchecked")
