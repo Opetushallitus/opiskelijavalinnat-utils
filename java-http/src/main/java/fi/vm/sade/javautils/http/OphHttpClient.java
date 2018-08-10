@@ -37,6 +37,9 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
 
+/**
+ * CAS supporting REST client. See tests for usage.
+ */
 @Getter
 @Slf4j
 public class OphHttpClient {

@@ -17,11 +17,12 @@ import org.mockito.Mockito;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static fi.vm.sade.javautils.httpclient.OphHttpClient.Header.CONTENT_TYPE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.eq;
 
@@ -32,7 +33,7 @@ public class OphHttpResponseImplTest {
         Type type = TypeToken.get(String.class).getType();
         OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new Gson(), type);
         String string = ophHttpResponse.expectedStatus(200).orElseThrow(RuntimeException::new);
-        assertEquals(string, "replystring");
+        assertThat(string).isEqualTo("replystring");
     }
 
     @Test
@@ -43,7 +44,7 @@ public class OphHttpResponseImplTest {
         String string = ophHttpResponse
                 .handleErrorStatus(400).with(Optional::ofNullable)
                 .expectedStatus(200).orElseThrow(RuntimeException::new);
-        assertEquals(string, "replystring");
+        assertThat(string).isEqualTo("replystring");
     }
 
     @Test(expected = UnhandledHttpStatusCodeException.class)
@@ -62,7 +63,7 @@ public class OphHttpResponseImplTest {
         Type type = TypeToken.get(String.class).getType();
         OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new Gson(), type);
         String string = ophHttpResponse.expectedStatus(200).orElseThrow(RuntimeException::new);
-        assertEquals(string, "{}");
+        assertThat(string).isEqualTo("{}");
     }
 
     @Test
@@ -71,7 +72,7 @@ public class OphHttpResponseImplTest {
         Type type = TypeToken.get(String.class).getType();
         OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new Gson(), type);
         String string = ophHttpResponse.expectedStatus(200).orElseThrow(RuntimeException::new);
-        assertEquals(string, "{}");
+        assertThat(string).isEqualTo("{}");
     }
 
     @Test
@@ -80,7 +81,16 @@ public class OphHttpResponseImplTest {
         Type type = TypeToken.get(TestObject.class).getType();
         OphHttpResponse<TestObject> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new Gson(), type);
         TestObject testObject = ophHttpResponse.expectedStatus(201).orElseThrow(RuntimeException::new);
-        assertEquals(testObject.getValue(), "stringvalue");
+        assertThat(testObject.getValue()).isEqualTo("stringvalue");
+    }
+
+    @Test
+    public void testJsonCollection() {
+        CloseableHttpResponse httpResponse = this.mockResponse("[\"value1\",\"value2\"]", 200, ContentType.APPLICATION_JSON.getMimeType());
+        Type type = TypeToken.get(TypeToken.getParameterized(ArrayList.class, String.class).getType()).getType();
+        OphHttpResponse<List<String>> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new Gson(), type);
+        List<String> stringList = ophHttpResponse.expectedStatus(200).orElseThrow(RuntimeException::new);
+        assertThat(stringList).containsExactly("value1", "value2");
     }
 
     @Test
@@ -88,8 +98,8 @@ public class OphHttpResponseImplTest {
         CloseableHttpResponse httpResponse = this.mockResponse("{\"value\":\"stringvalue\"}", 201, ContentType.APPLICATION_JSON.getMimeType());
         Type type = TypeToken.get(Void.class).getType();
         OphHttpResponse<Void> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new Gson(), type);
-        Optional testObject = ophHttpResponse.expectedStatus(201);
-        assertFalse(testObject.isPresent());
+        Optional<Void> testObject = ophHttpResponse.expectedStatus(201);
+        assertThat(testObject).isNotPresent();
     }
 
     @Test
@@ -97,8 +107,8 @@ public class OphHttpResponseImplTest {
         CloseableHttpResponse httpResponse = this.mockResponse("\"value\"", 201, ContentType.TEXT_PLAIN.getMimeType());
         Type type = TypeToken.get(Void.class).getType();
         OphHttpResponse<Void> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new Gson(), type);
-        Optional testObject = ophHttpResponse.expectedStatus(201);
-        assertFalse(testObject.isPresent());
+        Optional<Void> testObject = ophHttpResponse.expectedStatus(201);
+        assertThat(testObject).isNotPresent();
     }
 
     @Getter
