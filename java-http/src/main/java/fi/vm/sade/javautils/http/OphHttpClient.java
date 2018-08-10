@@ -1,6 +1,7 @@
 package fi.vm.sade.javautils.http;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.javautils.http.auth.Authenticator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -91,6 +92,15 @@ public class OphHttpClient {
             .setConnectionTimeToLive(builder.connectionTTLSec, TimeUnit.SECONDS);
 
         cachingClient = clientBuilder.build();
+    }
+
+    /**
+     * Void return type
+     * @param request Request to server
+     * @return Response handling bulder
+     */
+    public OphHttpResponse execute(OphHttpRequest request) {
+        return this.execute(request, TypeToken.get(Void.class).getType());
     }
 
     public OphHttpResponse execute(OphHttpRequest request, Type returnType) {
