@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import fi.vm.sade.javautils.http.auth.Authenticator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -44,6 +45,11 @@ public class OphHttpClient {
     private static final int MAX_OBJECT_SIZE = 10 * 1024 * 1024; // 10MB (oppilaitosnumero-koodisto is ~7,5MB)
     private static final String CACHE_RESPONSE_STATUS = "http.cache.response.status";
     private static final String CSRF = "CachingRestClient";
+
+    private static class Headers {
+        private static final String CLIENT_SUB_SYSTEM_CODE = "clientSubSystemCode";
+        private static final String CSRF = "CSRF";
+    }
 
     private LogUtil logUtil;
     private CloseableHttpClient cachingClient;
@@ -90,7 +96,12 @@ public class OphHttpClient {
 
     private CloseableHttpResponse execute(HttpUriRequest request, boolean retry) {
         ensureCSRFCookie(request.getURI().getHost());
-        request.addHeader("CSRF", CSRF);
+        request.addHeader(Headers.CSRF, CSRF);
+
+        if (StringUtils.isNotEmpty(this.clientSubSystemCode)
+                && request.getFirstHeader(Headers.CLIENT_SUB_SYSTEM_CODE) == null) {
+            request.addHeader(Headers.CLIENT_SUB_SYSTEM_CODE, this.clientSubSystemCode);
+        }
 
         boolean wasJustAuthenticated = authenticate(request, retry);
 
@@ -186,7 +197,7 @@ public class OphHttpClient {
             socketTimeoutMs = 10000; // 10s
             connectionTTLSec = 60; // infran palomuuri katkoo monta minuuttia makaavat connectionit
             allowUrlLogging = true;
-            clientSubSystemCode = "DefaultClient";
+            clientSubSystemCode = "";
 
             authenticator = Authenticator.NONE;
             cookieStore = new BasicCookieStore();

@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+
 /**
  * A configurable request object.
  * Once execute() or handleManually() is called OphHttpRequest instance can't be modified.
@@ -94,7 +96,7 @@ public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest>
                 if(!contentType.contains("charset")) {
                     contentType += "; charset=" + requestParameters.dataWriterCharset;
                 }
-                header(OphHttpClient.Header.CONTENT_TYPE, contentType);
+                header(CONTENT_TYPE, contentType);
             }
             if(requestParameters.acceptMediaTypes.size() > 0) {
                 header(OphHttpClient.Header.ACCEPT, join(requestParameters.acceptMediaTypes, ", "));
@@ -134,7 +136,7 @@ public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest>
 
     private void verifyContentType(OphHttpResponse response, List<String> acceptMediaTypes, String url) {
         if(acceptMediaTypes != null && acceptMediaTypes.size() > 0) {
-            String headerKey = OphHttpClient.Header.CONTENT_TYPE;
+            String headerKey = CONTENT_TYPE;
             String headerValue = getSingleHeaderValue(response, headerKey);
             int i = headerValue.indexOf(";");
             if(i > -1) {
