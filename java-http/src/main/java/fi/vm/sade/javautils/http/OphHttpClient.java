@@ -1,8 +1,10 @@
 package fi.vm.sade.javautils.http;
 
-import com.google.gson.Gson;
+import com.fatboyindustrial.gsonjavatime.Converters;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.javautils.http.auth.Authenticator;
+import fi.vm.sade.javautils.http.mappers.GsonConfiguration;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -33,6 +35,9 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -67,7 +72,7 @@ public class OphHttpClient {
     private HashMap<String, Boolean> csrfCookiesCreateForHost = new HashMap<>();
 
     private OphHttpClient(Builder builder) {
-        this.gson = new Gson();
+        this.gson = new GsonConfiguration().getGson();
 
         logUtil = new LogUtil(builder.allowUrlLogging, builder.connectionTimeoutMs, builder.socketTimeoutMs);
         authenticator = builder.authenticator;
