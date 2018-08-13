@@ -57,15 +57,16 @@ public class OphHttpResponseImpl<T> implements OphHttpResponse<T> {
     }
 
     private static String toString(InputStream stream) throws IOException { // IO
-        BufferedInputStream bis = new BufferedInputStream(stream);
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        int result;
-        result = bis.read();
-        while(result != -1) {
-            buf.write((byte) result);
+        try(BufferedInputStream bis = new BufferedInputStream(stream);
+                ByteArrayOutputStream buf = new ByteArrayOutputStream()) {
+            int result;
             result = bis.read();
+            while(result != -1) {
+                buf.write((byte) result);
+                result = bis.read();
+            }
+            return buf.toString();
         }
-        return buf.toString();
     }
 
     @Override

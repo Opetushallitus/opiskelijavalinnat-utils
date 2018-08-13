@@ -1,7 +1,6 @@
 package fi.vm.sade.javautils.http;
 
-import com.fatboyindustrial.gsonjavatime.Converters;
-import com.google.gson.*;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.javautils.http.auth.Authenticator;
 import fi.vm.sade.javautils.http.mappers.GsonConfiguration;
@@ -35,9 +34,6 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
