@@ -13,7 +13,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.verification.VerificationMode;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -34,7 +33,7 @@ import static org.mockito.Mockito.verify;
 
 public class OphHttpResponseImplTest {
     @Test
-    public void testString() {
+    public void testString() throws Exception {
         CloseableHttpResponse httpResponse = this.mockResponse("replystring", 200, ContentType.TEXT_PLAIN.getMimeType());
         Type type = TypeToken.get(String.class).getType();
         OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
@@ -42,10 +41,11 @@ public class OphHttpResponseImplTest {
                 .mapWith((response) -> new GsonConfiguration().getGson().fromJson(response, type))
                 .orElseThrow(RuntimeException::new);
         assertThat(string).isEqualTo("replystring");
+        verify(httpResponse, times(1)).close();
     }
 
     @Test
-    public void testStringErrorHandling() throws Throwable {
+    public void testStringErrorHandling() throws Exception {
         CloseableHttpResponse httpResponse = this.mockResponse("replystring", 400, ContentType.TEXT_PLAIN.getMimeType());
         Type type = TypeToken.get(String.class).getType();
         OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
@@ -57,10 +57,11 @@ public class OphHttpResponseImplTest {
                         .fromJson(text, type))
                 .orElseThrow(RuntimeException::new);
         assertThat(string).isEqualTo("replystring");
+        verify(httpResponse, times(1)).close();
     }
 
     @Test(expected = UnhandledHttpStatusCodeException.class)
-    public void unhandledStatusCode() {
+    public void unhandledStatusCode() throws Exception {
         CloseableHttpResponse httpResponse = this.mockResponse("replystring", 400, ContentType.TEXT_PLAIN.getMimeType());
         Type type = TypeToken.get(String.class).getType();
         OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
@@ -68,20 +69,22 @@ public class OphHttpResponseImplTest {
                 .handleErrorStatus(401).with(Optional::ofNullable)
                 .expectedStatus(200)
                 .mapWith(text -> new GsonConfiguration().getGson().fromJson(text, type));
+        verify(httpResponse, times(1)).close();
     }
 
     @Test
-    public void testStringContainingJson() {
+    public void testStringContainingJson() throws Exception {
         CloseableHttpResponse httpResponse = this.mockResponse("{}", 200, ContentType.TEXT_PLAIN.getMimeType());
         OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
         String string = ophHttpResponse.expectedStatus(200)
                 .mapWith(text -> text)
                 .orElseThrow(RuntimeException::new);
         assertThat(string).isEqualTo("{}");
+        verify(httpResponse, times(1)).close();
     }
 
     @Test
-    public void testJsonString() {
+    public void testJsonString() throws Exception {
         CloseableHttpResponse httpResponse = this.mockResponse("\"{}\"", 200, ContentType.APPLICATION_JSON.getMimeType());
         Type type = TypeToken.get(String.class).getType();
         OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
@@ -89,10 +92,11 @@ public class OphHttpResponseImplTest {
                 .mapWith(text -> new GsonConfiguration().getGson().fromJson(text, type))
                 .orElseThrow(RuntimeException::new);
         assertThat(string).isEqualTo("{}");
+        verify(httpResponse, times(1)).close();
     }
 
     @Test
-    public void testJsonObject() {
+    public void testJsonObject() throws Exception {
         String json = "{\"value\":\"stringvalue\",\"javaDate\":1471333673128,\"sqlDate\":1471333673128, \"localDate\": \"1971-02-10\", \"localDateTime\":\"2014-03-10T18:46:40.000\"}";
         CloseableHttpResponse httpResponse = this.mockResponse(json, 201, ContentType.APPLICATION_JSON.getMimeType());
         Type type = TypeToken.get(TestObject.class).getType();
@@ -105,20 +109,22 @@ public class OphHttpResponseImplTest {
                         TestObject::getLocalDate, TestObject::getLocalDateTime)
                 .containsExactly("stringvalue", new Date(1471333673128L), new java.sql.Date(1471333673128L),
                         LocalDate.parse("1971-02-10"), LocalDateTime.parse("2014-03-10T18:46:40.000"));
+        verify(httpResponse, times(1)).close();
     }
 
     @Test
-    public void testJsonObjectNotFoundOnServer() {
+    public void testJsonObjectNotFoundOnServer() throws Exception {
         CloseableHttpResponse httpResponse = this.mockResponse("{\"value\":\"stringvalue\"}", 404, ContentType.APPLICATION_JSON.getMimeType());
         Type type = TypeToken.get(TestObject.class).getType();
         OphHttpResponse<TestObject> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
         Optional<TestObject> testObject = ophHttpResponse.expectedStatus(201)
                 .mapWith(text -> new GsonConfiguration().getGson().fromJson(text, type));
         assertThat(testObject).isNotPresent();
+        verify(httpResponse, times(1)).close();
     }
 
     @Test
-    public void testJsonCollection() {
+    public void testJsonCollection() throws Exception {
         CloseableHttpResponse httpResponse = this.mockResponse("[\"value1\",\"value2\"]", 200, ContentType.APPLICATION_JSON.getMimeType());
         Type type = TypeToken.get(TypeToken.getParameterized(ArrayList.class, String.class).getType()).getType();
         OphHttpResponse<List<String>> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
@@ -126,6 +132,7 @@ public class OphHttpResponseImplTest {
                 .mapWith(text -> new GsonConfiguration().getGson().fromJson(text, type))
                 .orElseThrow(RuntimeException::new);
         assertThat(stringList).containsExactly("value1", "value2");
+        verify(httpResponse, times(1)).close();
     }
 
     @Test
