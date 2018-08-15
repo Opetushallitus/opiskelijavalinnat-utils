@@ -13,6 +13,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.verification.VerificationMode;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -28,25 +29,33 @@ import static fi.vm.sade.javautils.httpclient.OphHttpClient.Header.CONTENT_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class OphHttpResponseImplTest {
     @Test
     public void testString() {
         CloseableHttpResponse httpResponse = this.mockResponse("replystring", 200, ContentType.TEXT_PLAIN.getMimeType());
         Type type = TypeToken.get(String.class).getType();
-        OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new GsonConfiguration().getGson(), type);
-        String string = ophHttpResponse.expectedStatus(200).orElseThrow(RuntimeException::new);
+        OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
+        String string = ophHttpResponse.expectedStatus(200)
+                .mapWith((response) -> new GsonConfiguration().getGson().fromJson(response, type))
+                .orElseThrow(RuntimeException::new);
         assertThat(string).isEqualTo("replystring");
     }
 
     @Test
-    public void testStringErrorHandling() {
+    public void testStringErrorHandling() throws Throwable {
         CloseableHttpResponse httpResponse = this.mockResponse("replystring", 400, ContentType.TEXT_PLAIN.getMimeType());
         Type type = TypeToken.get(String.class).getType();
-        OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new GsonConfiguration().getGson(), type);
+        OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
         String string = ophHttpResponse
-                .handleErrorStatus(400).with(Optional::ofNullable)
-                .expectedStatus(200).orElseThrow(RuntimeException::new);
+                .handleErrorStatus(400)
+                .with(Optional::ofNullable)
+                .expectedStatus(200)
+                .mapWith(text -> new GsonConfiguration().getGson()
+                        .fromJson(text, type))
+                .orElseThrow(RuntimeException::new);
         assertThat(string).isEqualTo("replystring");
     }
 
@@ -54,18 +63,20 @@ public class OphHttpResponseImplTest {
     public void unhandledStatusCode() {
         CloseableHttpResponse httpResponse = this.mockResponse("replystring", 400, ContentType.TEXT_PLAIN.getMimeType());
         Type type = TypeToken.get(String.class).getType();
-        OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new GsonConfiguration().getGson(), type);
+        OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
         ophHttpResponse
                 .handleErrorStatus(401).with(Optional::ofNullable)
-                .expectedStatus(200);
+                .expectedStatus(200)
+                .mapWith(text -> new GsonConfiguration().getGson().fromJson(text, type));
     }
 
     @Test
     public void testStringContainingJson() {
         CloseableHttpResponse httpResponse = this.mockResponse("{}", 200, ContentType.TEXT_PLAIN.getMimeType());
-        Type type = TypeToken.get(String.class).getType();
-        OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new GsonConfiguration().getGson(), type);
-        String string = ophHttpResponse.expectedStatus(200).orElseThrow(RuntimeException::new);
+        OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
+        String string = ophHttpResponse.expectedStatus(200)
+                .mapWith(text -> text)
+                .orElseThrow(RuntimeException::new);
         assertThat(string).isEqualTo("{}");
     }
 
@@ -73,8 +84,10 @@ public class OphHttpResponseImplTest {
     public void testJsonString() {
         CloseableHttpResponse httpResponse = this.mockResponse("\"{}\"", 200, ContentType.APPLICATION_JSON.getMimeType());
         Type type = TypeToken.get(String.class).getType();
-        OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new GsonConfiguration().getGson(), type);
-        String string = ophHttpResponse.expectedStatus(200).orElseThrow(RuntimeException::new);
+        OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
+        String string = ophHttpResponse.expectedStatus(200)
+                .mapWith(text -> new GsonConfiguration().getGson().fromJson(text, type))
+                .orElseThrow(RuntimeException::new);
         assertThat(string).isEqualTo("{}");
     }
 
@@ -83,8 +96,10 @@ public class OphHttpResponseImplTest {
         String json = "{\"value\":\"stringvalue\",\"javaDate\":1471333673128,\"sqlDate\":1471333673128, \"localDate\": \"1971-02-10\", \"localDateTime\":\"2014-03-10T18:46:40.000\"}";
         CloseableHttpResponse httpResponse = this.mockResponse(json, 201, ContentType.APPLICATION_JSON.getMimeType());
         Type type = TypeToken.get(TestObject.class).getType();
-        OphHttpResponse<TestObject> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new GsonConfiguration().getGson(), type);
-        TestObject testObject = ophHttpResponse.expectedStatus(201).orElseThrow(RuntimeException::new);
+        OphHttpResponse<TestObject> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
+        TestObject testObject = ophHttpResponse.expectedStatus(201)
+                .mapWith(text -> new GsonConfiguration().getGson().fromJson(text, type))
+                .orElseThrow(RuntimeException::new);
         assertThat(testObject)
                 .extracting(TestObject::getValue, TestObject::getJavaDate, TestObject::getSqlDate,
                         TestObject::getLocalDate, TestObject::getLocalDateTime)
@@ -96,8 +111,9 @@ public class OphHttpResponseImplTest {
     public void testJsonObjectNotFoundOnServer() {
         CloseableHttpResponse httpResponse = this.mockResponse("{\"value\":\"stringvalue\"}", 404, ContentType.APPLICATION_JSON.getMimeType());
         Type type = TypeToken.get(TestObject.class).getType();
-        OphHttpResponse<TestObject> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new GsonConfiguration().getGson(), type);
-        Optional<TestObject> testObject = ophHttpResponse.expectedStatus(201);
+        OphHttpResponse<TestObject> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
+        Optional<TestObject> testObject = ophHttpResponse.expectedStatus(201)
+                .mapWith(text -> new GsonConfiguration().getGson().fromJson(text, type));
         assertThat(testObject).isNotPresent();
     }
 
@@ -105,27 +121,20 @@ public class OphHttpResponseImplTest {
     public void testJsonCollection() {
         CloseableHttpResponse httpResponse = this.mockResponse("[\"value1\",\"value2\"]", 200, ContentType.APPLICATION_JSON.getMimeType());
         Type type = TypeToken.get(TypeToken.getParameterized(ArrayList.class, String.class).getType()).getType();
-        OphHttpResponse<List<String>> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new GsonConfiguration().getGson(), type);
-        List<String> stringList = ophHttpResponse.expectedStatus(200).orElseThrow(RuntimeException::new);
+        OphHttpResponse<List<String>> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
+        List<String> stringList = ophHttpResponse.expectedStatus(200)
+                .mapWith(text -> new GsonConfiguration().getGson().fromJson(text, type))
+                .orElseThrow(RuntimeException::new);
         assertThat(stringList).containsExactly("value1", "value2");
     }
 
     @Test
-    public void testNoResponseJson() {
-        CloseableHttpResponse httpResponse = this.mockResponse("{\"value\":\"stringvalue\"}", 201, ContentType.APPLICATION_JSON.getMimeType());
-        Type type = TypeToken.get(Void.class).getType();
-        OphHttpResponse<Void> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new GsonConfiguration().getGson(), type);
-        Optional<Void> emptyOptional = ophHttpResponse.expectedStatus(201);
-        assertThat(emptyOptional).isNotPresent();
-    }
-
-    @Test
-    public void testNoResponseText() {
+    public void testNoResponseText() throws Exception {
         CloseableHttpResponse httpResponse = this.mockResponse("\"value\"", 201, ContentType.TEXT_PLAIN.getMimeType());
-        Type type = TypeToken.get(Void.class).getType();
-        OphHttpResponse<Void> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse, new GsonConfiguration().getGson(), type);
-        Optional<Void> emptyOptional = ophHttpResponse.expectedStatus(201);
-        assertThat(emptyOptional).isNotPresent();
+        OphHttpResponse<Void> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
+        ophHttpResponse.expectedStatus(201)
+                .ignoreResponse();
+        verify(httpResponse, times(1)).close();
     }
 
     @Getter

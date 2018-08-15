@@ -1,9 +1,6 @@
 package fi.vm.sade.javautils.http;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.javautils.http.auth.Authenticator;
-import fi.vm.sade.javautils.http.mappers.GsonConfiguration;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -62,14 +59,11 @@ public class OphHttpClient {
     private CookieStore cookieStore;
     private Authenticator authenticator;
     private String clientSubSystemCode;
-    private final Gson gson;
 
     private ThreadLocal<HttpContext> localContext = ThreadLocal.withInitial(BasicHttpContext::new);
     private HashMap<String, Boolean> csrfCookiesCreateForHost = new HashMap<>();
 
     private OphHttpClient(Builder builder) {
-        this.gson = new GsonConfiguration().getGson();
-
         logUtil = new LogUtil(builder.allowUrlLogging, builder.connectionTimeoutMs, builder.socketTimeoutMs);
         authenticator = builder.authenticator;
         cookieStore = builder.cookieStore;
@@ -96,17 +90,14 @@ public class OphHttpClient {
     }
 
     /**
-     * Void return type
-     * @param request Request to server
-     * @return Response handling bulder
+     * Provides chain of configurable response handlers for user.
+     * @param request User defined request send to server.
+     * @param <T> Type of returned object.
+     * @return Configuration chain.
      */
-    public OphHttpResponse<Void> execute(OphHttpRequest request) {
-        return this.execute(request, TypeToken.get(Void.class).getType());
-    }
-
-    public <T> OphHttpResponse<T> execute(OphHttpRequest request, Type returnType) {
+    public <T> OphHttpResponse<T> execute(OphHttpRequest request) {
         CloseableHttpResponse httpResponse = execute(request.getHttpUriRequest(), true);
-        return new OphHttpResponseImpl<>(httpResponse, gson, returnType);
+        return new OphHttpResponseImpl<>(httpResponse);
     }
 
     private CloseableHttpResponse execute(HttpUriRequest request, boolean retry) {

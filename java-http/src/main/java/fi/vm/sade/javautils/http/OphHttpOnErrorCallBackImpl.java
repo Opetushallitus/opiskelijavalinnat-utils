@@ -6,14 +6,14 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class OphHttpCallBackImpl<T> implements OphHttpCallBack<T> {
+public class OphHttpOnErrorCallBackImpl<T> implements OphHttpOnErrorCallBack<T> {
     private Set<Integer> statusCodes;
 
     private OphHttpResponse<T> ophHttpResponse;
 
     private Function<String, Optional<T>> callBack;
 
-    OphHttpCallBackImpl(int[] statusCodes, OphHttpResponse<T> ophHttpResponse) {
+    OphHttpOnErrorCallBackImpl(int[] statusCodes, OphHttpResponse<T> ophHttpResponse) {
         this.statusCodes = Arrays.stream(statusCodes)
                 .boxed()
                 .collect(Collectors.toSet());
