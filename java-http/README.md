@@ -23,11 +23,18 @@ Some examples
                 }
                 throw new RestClientException(responseAsString);
             })
-            .expectedStatus(SC_OK);
+            .expectedStatus(SC_OK)
+            .ignoreResponse();
 
-#### Get with return object
+#### Get with return object and jackson mapping
     OphHttpRequest request = OphHttpRequest.Builder
             .get(urlConfiguration.url("oppijanumerorekisteri-service.henkilo.hetu", hetu))
             .build();
-    Optional<HenkiloDto> = ophHttpClient.<HenkiloDto>execute(request, TypeToken.get(HenkiloDto.class).getType())
-            .expectedStatus(SC_OK);
+    ophHttpClient.<HenkiloDto>execute(request)
+            .expectedStatus(SC_OK).mapWith(text -> {
+                try {
+                    return this.objectMapper.readValue(text, HenkiloDto.class);
+                } catch (IOException jpe) {
+                    throw new RestClientException(jpe.getMessage());
+                }
+            });
