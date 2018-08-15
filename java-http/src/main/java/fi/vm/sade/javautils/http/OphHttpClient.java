@@ -198,13 +198,16 @@ public class OphHttpClient {
         ConnectionReuseStrategy reuseStrategy;
         CookieStore cookieStore;
 
-        public Builder() {
+        /**
+         * OphHttpClient builder
+         * @param clientSubSystemCode Identifier for calling service
+         */
+        public Builder(String clientSubSystemCode) {
             connectionTimeoutMs = 10000; // 10s
             socketTimeoutMs = 10000; // 10s
             connectionTTLSec = 60; // infran palomuuri katkoo monta minuuttia makaavat connectionit
             allowUrlLogging = true;
-            clientSubSystemCode = "";
-
+            this.clientSubSystemCode = clientSubSystemCode;
             authenticator = Authenticator.NONE;
             cookieStore = new BasicCookieStore();
 
