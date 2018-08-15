@@ -76,6 +76,19 @@ public class OphHttpResponseImplTest {
     }
 
     @Test
+    public void undefinedErrorHandlerCodeDoesNotHandleAnything() throws Exception {
+        CloseableHttpResponse httpResponse = this.mockResponse("replystring", 400, ContentType.TEXT_PLAIN.getMimeType());
+        Type type = TypeToken.get(String.class).getType();
+        OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
+        assertThatThrownBy(() -> ophHttpResponse.handleErrorStatus()
+                .with(Optional::ofNullable)
+                .expectedStatus(200)
+                .mapWith(text -> new GsonConfiguration().getGson().fromJson(text, type))
+        ).isInstanceOf(UnhandledHttpStatusCodeException.class).hasMessage("replystring");
+        verify(httpResponse, times(1)).close();
+    }
+
+    @Test
     public void testStringContainingJson() throws Exception {
         CloseableHttpResponse httpResponse = this.mockResponse("{}", 200, ContentType.TEXT_PLAIN.getMimeType());
         OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
