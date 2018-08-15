@@ -27,6 +27,7 @@ import java.util.Optional;
 
 import static fi.vm.sade.javautils.httpclient.OphHttpClient.Header.CONTENT_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
@@ -61,15 +62,16 @@ public class OphHttpResponseImplTest {
         verify(httpResponse, times(1)).close();
     }
 
-    @Test(expected = UnhandledHttpStatusCodeException.class)
+    @Test
     public void unhandledStatusCode() throws Exception {
         CloseableHttpResponse httpResponse = this.mockResponse("replystring", 400, ContentType.TEXT_PLAIN.getMimeType());
         Type type = TypeToken.get(String.class).getType();
         OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
-        ophHttpResponse
-                .handleErrorStatus(401).with(Optional::ofNullable)
+        assertThatThrownBy(() -> ophHttpResponse.handleErrorStatus(401)
+                .with(Optional::ofNullable)
                 .expectedStatus(200)
-                .mapWith(text -> new GsonConfiguration().getGson().fromJson(text, type));
+                .mapWith(text -> new GsonConfiguration().getGson().fromJson(text, type))
+        ).isInstanceOf(UnhandledHttpStatusCodeException.class).hasMessage("replystring");
         verify(httpResponse, times(1)).close();
     }
 
@@ -142,6 +144,16 @@ public class OphHttpResponseImplTest {
         OphHttpResponse<Void> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
         ophHttpResponse.expectedStatus(201)
                 .ignoreResponse();
+        verify(httpResponse, times(1)).close();
+    }
+
+    @Test
+    public void testNoResponseTextWithoutStatusCode() throws Exception {
+        CloseableHttpResponse httpResponse = this.mockResponse("\"value\"", 201, ContentType.TEXT_PLAIN.getMimeType());
+        OphHttpResponse<Void> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
+        assertThatThrownBy(() -> ophHttpResponse.expectedStatus().ignoreResponse())
+                .isInstanceOf(UnhandledHttpStatusCodeException.class)
+                .hasMessage("\"value\"");
         verify(httpResponse, times(1)).close();
     }
 

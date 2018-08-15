@@ -37,13 +37,10 @@ public class OphHttpResponseHandlerImpl<T> implements OphHttpResponseHandler<T> 
 
     @Override
     public void ignoreResponse() {
-        try {
-            if (Arrays.stream(statusArray).noneMatch(status -> status == this.response.getStatusLine().getStatusCode()) ) {
-                notExpectedStatusCodeHandling(false);
-            }
-        } finally {
-            this.close();
+        if (Arrays.stream(statusArray).noneMatch(status -> status == this.response.getStatusLine().getStatusCode()) ) {
+            notExpectedStatusCodeHandling(false);
         }
+        this.close();
     }
 
     private Optional<T> notExpectedStatusCodeHandling(boolean acceptEmptyResponse) {
