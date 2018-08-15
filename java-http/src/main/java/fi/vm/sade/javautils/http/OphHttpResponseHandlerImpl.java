@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.HttpStatus.SC_NO_CONTENT;
@@ -47,27 +48,28 @@ public class OphHttpResponseHandlerImpl<T> implements OphHttpResponseHandler<T> 
 
     private Optional<T> notExpectedStatusCodeHandling(boolean acceptEmptyResponse) {
         // Handled error code received
-        Optional<OphHttpOnErrorCallBackImpl<T>> callBackOptional = this.ophHttpCallBackSet.stream()
+        Set<OphHttpOnErrorCallBackImpl<T>> matchingCallBacks = this.ophHttpCallBackSet.stream()
                 .filter(ophHttpCallBack -> ophHttpCallBack.getStatusCode()
                         .contains(this.response.getStatusLine().getStatusCode()))
-                .findFirst();
+                .collect(Collectors.toSet());
 
         if (acceptEmptyResponse) {
             // If user has not handled 404 NOT_FOUND or 204 NO_CONTENT assume it means empty resource content.
-            if (!callBackOptional.isPresent() && this.response.getStatusLine().getStatusCode() == SC_NOT_FOUND) {
+            if (matchingCallBacks.isEmpty() && this.response.getStatusLine().getStatusCode() == SC_NOT_FOUND) {
                 this.close();
                 return Optional.empty();
             }
-            if (!callBackOptional.isPresent() && this.response.getStatusLine().getStatusCode() == SC_NO_CONTENT) {
+            if (matchingCallBacks.isEmpty() && this.response.getStatusLine().getStatusCode() == SC_NO_CONTENT) {
                 this.close();
                 return Optional.empty();
             }
         }
 
-        return callBackOptional
+        return matchingCallBacks.stream()
                 .map(OphHttpOnErrorCallBackImpl::getCallBack)
-                .orElseThrow(() -> new UnhandledHttpStatusCodeException(this.asTextAndClose()))
-                .apply(this.asTextAndClose());
+                .map(callback -> callback.apply(this.asTextAndClose()))
+                .findFirst()
+                .orElseThrow(() -> new UnhandledHttpStatusCodeException(this.asTextAndClose()));
     }
 
     @Override
