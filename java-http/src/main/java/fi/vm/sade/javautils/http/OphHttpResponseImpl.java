@@ -15,7 +15,7 @@ public class OphHttpResponseImpl<T> implements OphHttpResponse<T> {
 
     private Set<OphHttpOnErrorCallBackImpl<T>> ophHttpCallBackSet;
 
-    OphHttpResponseImpl(CloseableHttpResponse response) {
+    public OphHttpResponseImpl(CloseableHttpResponse response) {
         this.response = response;
         this.ophHttpCallBackSet = new HashSet<>();
     }
