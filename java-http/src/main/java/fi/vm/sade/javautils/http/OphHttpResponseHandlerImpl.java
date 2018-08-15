@@ -50,13 +50,13 @@ public class OphHttpResponseHandlerImpl<T> implements OphHttpResponseHandler<T> 
                         .contains(this.response.getStatusLine().getStatusCode()))
                 .collect(Collectors.toSet());
 
-        if (acceptEmptyResponse) {
+        if (acceptEmptyResponse && matchingCallBacks.isEmpty()) {
             // If user has not handled 404 NOT_FOUND or 204 NO_CONTENT assume it means empty resource content.
-            if (matchingCallBacks.isEmpty() && this.response.getStatusLine().getStatusCode() == SC_NOT_FOUND) {
+            if (this.response.getStatusLine().getStatusCode() == SC_NOT_FOUND) {
                 this.close();
                 return Optional.empty();
             }
-            if (matchingCallBacks.isEmpty() && this.response.getStatusLine().getStatusCode() == SC_NO_CONTENT) {
+            if (this.response.getStatusLine().getStatusCode() == SC_NO_CONTENT) {
                 this.close();
                 return Optional.empty();
             }

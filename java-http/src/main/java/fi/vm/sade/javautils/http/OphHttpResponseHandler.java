@@ -7,6 +7,11 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * Terminates the response chain. Allows user to map and ignore response as whole. Allows also consuming the response
+ * stream by user.
+ * @param <T> Type of the expected return object.
+ */
 public interface OphHttpResponseHandler<T> {
     /**
      * Expects user to map the response text to object of type T.
