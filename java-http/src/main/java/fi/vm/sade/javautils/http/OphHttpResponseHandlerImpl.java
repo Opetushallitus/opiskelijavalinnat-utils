@@ -77,10 +77,13 @@ public class OphHttpResponseHandlerImpl<T> implements OphHttpResponseHandler<T> 
                 handler.accept(inputStream);
             } catch (IOException ioe) {
                 throw new RuntimeException(ioe);
+            } finally {
+                this.close();
             }
         }
-
-        this.notExpectedStatusCodeHandling(false);
+        else {
+            this.notExpectedStatusCodeHandling(false);
+        }
     }
 
     private String asTextAndClose() {

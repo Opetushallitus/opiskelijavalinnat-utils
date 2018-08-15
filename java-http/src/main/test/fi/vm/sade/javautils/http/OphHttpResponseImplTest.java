@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
@@ -141,6 +142,25 @@ public class OphHttpResponseImplTest {
         OphHttpResponse<Void> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
         ophHttpResponse.expectedStatus(201)
                 .ignoreResponse();
+        verify(httpResponse, times(1)).close();
+    }
+
+    @Test
+    public void testStreamResponse() throws Exception {
+        CloseableHttpResponse httpResponse = this.mockResponse("\"value\"", 201, ContentType.TEXT_PLAIN.getMimeType());
+        StringBuilder stringBuilder = new StringBuilder();
+        OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
+        ophHttpResponse.expectedStatus(201)
+                .consumeStreamWith(stream -> {
+                    try {
+                        while(stream.available() > 0) {
+                            stringBuilder.append((char)stream.read());
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+        assertThat(stringBuilder.toString()).isEqualTo("\"value\"");
         verify(httpResponse, times(1)).close();
     }
 
