@@ -71,7 +71,7 @@ public class OphHttpResponseImplTest {
                 .with(Optional::ofNullable)
                 .expectedStatus(200)
                 .mapWith(text -> new GsonConfiguration().getGson().fromJson(text, type))
-        ).isInstanceOf(UnhandledHttpStatusCodeException.class).hasMessage("replystring");
+        ).isInstanceOf(UnhandledHttpStatusCodeException.class).hasMessage("Invalid status code 400. replystring");
         verify(httpResponse, times(1)).close();
     }
 
@@ -84,7 +84,7 @@ public class OphHttpResponseImplTest {
                 .with(Optional::ofNullable)
                 .expectedStatus(200)
                 .mapWith(text -> new GsonConfiguration().getGson().fromJson(text, type))
-        ).isInstanceOf(UnhandledHttpStatusCodeException.class).hasMessage("replystring");
+        ).isInstanceOf(UnhandledHttpStatusCodeException.class).hasMessage("Invalid status code 400. replystring");
         verify(httpResponse, times(1)).close();
     }
 
@@ -166,7 +166,7 @@ public class OphHttpResponseImplTest {
         OphHttpResponse<Void> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
         assertThatThrownBy(() -> ophHttpResponse.expectedStatus().ignoreResponse())
                 .isInstanceOf(UnhandledHttpStatusCodeException.class)
-                .hasMessage("\"value\"");
+                .hasMessage("Invalid status code 201. \"value\"");
         verify(httpResponse, times(1)).close();
     }
 

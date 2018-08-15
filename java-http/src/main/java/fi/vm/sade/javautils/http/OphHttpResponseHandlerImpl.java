@@ -66,7 +66,7 @@ public class OphHttpResponseHandlerImpl<T> implements OphHttpResponseHandler<T> 
                 .map(OphHttpOnErrorCallBackImpl::getCallBack)
                 .map(callback -> callback.apply(this.asTextAndClose()))
                 .findFirst()
-                .orElseThrow(() -> new UnhandledHttpStatusCodeException(this.asTextAndClose()));
+                .orElseThrow(() -> new UnhandledHttpStatusCodeException(this.asTextAndClose(), this.response.getStatusLine().getStatusCode()));
     }
 
     @Override

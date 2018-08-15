@@ -9,6 +9,10 @@ public class UnhandledHttpStatusCodeException extends RuntimeException {
         super(message);
     }
 
+    public UnhandledHttpStatusCodeException(String message, int statusCode) {
+        super(String.format("Invalid status code %d. %s", statusCode, message));
+    }
+
     public UnhandledHttpStatusCodeException(Throwable cause) {
         super(cause);
     }
