@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.HttpStatus.SC_NO_CONTENT;
@@ -44,29 +45,22 @@ public class OphHttpResponseHandlerImpl<T> implements OphHttpResponseHandler<T> 
     }
 
     private Optional<T> notExpectedStatusCodeHandling(boolean acceptEmptyResponse) {
-        // Handled error code received
-        Set<OphHttpOnErrorCallBackImpl<T>> matchingCallBacks = this.ophHttpCallBackSet.stream()
-                .filter(ophHttpCallBack -> ophHttpCallBack.getStatusCode()
-                        .contains(this.response.getStatusLine().getStatusCode()))
-                .collect(Collectors.toSet());
-
-        if (acceptEmptyResponse && matchingCallBacks.isEmpty()) {
+        try {
+            // Handled error code received
+            return this.ophHttpCallBackSet.stream()
+                    .filter(ophHttpCallBack -> ophHttpCallBack.getStatusCode()
+                            .contains(this.response.getStatusLine().getStatusCode()))
+                    .map(OphHttpOnErrorCallBackImpl::getCallBack)
+                    .map(callback -> callback.apply(this.asTextAndClose()))
+                    .findFirst()
+                    .orElseThrow(() -> new UnhandledHttpStatusCodeException(this.asTextAndClose(), this.response.getStatusLine().getStatusCode()));
+        } catch (UnhandledHttpStatusCodeException e) {
             // If user has not handled 404 NOT_FOUND or 204 NO_CONTENT assume it means empty resource content.
-            if (this.response.getStatusLine().getStatusCode() == SC_NOT_FOUND) {
-                this.close();
+            if (acceptEmptyResponse && (this.response.getStatusLine().getStatusCode() == SC_NOT_FOUND || this.response.getStatusLine().getStatusCode() == SC_NO_CONTENT)) {
                 return Optional.empty();
             }
-            if (this.response.getStatusLine().getStatusCode() == SC_NO_CONTENT) {
-                this.close();
-                return Optional.empty();
-            }
+            throw e;
         }
-
-        return matchingCallBacks.stream()
-                .map(OphHttpOnErrorCallBackImpl::getCallBack)
-                .map(callback -> callback.apply(this.asTextAndClose()))
-                .findFirst()
-                .orElseThrow(() -> new UnhandledHttpStatusCodeException(this.asTextAndClose(), this.response.getStatusLine().getStatusCode()));
     }
 
     @Override
