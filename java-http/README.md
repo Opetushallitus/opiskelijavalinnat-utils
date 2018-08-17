@@ -8,7 +8,7 @@ Some examples
 #### Put with an error handler and without return value
     OphHttpRequest request = OphHttpRequest.Builder
             .put(urlConfiguration.url("oppijanumerorekisteri-service.s2s.henkilo"))
-            .addHeader("Content-Type", CONTENT_TYPE)
+            .addHeader("Content-Type", "application/json;charset=UTF-8")
             .setEntity(new OphHttpEntity.Builder()
                     .content(content)
                     .contentType(ContentType.APPLICATION_JSON)
@@ -17,7 +17,7 @@ Some examples
     ophHttpClient.execute(request)
             .handleErrorStatus(HttpServletResponse.SC_BAD_REQUEST)
             .with(responseAsString -> {
-                if (retry && this.updateIfValidationErrorCanBeHandled(responseAsString, updateDto)) {
+                if (this.updateIfValidationErrorCanBeHandled(responseAsString, updateDto)) {
                     this.updateHenkilo(updateDto, false);
                     return Optional.empty();
                 }
