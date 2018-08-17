@@ -42,10 +42,8 @@ import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
 @Getter
 @Slf4j
 public class OphHttpClient {
-    private static final Charset UTF8 = Charset.forName("UTF-8");
     private static final int MAX_CACHE_ENTRIES = 50 * 1000; // 50000
     private static final int MAX_OBJECT_SIZE = 10 * 1024 * 1024; // 10MB (oppilaitosnumero-koodisto is ~7,5MB)
-    private static final String CACHE_RESPONSE_STATUS = "http.cache.response.status";
     private static final String CSRF = "CachingRestClient";
 
     private static class Headers {
