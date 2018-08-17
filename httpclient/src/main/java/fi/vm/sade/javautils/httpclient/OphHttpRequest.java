@@ -29,9 +29,6 @@ public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest>
     /**
      * Make a request and use handler to handle the response.
      * All resources are automatically released after the handler code finishes.
-     * @param handler
-     * @param <R>
-     * @return
      */
     public <R> R execute(final OphHttpResponseHandler<R> handler) {
         prepareRequest();
@@ -67,8 +64,6 @@ public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest>
 
     /**
      * Make a request and handle everything manually. There should not be the need to use this method.
-     * @return
-     * @throws IOException
      */
     public OphHttpResponse handleManually() throws IOException {
         prepareRequest();
