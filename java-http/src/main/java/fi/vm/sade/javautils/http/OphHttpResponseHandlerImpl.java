@@ -10,25 +10,26 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.HttpStatus.SC_NO_CONTENT;
 
 public class OphHttpResponseHandlerImpl<T> implements OphHttpResponseHandler<T> {
     private CloseableHttpResponse response;
-    private int[] allowedStatusCodes;
+    private Set<Integer> allowedStatusCodes;
     private Set<OphHttpOnErrorCallBackImpl<T>> ophHttpCallBackSet;
 
     OphHttpResponseHandlerImpl(CloseableHttpResponse response, int[] allowedStatusCodes, Set<OphHttpOnErrorCallBackImpl<T>> ophHttpCallBackSet) {
         this.response = response;
-        this.allowedStatusCodes = allowedStatusCodes;
+        this.allowedStatusCodes = Arrays.stream(allowedStatusCodes).boxed().collect(Collectors.toSet());
         this.ophHttpCallBackSet = ophHttpCallBackSet;
     }
 
     @Override
     public Optional<T> mapWith(Function<String, T> handler) {
         // Expected status code received
-        if (Arrays.stream(allowedStatusCodes).anyMatch(status -> status == this.response.getStatusLine().getStatusCode()) ) {
+        if (this.allowedStatusCodes.stream().anyMatch(status -> status == this.response.getStatusLine().getStatusCode()) ) {
             return Optional.ofNullable(handler.apply(this.asTextAndClose()));
         }
         return this.notExpectedStatusCodeHandling(true);
@@ -36,7 +37,7 @@ public class OphHttpResponseHandlerImpl<T> implements OphHttpResponseHandler<T> 
 
     @Override
     public void ignoreResponse() {
-        if (Arrays.stream(allowedStatusCodes).noneMatch(status -> status == this.response.getStatusLine().getStatusCode()) ) {
+        if (this.allowedStatusCodes.stream().noneMatch(status -> status == this.response.getStatusLine().getStatusCode()) ) {
             notExpectedStatusCodeHandling(false);
         }
         this.close();
@@ -63,7 +64,7 @@ public class OphHttpResponseHandlerImpl<T> implements OphHttpResponseHandler<T> 
 
     @Override
     public void consumeStreamWith(Consumer<InputStream> handler) {
-        if (Arrays.stream(allowedStatusCodes).anyMatch(status -> status == this.response.getStatusLine().getStatusCode()) ) {
+        if (this.allowedStatusCodes.stream().anyMatch(status -> status == this.response.getStatusLine().getStatusCode()) ) {
             try (InputStream inputStream = this.response.getEntity().getContent()) {
                 handler.accept(inputStream);
             } catch (IOException ioe) {
