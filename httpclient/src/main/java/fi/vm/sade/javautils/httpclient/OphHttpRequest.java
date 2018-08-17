@@ -112,8 +112,7 @@ public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest>
     }
 
     private String createUrl(OphRequestParameters requestParameters) {
-        List params = new ArrayList();
-        params.addAll(Arrays.asList(requestParameters.urlParams));
+        List<Object> params = new ArrayList<>(Arrays.asList(requestParameters.urlParams));
         if(requestParameters.params.size() > 0) {
             params.add(requestParameters.params);
         }
