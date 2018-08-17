@@ -1,8 +1,5 @@
 package fi.vm.sade.javautils.http;
 
-import static org.apache.http.HttpStatus.SC_NOT_FOUND;
-import static org.apache.http.HttpStatus.SC_NO_CONTENT;
-
 import fi.vm.sade.javautils.http.exceptions.UnhandledHttpStatusCodeException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 
@@ -14,21 +11,24 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static org.apache.http.HttpStatus.SC_NOT_FOUND;
+import static org.apache.http.HttpStatus.SC_NO_CONTENT;
+
 public class OphHttpResponseHandlerImpl<T> implements OphHttpResponseHandler<T> {
     private CloseableHttpResponse response;
-    private int[] statusArray;
+    private int[] allowedStatusCodes;
     private Set<OphHttpOnErrorCallBackImpl<T>> ophHttpCallBackSet;
 
-    OphHttpResponseHandlerImpl(CloseableHttpResponse response, int[] statusArray, Set<OphHttpOnErrorCallBackImpl<T>> ophHttpCallBackSet) {
+    OphHttpResponseHandlerImpl(CloseableHttpResponse response, int[] allowedStatusCodes, Set<OphHttpOnErrorCallBackImpl<T>> ophHttpCallBackSet) {
         this.response = response;
-        this.statusArray = statusArray;
+        this.allowedStatusCodes = allowedStatusCodes;
         this.ophHttpCallBackSet = ophHttpCallBackSet;
     }
 
     @Override
     public Optional<T> mapWith(Function<String, T> handler) {
         // Expected status code received
-        if (Arrays.stream(statusArray).anyMatch(status -> status == this.response.getStatusLine().getStatusCode()) ) {
+        if (Arrays.stream(allowedStatusCodes).anyMatch(status -> status == this.response.getStatusLine().getStatusCode()) ) {
             return Optional.ofNullable(handler.apply(this.asTextAndClose()));
         }
         return this.notExpectedStatusCodeHandling(true);
@@ -36,7 +36,7 @@ public class OphHttpResponseHandlerImpl<T> implements OphHttpResponseHandler<T> 
 
     @Override
     public void ignoreResponse() {
-        if (Arrays.stream(statusArray).noneMatch(status -> status == this.response.getStatusLine().getStatusCode()) ) {
+        if (Arrays.stream(allowedStatusCodes).noneMatch(status -> status == this.response.getStatusLine().getStatusCode()) ) {
             notExpectedStatusCodeHandling(false);
         }
         this.close();
@@ -63,7 +63,7 @@ public class OphHttpResponseHandlerImpl<T> implements OphHttpResponseHandler<T> 
 
     @Override
     public void consumeStreamWith(Consumer<InputStream> handler) {
-        if (Arrays.stream(statusArray).anyMatch(status -> status == this.response.getStatusLine().getStatusCode()) ) {
+        if (Arrays.stream(allowedStatusCodes).anyMatch(status -> status == this.response.getStatusLine().getStatusCode()) ) {
             try (InputStream inputStream = this.response.getEntity().getContent()) {
                 handler.accept(inputStream);
             } catch (IOException ioe) {

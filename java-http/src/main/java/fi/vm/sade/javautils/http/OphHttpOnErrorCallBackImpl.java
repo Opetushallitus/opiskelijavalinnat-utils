@@ -7,21 +7,21 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class OphHttpOnErrorCallBackImpl<T> implements OphHttpOnErrorCallBack<T> {
-    private Set<Integer> statusCodes;
+    private Set<Integer> errorCodesToHandle;
 
     private OphHttpResponse<T> ophHttpResponse;
 
     private Function<String, Optional<T>> callBack;
 
-    OphHttpOnErrorCallBackImpl(int[] statusCodes, OphHttpResponse<T> ophHttpResponse) {
-        this.statusCodes = Arrays.stream(statusCodes)
+    OphHttpOnErrorCallBackImpl(int[] errorCodesToHandle, OphHttpResponse<T> ophHttpResponse) {
+        this.errorCodesToHandle = Arrays.stream(errorCodesToHandle)
                 .boxed()
                 .collect(Collectors.toSet());
         this.ophHttpResponse = ophHttpResponse;
     }
 
     Set<Integer> getStatusCode() {
-        return this.statusCodes;
+        return this.errorCodesToHandle;
     }
 
     Function<String, Optional<T>> getCallBack() {
