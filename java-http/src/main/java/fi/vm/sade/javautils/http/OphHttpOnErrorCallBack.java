@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * Binds status cede(s) and callback function of OphHttpResponse.
+ * Binds status code(s) and callback function of OphHttpResponse.
  */
 public interface OphHttpOnErrorCallBack<T> {
     /**
