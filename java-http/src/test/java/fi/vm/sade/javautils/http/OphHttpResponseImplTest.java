@@ -1,6 +1,16 @@
 package fi.vm.sade.javautils.http;
 
+import static fi.vm.sade.javautils.httpclient.OphHttpClient.Header.CONTENT_TYPE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import com.google.gson.reflect.TypeToken;
+
 import fi.vm.sade.javautils.http.exceptions.UnhandledHttpStatusCodeException;
 import fi.vm.sade.javautils.http.mappers.GsonConfiguration;
 import lombok.Getter;
@@ -24,14 +34,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
-import static fi.vm.sade.javautils.httpclient.OphHttpClient.Header.CONTENT_TYPE;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class OphHttpResponseImplTest {
     @Test
@@ -186,6 +188,22 @@ public class OphHttpResponseImplTest {
                     }
                 });
         assertThat(stringBuilder.toString()).isEqualTo("\"value\"");
+        verify(httpResponse, times(1)).close();
+    }
+
+    @Test
+    public void testResponseGetsClosedIfStreamProcessingThrowsException() throws IOException {
+        CloseableHttpResponse httpResponse = this.mockResponse("", 201, ContentType.TEXT_PLAIN.getMimeType());
+        OphHttpResponse<String> ophHttpResponse = new OphHttpResponseImpl<>(httpResponse);
+
+        try {
+            ophHttpResponse.expectedStatus(201).consumeStreamWith(stream -> {
+                throw new NullPointerException("Boom");
+            });
+            fail("Should have thrown exception.");
+        } catch (NullPointerException e) {
+            assertEquals("Boom", e.getMessage());
+        }
         verify(httpResponse, times(1)).close();
     }
 
