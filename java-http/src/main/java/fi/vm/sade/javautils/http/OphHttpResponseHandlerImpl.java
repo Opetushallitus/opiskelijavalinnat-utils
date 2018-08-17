@@ -1,5 +1,8 @@
 package fi.vm.sade.javautils.http;
 
+import static org.apache.http.HttpStatus.SC_NOT_FOUND;
+import static org.apache.http.HttpStatus.SC_NO_CONTENT;
+
 import fi.vm.sade.javautils.http.exceptions.UnhandledHttpStatusCodeException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 
@@ -10,11 +13,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.apache.http.HttpStatus.SC_NOT_FOUND;
-import static org.apache.http.HttpStatus.SC_NO_CONTENT;
 
 public class OphHttpResponseHandlerImpl<T> implements OphHttpResponseHandler<T> {
     private CloseableHttpResponse response;

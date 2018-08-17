@@ -1,5 +1,7 @@
 package fi.vm.sade.javautils.http;
 
+import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
+
 import fi.vm.sade.javautils.http.auth.Authenticator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +21,11 @@ import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.NoConnectionReuseStrategy;
-import org.apache.http.impl.client.*;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.RedirectLocations;
 import org.apache.http.impl.client.cache.CacheConfig;
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -29,11 +35,8 @@ import org.apache.http.protocol.HttpContext;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
-
-import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
 
 /**
  * CAS supporting REST client.
