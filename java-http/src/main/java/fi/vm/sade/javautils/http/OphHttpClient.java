@@ -1,8 +1,11 @@
 package fi.vm.sade.javautils.http;
 
+import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
+
 import fi.vm.sade.javautils.http.auth.Authenticator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -18,7 +21,11 @@ import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.NoConnectionReuseStrategy;
-import org.apache.http.impl.client.*;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.RedirectLocations;
 import org.apache.http.impl.client.cache.CacheConfig;
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -28,20 +35,24 @@ import org.apache.http.protocol.HttpContext;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
-
+/**
+ * CAS supporting REST client.
+ * See OphHttpResponseImplTest for usage.
+ */
 @Getter
 @Slf4j
 public class OphHttpClient {
-    private static final Charset UTF8 = Charset.forName("UTF-8");
     private static final int MAX_CACHE_ENTRIES = 50 * 1000; // 50000
     private static final int MAX_OBJECT_SIZE = 10 * 1024 * 1024; // 10MB (oppilaitosnumero-koodisto is ~7,5MB)
-    private static final String CACHE_RESPONSE_STATUS = "http.cache.response.status";
     private static final String CSRF = "CachingRestClient";
+
+    private static class Headers {
+        private static final String CLIENT_SUB_SYSTEM_CODE = "clientSubSystemCode";
+        private static final String CSRF = "CSRF";
+    }
 
     private LogUtil logUtil;
     private CloseableHttpClient cachingClient;
@@ -78,13 +89,25 @@ public class OphHttpClient {
         cachingClient = clientBuilder.build();
     }
 
-    public OphHttpResponse execute(OphHttpRequest request) {
-        return new OphHttpResponseImpl(execute(request.getHttpUriRequest(), true));
+    /**
+     * Provides chain of configurable response handlers for user.
+     * @param request User defined request send to server.
+     * @param <T> Type of returned object.
+     * @return Configuration chain.
+     */
+    public <T> OphHttpResponse<T> execute(OphHttpRequest request) {
+        CloseableHttpResponse httpResponse = execute(request.getHttpUriRequest(), true);
+        return new OphHttpResponseImpl<>(httpResponse);
     }
 
-    private HttpResponse execute(HttpUriRequest request, boolean retry) {
+    private CloseableHttpResponse execute(HttpUriRequest request, boolean retry) {
         ensureCSRFCookie(request.getURI().getHost());
-        request.addHeader("CSRF", CSRF);
+        request.addHeader(Headers.CSRF, CSRF);
+
+        if (StringUtils.isNotEmpty(this.clientSubSystemCode)
+                && request.getFirstHeader(Headers.CLIENT_SUB_SYSTEM_CODE) == null) {
+            request.addHeader(Headers.CLIENT_SUB_SYSTEM_CODE, this.clientSubSystemCode);
+        }
 
         boolean wasJustAuthenticated = authenticate(request, retry);
 
@@ -175,13 +198,16 @@ public class OphHttpClient {
         ConnectionReuseStrategy reuseStrategy;
         CookieStore cookieStore;
 
-        public Builder() {
+        /**
+         * OphHttpClient builder
+         * @param clientSubSystemCode Identifier for calling service
+         */
+        public Builder(String clientSubSystemCode) {
             connectionTimeoutMs = 10000; // 10s
             socketTimeoutMs = 10000; // 10s
             connectionTTLSec = 60; // infran palomuuri katkoo monta minuuttia makaavat connectionit
             allowUrlLogging = true;
-            clientSubSystemCode = "DefaultClient";
-
+            this.clientSubSystemCode = clientSubSystemCode;
             authenticator = Authenticator.NONE;
             cookieStore = new BasicCookieStore();
 

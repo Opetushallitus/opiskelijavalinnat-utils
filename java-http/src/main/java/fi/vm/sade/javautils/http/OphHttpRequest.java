@@ -1,13 +1,12 @@
 package fi.vm.sade.javautils.http;
 
-import org.apache.http.client.methods.*;
-import org.apache.http.entity.ContentType;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.entity.StringEntity;
-
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.nio.charset.Charset;
 
 /**
  * Wrapper for Apache HttpRequest.

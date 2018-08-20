@@ -3,8 +3,6 @@ package fi.vm.sade.javautils.http.auth;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpUriRequest;
 
-import java.io.IOException;
-
 public interface Authenticator {
 
     Authenticator NONE = new Authenticator() {
