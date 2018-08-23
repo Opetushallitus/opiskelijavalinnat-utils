@@ -3,7 +3,7 @@
 ## OphHttpClient
 
 ### Usage
-Some examples
+If response code 204 or 404 is received this is handled internally and Optional.empty() is returned. Otherwise exception is thrown. These can be overriden with custom error handlers e.g. see below example.
 
 #### Put with an error handler and without return value
     OphHttpRequest request = OphHttpRequest.Builder
