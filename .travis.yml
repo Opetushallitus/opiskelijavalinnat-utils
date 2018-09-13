@@ -1,0 +1,20 @@
+sudo: required
+
+language: java
+
+jdk:
+- oraclejdk8
+
+cache:
+  directories:
+  - $HOME/.m2
+
+env:
+  global:
+  # ARTIFACTORY_USERNAME
+  - secure: "aSNdf7rztV64az0LiAVvVJ+wO+L8w9YtG23v24FraBBUCgdc3+eeqihFAxF54axj5ACD9ryUYkeN0ueC3bFwzwPfs1P3NO14wGb6VaoUit8Y/JozdxYHfu87CxUQqqIhMo47BVKEs2cXd/hWbicRdS/5WDWcE8LYWwEtKIT+PMVpvZJdS8qehBhmN+8lEtYodf+Q9DHxXA8nuyzEc9e4Lib3/4zdqk0kSiBMgq7yjPtxZ4IuwvM7GiBQGZeB8NV+ZaY9DiyyRPhwmH4bMuTN4DE5V3wRub71G7t8w+sfnBB+Ztey4fnLzKbrFZRretyA9JEujhZIn0cU3hukZeCsbxYI2J6wHoe+RtwrIFlBOxAyfIswaXyzSVEJPBo1R2ti1/QOnY5a5UAysuq9NOihZ5FfrTO0uZg3oErWPQZQsSs4qr75avxKZi+0RENeEWJZb1lq6yk+hA8LPxcLNcpwhWfng5MOMh7RZWPWu40RDSjpIr9234DyL/Z+9XkRJ6fbL8ZuLmPX0VZYy/g6rXeZ/PoKfp9O3wF7E/YURkod/g84t39/laOaCbK18f1u4c+IHQ9k8XKaTnpCvDJwvvYeMDz+Je7Px+o3I6CrN8LVRuMI1QSZkh3wl5kZ0h3HhAum/584UP927VH7MgbrEURWyY0lFP1gunkdyaCSLHHqDE8="
+  # ARTIFACTORY_PASSWORD
+  - secure: "oAUcgy5zAtndOOSGPwF7iTcg7l4fDZl87xkY3x/0iacPSfkci/XqXazdLL9sXGJ7h1CFABuN301Gklysb0Ags/Y5/9K8Swk9s3sJDHvKqa5WF3aOlvLH14ZLJGseuBafNwMC3SziihnYFFuGHdRnU6AXKqTlBH+TS0wn+MIxhroFoqhu+oHhy7YxbAU7Q5T05DrFVS6GmDqNUNJiLndmDq3KuBLseET6lkUe0qKCbM+CE5vyKTVTVhzeCSllBxJISY1YShaAH9FUQIjPBcojRDPRisI9ql8iDTGniWt+3p0h7T2i3eXWrp3U/bFyxkSlJdxK//QuxKOw/XLoENChaJ+JQk0g7wvZ3G+He72w0d2S2QVKJfKBwaFFrFw6yKqHeo2Hg1aCkpm2gqyRzM8RNQ7p1bFhZiCdGLk1jzoZcaBfN28mmLp9K9skGp4fTGJlQhVKBZh9lxmVOTMY4UAzK7b4CyjIdWBrMLFXtukCl+ne6Mq4c5XXhAIcoVI0ByTQqtpeKXNzCOF8irVuNgSEqGbGz4ydpt8CW0JNVwCn/vJNMSwq7AF7Tq4hgGUZJal0ZyFPWMn5zUEkyDuzA37htqQp6mFK2HNkatR2O1oC7/Knc08bv66ealrWDzkBKIYAeiw4BvDKoVjYZP8vb9q3I5C920kTcitHJ1Qk1Pvli8k="
+
+script:
+- mvn clean deploy -B -Dbranch=${TRAVIS_BRANCH} -Drevision=${TRAVIS_COMMIT} -DbuildNumber=${TRAVIS_BUILD_NUMBER} --settings maven-settings.xml
