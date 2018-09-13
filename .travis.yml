@@ -21,4 +21,11 @@ install:
 - source ci-tools/common/setup-tools.sh
 
 script:
-- mvn clean deploy --settings ci-tools/common/maven-settings.xml
+- mvn clean package
+
+deploy:
+  provider: script
+  script: "mvn deploy --settings ci-tools/common/maven-settings.xml"
+  skip_cleanup: true
+  on:
+    branch: master
