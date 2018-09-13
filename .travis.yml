@@ -21,4 +21,4 @@ install:
 - source ci-tools/common/setup-tools.sh
 
 script:
-- mvn clean deploy --settings ci-tools/common/maven-settings.xml
+- mvn clean deploy --settings $HOME/ci-tools/common/maven-settings.xml
