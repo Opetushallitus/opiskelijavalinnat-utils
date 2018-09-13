@@ -16,5 +16,9 @@ env:
   # ARTIFACTORY_PASSWORD
   - secure: "oAUcgy5zAtndOOSGPwF7iTcg7l4fDZl87xkY3x/0iacPSfkci/XqXazdLL9sXGJ7h1CFABuN301Gklysb0Ags/Y5/9K8Swk9s3sJDHvKqa5WF3aOlvLH14ZLJGseuBafNwMC3SziihnYFFuGHdRnU6AXKqTlBH+TS0wn+MIxhroFoqhu+oHhy7YxbAU7Q5T05DrFVS6GmDqNUNJiLndmDq3KuBLseET6lkUe0qKCbM+CE5vyKTVTVhzeCSllBxJISY1YShaAH9FUQIjPBcojRDPRisI9ql8iDTGniWt+3p0h7T2i3eXWrp3U/bFyxkSlJdxK//QuxKOw/XLoENChaJ+JQk0g7wvZ3G+He72w0d2S2QVKJfKBwaFFrFw6yKqHeo2Hg1aCkpm2gqyRzM8RNQ7p1bFhZiCdGLk1jzoZcaBfN28mmLp9K9skGp4fTGJlQhVKBZh9lxmVOTMY4UAzK7b4CyjIdWBrMLFXtukCl+ne6Mq4c5XXhAIcoVI0ByTQqtpeKXNzCOF8irVuNgSEqGbGz4ydpt8CW0JNVwCn/vJNMSwq7AF7Tq4hgGUZJal0ZyFPWMn5zUEkyDuzA37htqQp6mFK2HNkatR2O1oC7/Knc08bv66ealrWDzkBKIYAeiw4BvDKoVjYZP8vb9q3I5C920kTcitHJ1Qk1Pvli8k="
 
+install:
+- git clone https://github.com/Opetushallitus/ci-tools.git
+- source ci-tools/common/setup-tools.sh
+
 script:
-- mvn clean deploy -B -Dbranch=${TRAVIS_BRANCH} -Drevision=${TRAVIS_COMMIT} -DbuildNumber=${TRAVIS_BUILD_NUMBER} --settings maven-settings.xml
+- mvn clean deploy --settings ci-tools/common/maven-settings.xml
