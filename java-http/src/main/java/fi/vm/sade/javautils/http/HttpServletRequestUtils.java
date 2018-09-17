@@ -14,6 +14,14 @@ import java.util.function.Predicate;
 public class HttpServletRequestUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpServletRequestUtils.class);
     private static final Set<String> HARMLESS_URLS = parseHarmlessUrlsFromSystemProperty();
+    private static final boolean SKIP_MISSING_HEADER_LOGGING = "true".equals(
+        System.getProperty("fi.vm.sade.javautils.http.HttpServletRequestUtils.SKIP_MISSING_HEADER_LOGGING"));
+
+    static {
+        if (SKIP_MISSING_HEADER_LOGGING) {
+            LOGGER.warn("Skipping missing real IPs logging. This should not be used in production.");
+        }
+    }
 
     private static Set<String> parseHarmlessUrlsFromSystemProperty() {
         String property = System.getProperty("fi.vm.sade.javautils.http.HttpServletRequestUtils.HARMLESS_URLS");
@@ -42,7 +50,7 @@ public class HttpServletRequestUtils {
             }
             return xForwardedFor;
         }
-        if (!HARMLESS_URLS.contains(requestURI)) {
+        if (!SKIP_MISSING_HEADER_LOGGING && !HARMLESS_URLS.contains(requestURI)) {
             LOGGER.warn(String.format("X-Real-IP or X-Forwarded-For was not set. Are we not running behind a load balancer? Request URI is '%s'", requestURI));
         }
         return remoteAddr;
