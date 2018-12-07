@@ -75,16 +75,19 @@ public class OphHttpClient {
                 .setSoTimeout(builder.socketTimeoutMs)
                 .build();
 
-        HttpClientBuilder clientBuilder = CachingHttpClientBuilder.create()
-            .setCacheConfig(builder.cacheConfig)
-            .setDefaultRequestConfig(requestConfig)
-            .setDefaultSocketConfig(socketConfig)
-            .setConnectionManager(builder.connectionManager)
-            .setKeepAliveStrategy(builder.keepAliveStrategy)
-            .setDefaultCookieStore(cookieStore)
-            .setRedirectStrategy(builder.redirectStrategy)
-            .setConnectionReuseStrategy(builder.reuseStrategy)
-            .setConnectionTimeToLive(builder.connectionTTLSec, TimeUnit.SECONDS);
+        HttpClientBuilder clientBuilder = builder.cacheConfig == null
+                ? HttpClientBuilder.create()
+                : CachingHttpClientBuilder.create().setCacheConfig(builder.cacheConfig);
+
+        clientBuilder
+                .setDefaultRequestConfig(requestConfig)
+                .setDefaultSocketConfig(socketConfig)
+                .setConnectionManager(builder.connectionManager)
+                .setKeepAliveStrategy(builder.keepAliveStrategy)
+                .setDefaultCookieStore(cookieStore)
+                .setRedirectStrategy(builder.redirectStrategy)
+                .setConnectionReuseStrategy(builder.reuseStrategy)
+                .setConnectionTimeToLive(builder.connectionTTLSec, TimeUnit.SECONDS);
 
         cachingClient = clientBuilder.build();
     }
@@ -215,7 +218,26 @@ public class OphHttpClient {
             keepAliveStrategy = createKeepAliveStrategy();
             redirectStrategy = createRedirectStrategy();
             reuseStrategy = new DefaultConnectionReuseStrategy();
-            cacheConfig = createCacheConfig();
+            cacheConfig = null;
+        }
+
+        /**
+         * Set cache config. Setting this enables http request caching.
+         * @param cacheConfig Cache configurations
+         * @return Builder
+         */
+        public Builder cacheConfig(CacheConfig cacheConfig) {
+            this.cacheConfig = cacheConfig;
+            return this;
+        }
+
+        /**
+         * Enables http request caching with default configuration.
+         * @return Builder
+         */
+        public Builder useDefaultCacheConfig() {
+            this.cacheConfig = createCacheConfig();
+            return this;
         }
 
         /**
@@ -250,11 +272,6 @@ public class OphHttpClient {
 
         public Builder disableConnectionReuse() {
             reuseStrategy = new NoConnectionReuseStrategy();
-            return this;
-        }
-
-        public Builder clientSubSystemCode(String clientSubSystemCode) {
-            this.clientSubSystemCode = clientSubSystemCode;
             return this;
         }
 
