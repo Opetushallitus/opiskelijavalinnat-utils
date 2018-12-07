@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 @Getter
 @Slf4j
 public class OphHttpClient {
-    private static final int MAX_CACHE_ENTRIES = 50 * 1000; // 50000
+    private static final int MAX_CACHE_ENTRIES = 20; // max = 20 * 10MB = 200MB
     private static final int MAX_OBJECT_SIZE = 10 * 1024 * 1024; // 10MB (oppilaitosnumero-koodisto is ~7,5MB)
     private static final String CSRF = "CachingRestClient";
 
@@ -223,11 +223,11 @@ public class OphHttpClient {
 
         /**
          * Set cache config. Setting this enables http request caching.
-         * @param cacheConfig Cache configurations
+         * @param cacheConfigBuilder Cache configuration builder
          * @return Builder
          */
-        public Builder cacheConfig(CacheConfig cacheConfig) {
-            this.cacheConfig = cacheConfig;
+        public Builder cache(CacheConfig.Builder cacheConfigBuilder) {
+            this.cacheConfig = cacheConfigBuilder.build();
             return this;
         }
 
@@ -235,10 +235,22 @@ public class OphHttpClient {
          * Enables http request caching with default configuration.
          * @return Builder
          */
-        public Builder useDefaultCacheConfig() {
-            this.cacheConfig = createCacheConfig();
+        public Builder useDefaultCache() {
+            this.cacheConfig = customCacheConfig()
+                    .setMaxCacheEntries(MAX_CACHE_ENTRIES)
+                    .setMaxObjectSize(MAX_OBJECT_SIZE)
+                    .build();
             return this;
         }
+
+        /**
+         * Convenience method for creating custom cache configuration
+         * @return Cache configuration builder
+         */
+        public static CacheConfig.Builder customCacheConfig() {
+            return CacheConfig.custom();
+        }
+
 
         /**
          * Set connection timeout.
@@ -315,12 +327,6 @@ public class OphHttpClient {
             return connectionManager;
         }
 
-        private static CacheConfig createCacheConfig() {
-            return CacheConfig.custom()
-                    .setMaxCacheEntries(MAX_CACHE_ENTRIES)
-                    .setMaxObjectSize(MAX_OBJECT_SIZE)
-                    .build();
-        }
     }
 
 }
