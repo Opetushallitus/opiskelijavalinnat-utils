@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 @Getter
 @Slf4j
 public class OphHttpClient {
-    private static final int MAX_CACHE_ENTRIES = 50 * 1000; // 50000
+    private static final int MAX_CACHE_ENTRIES = 20; // max = 20 * 10MB = 200MB
     private static final int MAX_OBJECT_SIZE = 10 * 1024 * 1024; // 10MB (oppilaitosnumero-koodisto is ~7,5MB)
     private static final String CSRF = "CachingRestClient";
 
@@ -75,16 +75,19 @@ public class OphHttpClient {
                 .setSoTimeout(builder.socketTimeoutMs)
                 .build();
 
-        HttpClientBuilder clientBuilder = CachingHttpClientBuilder.create()
-            .setCacheConfig(builder.cacheConfig)
-            .setDefaultRequestConfig(requestConfig)
-            .setDefaultSocketConfig(socketConfig)
-            .setConnectionManager(builder.connectionManager)
-            .setKeepAliveStrategy(builder.keepAliveStrategy)
-            .setDefaultCookieStore(cookieStore)
-            .setRedirectStrategy(builder.redirectStrategy)
-            .setConnectionReuseStrategy(builder.reuseStrategy)
-            .setConnectionTimeToLive(builder.connectionTTLSec, TimeUnit.SECONDS);
+        HttpClientBuilder clientBuilder = builder.cacheConfig == null
+                ? HttpClientBuilder.create()
+                : CachingHttpClientBuilder.create().setCacheConfig(builder.cacheConfig);
+
+        clientBuilder
+                .setDefaultRequestConfig(requestConfig)
+                .setDefaultSocketConfig(socketConfig)
+                .setConnectionManager(builder.connectionManager)
+                .setKeepAliveStrategy(builder.keepAliveStrategy)
+                .setDefaultCookieStore(cookieStore)
+                .setRedirectStrategy(builder.redirectStrategy)
+                .setConnectionReuseStrategy(builder.reuseStrategy)
+                .setConnectionTimeToLive(builder.connectionTTLSec, TimeUnit.SECONDS);
 
         cachingClient = clientBuilder.build();
     }
@@ -215,13 +218,39 @@ public class OphHttpClient {
             keepAliveStrategy = createKeepAliveStrategy();
             redirectStrategy = createRedirectStrategy();
             reuseStrategy = new DefaultConnectionReuseStrategy();
-            cacheConfig = createCacheConfig();
+            cacheConfig = null;
         }
+
+        /**
+         * Set cache config. Setting this enables http request caching.
+         */
+        public Builder cache(CacheConfig.Builder cacheConfigBuilder) {
+            this.cacheConfig = cacheConfigBuilder.build();
+            return this;
+        }
+
+        /**
+         * Enables http request caching with default configuration.
+         */
+        public Builder useDefaultCache() {
+            this.cacheConfig = customCacheConfig()
+                    .setMaxCacheEntries(MAX_CACHE_ENTRIES)
+                    .setMaxObjectSize(MAX_OBJECT_SIZE)
+                    .build();
+            return this;
+        }
+
+        /**
+         * Convenience method for creating custom cache configuration
+         */
+        public static CacheConfig.Builder customCacheConfig() {
+            return CacheConfig.custom();
+        }
+
 
         /**
          * Set connection timeout.
          * @param timeout The time given to create connection before timing out.
-         * @return builder
          */
         public Builder timeoutMs(int timeout) {
             this.connectionTimeoutMs = timeout;
@@ -231,7 +260,6 @@ public class OphHttpClient {
         /**
          * Set socket timeout. Note this is between packets not requests.
          * @param socketTimeoutMs The time to wait for a package before connection timeout
-         * @return builder
          */
         public Builder setSocketTimeoutMs(int socketTimeoutMs) {
             this.socketTimeoutMs = socketTimeoutMs;
@@ -250,11 +278,6 @@ public class OphHttpClient {
 
         public Builder disableConnectionReuse() {
             reuseStrategy = new NoConnectionReuseStrategy();
-            return this;
-        }
-
-        public Builder clientSubSystemCode(String clientSubSystemCode) {
-            this.clientSubSystemCode = clientSubSystemCode;
             return this;
         }
 
@@ -298,12 +321,6 @@ public class OphHttpClient {
             return connectionManager;
         }
 
-        private static CacheConfig createCacheConfig() {
-            return CacheConfig.custom()
-                    .setMaxCacheEntries(MAX_CACHE_ENTRIES)
-                    .setMaxObjectSize(MAX_OBJECT_SIZE)
-                    .build();
-        }
     }
 
 }
