@@ -223,8 +223,6 @@ public class OphHttpClient {
 
         /**
          * Set cache config. Setting this enables http request caching.
-         * @param cacheConfigBuilder Cache configuration builder
-         * @return Builder
          */
         public Builder cache(CacheConfig.Builder cacheConfigBuilder) {
             this.cacheConfig = cacheConfigBuilder.build();
@@ -233,7 +231,6 @@ public class OphHttpClient {
 
         /**
          * Enables http request caching with default configuration.
-         * @return Builder
          */
         public Builder useDefaultCache() {
             this.cacheConfig = customCacheConfig()
@@ -245,7 +242,6 @@ public class OphHttpClient {
 
         /**
          * Convenience method for creating custom cache configuration
-         * @return Cache configuration builder
          */
         public static CacheConfig.Builder customCacheConfig() {
             return CacheConfig.custom();
@@ -255,7 +251,6 @@ public class OphHttpClient {
         /**
          * Set connection timeout.
          * @param timeout The time given to create connection before timing out.
-         * @return builder
          */
         public Builder timeoutMs(int timeout) {
             this.connectionTimeoutMs = timeout;
@@ -265,7 +260,6 @@ public class OphHttpClient {
         /**
          * Set socket timeout. Note this is between packets not requests.
          * @param socketTimeoutMs The time to wait for a package before connection timeout
-         * @return builder
          */
         public Builder setSocketTimeoutMs(int socketTimeoutMs) {
             this.socketTimeoutMs = socketTimeoutMs;
