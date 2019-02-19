@@ -10,8 +10,6 @@ import java.util.Map;
 
 /**
  * Poor man's performance tracer, investigate Spring etc performance interceptors if this are used beyond temp usage
- *
- * @author Antti Salonen
  */
 public class TraceInterceptor implements MethodInterceptor {
 
