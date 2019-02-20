@@ -15,8 +15,6 @@ import java.util.Collections;
 
 /**
  * Simple cas http mock, works with CasClient, see also HttpTestResource.
- *
- * @author Antti Salonen
  */
 @Path("/mock_cas")
 public class MockCasResource {

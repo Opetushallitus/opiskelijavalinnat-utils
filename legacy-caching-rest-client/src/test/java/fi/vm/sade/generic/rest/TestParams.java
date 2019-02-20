@@ -2,9 +2,6 @@ package fi.vm.sade.generic.rest;
 
 import java.util.ArrayList;
 
-/**
- * @author Antti Salonen
- */
 public class TestParams {
 
     public static TestParams instance;

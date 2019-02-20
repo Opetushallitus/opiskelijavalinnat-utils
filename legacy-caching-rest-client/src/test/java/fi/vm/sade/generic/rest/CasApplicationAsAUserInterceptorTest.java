@@ -8,9 +8,6 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Assert;
 import org.junit.Test;
 
-/**
- * @author Antti Salonen
- */
 public class CasApplicationAsAUserInterceptorTest extends RestWithCasTestSupport {
 
     private WebClient webClient;

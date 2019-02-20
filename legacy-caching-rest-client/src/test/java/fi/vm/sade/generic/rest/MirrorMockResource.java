@@ -11,7 +11,6 @@ import java.util.Enumeration;
 
 /**
  * Mock resource for mirroring request for testing purposes.
- * @author Jouni Stam
  */
 @Path("/mirror")
 public class MirrorMockResource {

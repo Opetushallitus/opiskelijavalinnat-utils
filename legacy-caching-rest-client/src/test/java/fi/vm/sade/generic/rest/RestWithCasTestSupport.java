@@ -7,9 +7,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-/**
- * @author Antti Salonen
- */
 public class RestWithCasTestSupport {
 
     CachingRestClient client;

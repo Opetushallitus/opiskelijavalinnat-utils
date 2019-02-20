@@ -22,9 +22,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-/**
- * @author Antti Salonen
- */
 public class CachingRestClientTest extends RestWithCasTestSupport {
 
     @Test

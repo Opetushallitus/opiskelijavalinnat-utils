@@ -23,9 +23,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-/**
- * @author Antti Salonen
- */
 @Path("/httptest")
 public class HttpTestResource {
 
