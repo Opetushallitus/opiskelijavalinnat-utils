@@ -4,9 +4,6 @@ import javax.servlet.ServletContext;
 import java.util.HashMap;
 import java.util.Properties;
 
-/**
- * @author Antti Salonen
- */
 public class BuildVersionHealthChecker implements HealthChecker {
     private ServletContext servletContext;
 

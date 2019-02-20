@@ -10,9 +10,6 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @author Antti Salonen
- */
 @Component
 public class OidProvider {
 

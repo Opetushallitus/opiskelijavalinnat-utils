@@ -8,8 +8,6 @@ import org.springframework.security.core.Authentication;
 /**
  * Blocking cache for CAS tickets.
  * Blocks cache gets/loads per ticketKey.
- *
- * @author Antti Salonen
  */
 public abstract class TicketCachePolicy {
     private static final Logger log = LoggerFactory.getLogger(TicketCachePolicy.class);

@@ -15,9 +15,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
-/**
- * @author Antti Salonen
- */
 public class ProxyAuthenticator {
 
     private static final Logger log = LoggerFactory.getLogger(ProxyAuthenticator.class);

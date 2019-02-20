@@ -12,8 +12,6 @@ import java.util.Map;
  * Ticket cache policy that keeps cached ticket in user's http session context
  * (if using from spring webapp), otherwise in global (not static though) context
  * (with configurable expiration time).
- *
- * @author Antti Salonen
  */
 public class DefaultTicketCachePolicy extends TicketCachePolicy {
 

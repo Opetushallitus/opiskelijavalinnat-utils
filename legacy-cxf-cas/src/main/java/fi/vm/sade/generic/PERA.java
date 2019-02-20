@@ -5,8 +5,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 
 /**
  * https://liitu.hard.ware.fi/confluence/display/SPEKSI/5.+Sanomien+rakenne
- *
- * @author Antti Salonen
  */
 public class PERA {
 

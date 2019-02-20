@@ -23,9 +23,7 @@ import java.util.Set;
 
 /**
  * Interceptor for outgoing SOAP calls that uses "application-as-a-user" pattern: authenticates against CAS REST API to get a service ticket.
- *
- * @author Antti Salonen
- */
+*/
 public class CasApplicationAsAUserInterceptor extends AbstractPhaseInterceptor<Message> {
 
     private static final Logger logger = LoggerFactory.getLogger(CasApplicationAsAUserInterceptor.class);

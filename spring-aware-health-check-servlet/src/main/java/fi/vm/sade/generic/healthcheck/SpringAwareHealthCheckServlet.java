@@ -73,7 +73,6 @@ import java.util.Map;
  * - https://liitu.hard.ware.fi/confluence/display/PROG/Healthcheck+url
  *
  * @see HealthChecker
- * @author Antti Salonen
  */
 public class SpringAwareHealthCheckServlet extends HttpServlet {
 

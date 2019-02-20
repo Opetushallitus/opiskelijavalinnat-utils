@@ -9,9 +9,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.servlet.ServletContext;
 
-/**
- * @author Antti Salonen
- */
 public class ProxyAuthenticationChecker implements HealthChecker {
 
     private ServletContext servletContext;

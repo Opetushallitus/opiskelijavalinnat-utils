@@ -82,8 +82,6 @@ import java.util.concurrent.TimeUnit;
  * Service-as-a-user authentication: set webCasUrl/casService/username/password
  *
  * Proxy authentication: set useProxyAuthentication=true + casService
- *
- * @author Antti Salonen
  */
 public class CachingRestClient implements HealthChecker {
 

@@ -1,8 +1,5 @@
 package fi.vm.sade.generic.service.exception;
 
-/**
- * @author Eetu Blomqvist
- */
 public class NotAuthorizedException extends SadeBusinessException {
 
     public NotAuthorizedException() {

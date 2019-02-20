@@ -27,7 +27,6 @@ package fi.vm.sade.generic.healthcheck;
  *  }
  *
  * @see SpringAwareHealthCheckServlet (in other module)
- * @author Antti Salonen
  */
 public interface HealthChecker {
     /**
