@@ -16,6 +16,7 @@ package fi.vm.sade.authentication.ldap;
  * European Union Public Licence for more details.
  */
 
+import fi.vm.sade.generic.common.auth.SadeUserDetailsWrapper;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
