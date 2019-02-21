@@ -13,7 +13,6 @@
         <module>tcp-utils</module>
         <module>jetty-test-utils</module>
         <module>java-cas</module>
-        <module>java-ldap</module>
         <module>java-cxf</module>
         <module>httpclient</module>
         <module>url-connection-tester</module>
@@ -26,6 +25,7 @@
         <module>java-tracing</module>
         <module>java-cache</module>
         <module>opintopolku-spring-security</module>
+        <module>java-ldap</module>
         <module>legacy-cxf-cas</module>
         <module>legacy-caching-rest-client</module>
         <module>spring-aware-health-check-servlet</module>

@@ -1,6 +1,6 @@
 package fi.vm.sade.authentication.business.service;
 
-import fi.vm.sade.generic.service.exception.NotAuthorizedException;
+import fi.vm.sade.authorization.NotAuthorizedException;
 
 public interface Authorizer {
     void checkUserIsNotSame(String userOid) throws NotAuthorizedException;
