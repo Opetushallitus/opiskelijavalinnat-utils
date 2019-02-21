@@ -1,4 +1,4 @@
-package fi.vm.sade.authentication.ldap;
+package fi.vm.sade.generic.common.auth;
 /*
  *
  * Copyright (c) 2012 The Finnish Board of Education - Opetushallitus
@@ -18,6 +18,7 @@ package fi.vm.sade.authentication.ldap;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
 import java.util.Collection;
 
 public class SadeUserDetailsWrapper implements UserDetails  {

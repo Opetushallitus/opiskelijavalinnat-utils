@@ -10,11 +10,39 @@
   <artifactId>java-ldap</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
+  <properties>
+      <spring.version>4.3.22.RELEASE</spring.version>
+      <spring.security.version>4.1.5.RELEASE</spring.security.version>
+  </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-core</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.11</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.7.25</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
+    <dependency>
+      <groupId>fi.vm.sade.java-utils</groupId>
+      <artifactId>opintopolku-spring-security</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-ldap</artifactId>
-      <version>4.1.3.RELEASE</version>
+      <version>${spring.security.version}</version>
     </dependency>
   </dependencies>
 </project>
