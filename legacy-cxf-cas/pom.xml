@@ -14,7 +14,8 @@
 
     <properties>
         <apache.httpclient.version>4.5.2</apache.httpclient.version>
-        <spring.security.version>5.1.2.RELEASE</spring.security.version>
+        <spring.version>5.1.5.RELEASE</spring.version>
+        <spring.security.version>4.2.11.RELEASE</spring.security.version>
     </properties>
 
     <dependencyManagement>
@@ -33,8 +34,18 @@
 
             <dependency>
                 <groupId>org.springframework</groupId>
+                <artifactId>spring-beans</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
                 <artifactId>spring-web</artifactId>
-                <version>5.1.3.RELEASE</version>
+                <version>${spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.security</groupId>
