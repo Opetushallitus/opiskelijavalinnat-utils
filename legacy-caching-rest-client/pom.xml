@@ -15,6 +15,7 @@
     <properties>
         <spring.version>5.1.5.RELEASE</spring.version>
         <spring.security.version>4.2.11.RELEASE</spring.security.version>
+        <cxf.version>3.3.0</cxf.version>
     </properties>
 
     <dependencyManagement>
@@ -57,13 +58,13 @@
             <dependency>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-                <version>3.2.7</version>
+                <version>${cxf.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-rt-rs-client</artifactId>
-                <version>3.2.7</version>
+                <version>${cxf.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -86,6 +87,11 @@
                 <artifactId>spring-web</artifactId>
                 <version>${spring.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-core</artifactId>
+                <version>${cxf.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -102,14 +108,14 @@
             <version>0.3.1-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>legacy-cxf-cas</artifactId>
             <version>0.1.0-SNAPSHOT</version>
             <exclusions>
-                <exclusion>
-                    <groupId>org.apache.cxf</groupId>
-                    <artifactId>cxf-api</artifactId>
-                </exclusion>
                 <exclusion>
                     <groupId>org.apache.cxf</groupId>
                     <artifactId>cxf-common-utilities</artifactId>
@@ -152,13 +158,13 @@
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-            <version>3.2.7</version>
+            <version>${cxf.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-rs-client</artifactId>
-            <version>3.2.7</version>
+            <version>${cxf.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
