@@ -29,6 +29,7 @@
         <module>legacy-cxf-cas</module>
         <module>legacy-caching-rest-client</module>
         <module>spring-aware-health-check-servlet</module>
+        <module>opintopolku-jetty</module>
     </modules>
     <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
