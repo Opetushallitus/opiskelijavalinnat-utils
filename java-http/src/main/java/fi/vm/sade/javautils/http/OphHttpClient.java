@@ -50,7 +50,7 @@ public class OphHttpClient {
     private static final String CSRF = "CachingRestClient";
 
     private static class Headers {
-        private static final String CLIENT_SUB_SYSTEM_CODE = "clientSubSystemCode";
+        private static final String CALLER_ID = "callerId";
         private static final String CSRF = "CSRF";
     }
 
@@ -58,7 +58,7 @@ public class OphHttpClient {
     private CloseableHttpClient cachingClient;
     private CookieStore cookieStore;
     private Authenticator authenticator;
-    private String clientSubSystemCode;
+    private String callerId;
 
     private ThreadLocal<HttpContext> localContext = ThreadLocal.withInitial(BasicHttpContext::new);
     private HashMap<String, Boolean> csrfCookiesCreateForHost = new HashMap<>();
@@ -67,7 +67,7 @@ public class OphHttpClient {
         logUtil = new LogUtil(builder.allowUrlLogging, builder.connectionTimeoutMs, builder.socketTimeoutMs);
         authenticator = builder.authenticator;
         cookieStore = builder.cookieStore;
-        clientSubSystemCode = builder.clientSubSystemCode;
+        callerId = builder.callerId;
         RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectTimeout(builder.connectionTimeoutMs)
                 .build();
@@ -107,9 +107,9 @@ public class OphHttpClient {
         ensureCSRFCookie(request.getURI().getHost());
         request.addHeader(Headers.CSRF, CSRF);
 
-        if (StringUtils.isNotEmpty(this.clientSubSystemCode)
-                && request.getFirstHeader(Headers.CLIENT_SUB_SYSTEM_CODE) == null) {
-            request.addHeader(Headers.CLIENT_SUB_SYSTEM_CODE, this.clientSubSystemCode);
+        if (StringUtils.isNotEmpty(this.callerId)
+                && request.getFirstHeader(Headers.CALLER_ID) == null) {
+            request.addHeader(Headers.CALLER_ID, this.callerId);
         }
 
         boolean wasJustAuthenticated = authenticate(request, retry);
@@ -192,7 +192,7 @@ public class OphHttpClient {
         int socketTimeoutMs;
         long connectionTTLSec;
         boolean allowUrlLogging;
-        String clientSubSystemCode;
+        String callerId;
         Authenticator authenticator;
         CacheConfig cacheConfig;
         RedirectStrategy redirectStrategy;
@@ -203,14 +203,14 @@ public class OphHttpClient {
 
         /**
          * OphHttpClient builder
-         * @param clientSubSystemCode Identifier for calling service
+         * @param callerId Identifier for calling service
          */
-        public Builder(String clientSubSystemCode) {
+        public Builder(String callerId) {
             connectionTimeoutMs = 10000; // 10s
             socketTimeoutMs = 10000; // 10s
             connectionTTLSec = 60; // infran palomuuri katkoo monta minuuttia makaavat connectionit
             allowUrlLogging = true;
-            this.clientSubSystemCode = clientSubSystemCode;
+            this.callerId = callerId;
             authenticator = Authenticator.NONE;
             cookieStore = new BasicCookieStore();
 
