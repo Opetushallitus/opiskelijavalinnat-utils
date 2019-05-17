@@ -1,46 +1,23 @@
 package fi.vm.sade.javautils.cxf;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.ws.rs.core.MediaType;
-
 import fi.vm.sade.jetty.JettyJersey;
 import org.apache.cxf.helpers.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.message.Message;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-//import org.springframework.security.core.context.SecurityContextHolder;
-
-
-/**
- * Tests for Caller-Id header insertion interceptor for cxf.
- * @author Jouni Stam
- *
- */
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.io.InputStream;
 public class OphRequestHeadersCxfInterceptorTest {
-
-    String unprotectedTargetUrl = "/mirror/headers";
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
+    private String unprotectedTargetUrl = "/mirror/headers";
 
     @Before
     public void setUp() throws Exception {
         JettyJersey.startServer("fi.vm.sade.javautils.cxf", null);
-        //SecurityContextHolder.clearContext();
     }
 
     @After
@@ -48,9 +25,6 @@ public class OphRequestHeadersCxfInterceptorTest {
         JettyJersey.stopServer();
     }
 
-    /**
-     * Caller-Id:n tulisi tulla pyynnön headeriin.
-     */
     @Test
     public void testCallerIdInsertion() throws IOException {
         OphRequestHeadersCxfInterceptor<Message> interceptor = createInterceptor();
@@ -81,5 +55,4 @@ public class OphRequestHeadersCxfInterceptorTest {
     public static String getUrl(String url) {
         return JettyJersey.getUrl(url);
     }
-
 }
