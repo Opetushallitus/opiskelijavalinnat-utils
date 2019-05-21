@@ -41,26 +41,26 @@ public class OphHttpClient extends OphRequestParameterAccessors<OphHttpClient> i
     /**
      * Resolve urls through urlProperties
      * @param httpAdapter
-     * @param clientSubsystemCode
+     * @param callerId
      * @param urlProperties
      */
-    public OphHttpClient(OphHttpClientProxy httpAdapter, String clientSubsystemCode, OphProperties urlProperties) {
+    public OphHttpClient(OphHttpClientProxy httpAdapter, String callerId, OphProperties urlProperties) {
         this.httpAdapter = httpAdapter;
         this.urlProperties = urlProperties;
         setThisForRequestParamSetters(this);
-        setClientSubSystemCode(clientSubsystemCode);
+        setCallerId(callerId);
     }
 
     /**
      * Use urls without any parameter resolving
      * @param httpAdapter
-     * @param clientSubsystemCode
+     * @param callerId
      */
-    public OphHttpClient(OphHttpClientProxy httpAdapter, String clientSubsystemCode) {
+    public OphHttpClient(OphHttpClientProxy httpAdapter, String callerId) {
         this.httpAdapter = httpAdapter;
         this.urlProperties = null;
         setThisForRequestParamSetters(this);
-        setClientSubSystemCode(clientSubsystemCode);
+        setCallerId(callerId);
     }
 
     /*

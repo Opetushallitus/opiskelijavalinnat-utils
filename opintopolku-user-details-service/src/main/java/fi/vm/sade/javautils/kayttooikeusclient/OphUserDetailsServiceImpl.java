@@ -25,10 +25,11 @@ public class OphUserDetailsServiceImpl implements UserDetailsService {
      * Rakentaja.
      *
      * @param urlVirkailija käyttöoikeuspalvelun sisäinen osoite ("scheme://host" ilman "/kayttooikeus-service/...")
-     * @param clientSubsystemCode kutsuvan palvelun tunniste, esim. "oppijanumerorekisteri"
+     * @param callerId kutsuvan palvelun tunniste, esim. "1.2.246.562.10.00000000001.oppijanumerorekisteri"
+     *                 (ks. https://confluence.csc.fi/pages/viewpage.action?pageId=50858064 )
      */
-    public OphUserDetailsServiceImpl(String urlVirkailija, String clientSubsystemCode) {
-        this.httpClient = ApacheOphHttpClient.createDefaultOphClient(clientSubsystemCode,
+    public OphUserDetailsServiceImpl(String urlVirkailija, String callerId) {
+        this.httpClient = ApacheOphHttpClient.createDefaultOphClient(callerId,
                 new OphProperties("/kayttooikeusclient-oph.properties")
                         .addOverride("url-virkailija", urlVirkailija));
     }

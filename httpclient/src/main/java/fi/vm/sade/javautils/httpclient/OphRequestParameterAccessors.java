@@ -16,9 +16,9 @@ class OphRequestParameterAccessors<T> {
         this.requestParameters = requestParameters;
     }
 
-    public T setClientSubSystemCode(String clientSubSystemCode) {
+    public T setCallerId(String callerId) {
         checkEditMode();
-        requestParameters.clientSubSystemCode = clientSubSystemCode;
+        requestParameters.callerId = callerId;
         return thisParams;
     }
 

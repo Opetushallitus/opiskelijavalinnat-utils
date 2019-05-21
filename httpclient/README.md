@@ -17,7 +17,7 @@ By default the client expects the status code to be 2xx.
 * Built in retry: `retryOnError(times, delayMs)`
 * Uses Apache Httpclient 4.5.2, but you can write an adapter for other http client libraries.
   Just implement your own OphHttpClientProxy, OphHttpClientProxyRequest and OphHttpResponse
-* Supports OPH's CSRF protection and clientSubSystem
+* Supports OPH's CSRF protection and Caller-Id header
 
 # Usage
 
@@ -39,7 +39,7 @@ Initialize a non-caching http client that pools connections.
 
     OphHttpClient client = ApacheOphHttpClient.createDefaultOphHttpClient("tester", properties, 10000, 600);
 
-* `tester` is clientSubSystemCode header, which identifies this client by adding the header with the specified value to the request
+* `tester` is callerId header, which identifies this client by adding the header with the specified value to the request
 * `properties` is a OphProperties instance. Urls are resolved through it, see: https://github.com/Opetushallitus/java-utils/tree/master/java-properties
 * 10000ms is a common timeout for various timeout values
 * 600s is the how long each connection is up
