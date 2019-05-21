@@ -59,6 +59,20 @@ public class ValtuudetClientImpl implements ValtuudetClient {
         return session;
     }
 
+    @Override
+    public void destroySession(ValtuudetType type, String sessionId) {
+        String path = String.format("/service/%s/user/unregister/%s?requestId=%s",
+                type.path, sessionId,
+                encodeQueryParam(requestIdProvider.get()));
+        String url = properties.getHost() + path;
+
+        httpClient.get(url)
+                .header(AUTHORIZATION_HEADER, getChecksum(path, instantProvider.get()))
+                .doNotSendOphHeaders()
+                .expectStatus(200)
+                .execute();
+    }
+
     public String getRedirectUrl(String userId, String callbackUrl, String language) {
         String path = String.format("/oauth/authorize?client_id=%s&response_type=code&redirect_uri=%s&user=%s&lang=%s",
                 encodeQueryParam(properties.getClientId()), encodeQueryParam(callbackUrl),

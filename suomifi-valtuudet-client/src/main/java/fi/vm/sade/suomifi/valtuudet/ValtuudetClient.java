@@ -19,6 +19,7 @@ package fi.vm.sade.suomifi.valtuudet;
  *         Get person or organisation selected by user depending on type used in session
  *         ({@link #getSelectedPerson(String, String)} or {@link #getSelectedOrganisation(String, String)})
  *     </li>
+ *     <li>Destroy session from service with {@link #destroySession(ValtuudetType, String)}</li>
  * </ol>
  */
 public interface ValtuudetClient {
@@ -31,6 +32,14 @@ public interface ValtuudetClient {
      * @return session
      */
     SessionDto createSession(ValtuudetType type, String nationalIdentificationNumber);
+
+    /**
+     * Destroy session from service.
+     *
+     * @param type person or organisation
+     * @param sessionId session id from {@link #createSession(ValtuudetType, String)}
+     */
+    void destroySession(ValtuudetType type, String sessionId);
 
     /**
      * Returns url to which user should be redirected.

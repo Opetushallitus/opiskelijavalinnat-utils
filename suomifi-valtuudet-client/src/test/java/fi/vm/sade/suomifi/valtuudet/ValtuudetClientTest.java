@@ -91,12 +91,21 @@ public class ValtuudetClientTest {
                 .respond()
                 .withStatus(200)
                 .withBody(loadAsString("authorization-allowed.json"));
+        onRequest()
+                .havingMethodEqualTo("GET")
+                .havingPathEqualTo(String.format("/service/hpa/user/unregister/%s", "sessionId123"))
+                .havingQueryStringEqualTo(String.format("requestId=%s", TEST_REQUEST_ID))
+                .havingHeader("X-AsiointivaltuudetAuthorization", hasItem(startsWith(TEST_CHECKSUM_PREFIX)))
+                .respond()
+                .withStatus(200)
+                .withBody("true");
 
         SessionDto session = client.createSession(ValtuudetType.PERSON, TEST_HETU);
         String redirectUrl = client.getRedirectUrl(session.userId, callbackUrl, "fi");
         String accessToken = client.getAccessToken(testCode, callbackUrl);
         PersonDto person = client.getSelectedPerson(session.sessionId, accessToken);
         boolean authorized = client.isAuthorizedToPerson(session.sessionId, accessToken, person.personId);
+        client.destroySession(ValtuudetType.PERSON, session.sessionId);
 
         assertThat(redirectUrl).endsWith("oauth/authorize?client_id=" + TEST_CLIENT_ID + "&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fcallback%3Fparameter%3D1%26another%3D2&user=userId123&lang=fi");
         assertThat(person).returns("120508A950F", t -> t.personId);
@@ -132,11 +141,20 @@ public class ValtuudetClientTest {
                 .respond()
                 .withStatus(200)
                 .withBody(loadAsString("organisations.json"));
+        onRequest()
+                .havingMethodEqualTo("GET")
+                .havingPathEqualTo(String.format("/service/ypa/user/unregister/%s", "sessionId123"))
+                .havingQueryStringEqualTo(String.format("requestId=%s", TEST_REQUEST_ID))
+                .havingHeader("X-AsiointivaltuudetAuthorization", hasItem(startsWith(TEST_CHECKSUM_PREFIX)))
+                .respond()
+                .withStatus(200)
+                .withBody("true");
 
         SessionDto session = client.createSession(ValtuudetType.ORGANISATION, TEST_HETU);
         String redirectUrl = client.getRedirectUrl(session.userId, callbackUrl, "fi");
         String accessToken = client.getAccessToken(testCode, callbackUrl);
         OrganisationDto organisation = client.getSelectedOrganisation(session.sessionId, accessToken);
+        client.destroySession(ValtuudetType.ORGANISATION, session.sessionId);
 
         assertThat(redirectUrl).endsWith("oauth/authorize?client_id=" + TEST_CLIENT_ID + "&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fcallback%3Fparameter%3D1%26another%3D2&user=userId123&lang=fi");
         assertThat(organisation).returns("2305162-8", t -> t.identifier);
