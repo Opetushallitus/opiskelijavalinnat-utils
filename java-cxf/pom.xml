@@ -14,6 +14,11 @@
     <artifactId>java-cxf</artifactId>
     <version>0.3.0-SNAPSHOT</version>
     <!-- exclusions due <dependencyConvergence/> -->
+
+    <properties>
+        <cxf.version>3.3.2</cxf.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -24,7 +29,7 @@
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>jetty-test-utils</artifactId>
-            <version>0.2.0-SNAPSHOT</version>
+            <version>0.2.1-SNAPSHOT</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -36,32 +41,20 @@
 
         <dependency>
             <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-bundle</artifactId>
-            <version>2.5.1</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-collections</groupId>
-                    <artifactId>commons-collections</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-lang</groupId>
-                    <artifactId>commons-lang</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.santuario</groupId>
-                    <artifactId>xmlsec</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
+            <artifactId>cxf-core</artifactId>
+            <version>${cxf.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-rs-client</artifactId>
+            <version>${cxf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>5.2</version>
+        </dependency>
+
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>

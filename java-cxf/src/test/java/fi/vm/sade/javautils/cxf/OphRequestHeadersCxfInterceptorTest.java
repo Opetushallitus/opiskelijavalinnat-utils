@@ -15,6 +15,7 @@ import java.io.InputStream;
 public class OphRequestHeadersCxfInterceptorTest {
     private static final String CALLER_ID = "1.2.246.562.10.00000000001.java-cxf.TESTCLIENT";
     private String unprotectedTargetUrl = "/mirror/headers";
+    private final OphRequestHeadersCxfInterceptor<Message> interceptor = createInterceptor();
 
     @Before
     public void setUp() throws Exception {
@@ -28,10 +29,16 @@ public class OphRequestHeadersCxfInterceptorTest {
 
     @Test
     public void testCallerIdInsertion() throws IOException {
-        OphRequestHeadersCxfInterceptor<Message> interceptor = createInterceptor();
-        WebClient cxfClient = createClient(this.unprotectedTargetUrl, interceptor);
-        String response = IOUtils.toString((InputStream) cxfClient.get().getEntity());
+        String response = IOUtils.toString((InputStream) createClient(this.unprotectedTargetUrl, interceptor).get().getEntity());
         assertContains(response, "Caller-Id: " + CALLER_ID, "CSRF: CSRF", "Cookie: CSRF=CSRF");
+    }
+
+    @Test
+    public void testMultipleCookieValues() throws IOException {
+        WebClient client = createClient(this.unprotectedTargetUrl, interceptor)
+            .header("Cookie", "X-Foo=baar; X-Wing=Destroyer");
+        String response = IOUtils.toString((InputStream) client.get().getEntity());
+        assertContains(response, "Caller-Id: " + CALLER_ID, "CSRF: CSRF", "Cookie: X-Foo=baar; X-Wing=Destroyer; CSRF=CSRF");
     }
 
     private static void assertContains(String from, String... args) {
