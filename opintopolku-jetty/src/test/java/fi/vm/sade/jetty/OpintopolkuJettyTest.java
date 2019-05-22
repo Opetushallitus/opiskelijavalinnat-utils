@@ -30,7 +30,7 @@ public class OpintopolkuJettyTest {
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(5000);
 
-            responseContent = IOUtils.toString(connection.getInputStream());
+            responseContent = IOUtils.toString(connection.getInputStream(), "UTF-8");
         }
 
         assertThat(responseContent, containsString("Hello, world according to OpintopolkuJetty!"));
