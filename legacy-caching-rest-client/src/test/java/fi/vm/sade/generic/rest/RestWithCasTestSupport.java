@@ -23,7 +23,7 @@ public class RestWithCasTestSupport {
         HttpTestResource.someResource = "original value";
         SecurityContextHolder.clearContext();
 //        DefaultTicketCachePolicy.ticketThreadLocal.remove();
-        client = new CachingRestClient().setClientSubSystemCode("RestWithCasTestSupport");
+        client = new CachingRestClient("RestWithCasTestSupport");
         client.setWebCasUrl("N/A");
     }
 

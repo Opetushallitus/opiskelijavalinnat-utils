@@ -49,14 +49,14 @@ public class OphHttpClientTest {
     }
 
     @Test
-    public void getSendsClientSubSystemCode() {
+    public void getSendsCallerId() {
 
         new MockServerClient("localhost", mockServerRule.getPort()).when(
                 request()
                         .withMethod("GET")
                         .withPath("/test")
                         .withQueryStringParameter("a","1","2")
-                        .withHeader("clientSubSystemCode: TESTCLIENT")
+                        .withHeader("Caller-Id: TESTCLIENT")
         ).respond(response()
                 .withStatusCode(200)
                 .withHeader("Content-Type", TEXT)
@@ -71,12 +71,12 @@ public class OphHttpClientTest {
     }
 
     @Test
-    public void postSendsClientSubSystemCodeAndCSRFAndContentTypeAndEncoding() {
+    public void postSendsCallerIdAndCSRFAndContentTypeAndEncoding() {
         new MockServerClient("localhost", mockServerRule.getPort()).when(
                 request()
                         .withMethod("POST")
                         .withPath("/test")
-                        .withHeader("clientSubSystemCode", "TESTCLIENT")
+                        .withHeader("Caller-Id", "TESTCLIENT")
                         .withHeader("Content-Type", "application/json; charset=UTF-8")
                         .withHeader("CSRF", "CSRF")
                         .withCookie("CSRF", "CSRF")

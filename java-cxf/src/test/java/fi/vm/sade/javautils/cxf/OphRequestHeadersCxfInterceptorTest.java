@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 public class OphRequestHeadersCxfInterceptorTest {
+    private static final String CALLER_ID = "1.2.246.562.10.00000000001.java-cxf.TESTCLIENT";
     private String unprotectedTargetUrl = "/mirror/headers";
 
     @Before
@@ -30,7 +31,7 @@ public class OphRequestHeadersCxfInterceptorTest {
         OphRequestHeadersCxfInterceptor<Message> interceptor = createInterceptor();
         WebClient cxfClient = createClient(this.unprotectedTargetUrl, interceptor);
         String response = IOUtils.toString((InputStream) cxfClient.get().getEntity());
-        assertContains(response, "clientSubSystemCode: TESTCLIENT", "CSRF: CSRF", "Cookie: CSRF=CSRF");
+        assertContains(response, "Caller-Id: " + CALLER_ID, "CSRF: CSRF", "Cookie: CSRF=CSRF");
     }
 
     private static void assertContains(String from, String... args) {
@@ -47,9 +48,7 @@ public class OphRequestHeadersCxfInterceptorTest {
     }
     
     private OphRequestHeadersCxfInterceptor<Message> createInterceptor() {
-        OphRequestHeadersCxfInterceptor<Message> interceptor = new OphRequestHeadersCxfInterceptor<Message>();
-        interceptor.setClientSubSystemCode("TESTCLIENT");
-        return interceptor;
+        return new OphRequestHeadersCxfInterceptor<Message>(CALLER_ID);
     }
     
     public static String getUrl(String url) {

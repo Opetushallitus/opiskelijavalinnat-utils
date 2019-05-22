@@ -100,8 +100,8 @@ public class OphHttpRequest extends OphRequestParameterAccessors<OphHttpRequest>
                 if(!OphHttpClient.CSRF_SAFE_VERBS.contains(requestParameters.method)) {
                     header(OphHttpClient.Header.CSRF, OphHttpClient.Header.CSRF);
                 }
-                if(requestParameters.clientSubSystemCode != null) {
-                    header("clientSubSystemCode", requestParameters.clientSubSystemCode);
+                if(requestParameters.callerId != null) {
+                    header("Caller-Id", requestParameters.callerId);
                 }
                 }
             if(requestParameters.url == null) {

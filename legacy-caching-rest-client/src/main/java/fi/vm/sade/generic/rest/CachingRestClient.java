@@ -128,24 +128,25 @@ public class CachingRestClient implements HealthChecker {
     private String proxyAuthMode;
     private String requiredVersionRegex;
     private final int timeoutMs;
-    private String clientSubSystemCode;
+    private final String callerId;
     private boolean allowUrlLogging;
     private HashMap<String, Boolean> csrfCookiesCreateForHost = new HashMap<String, Boolean>();
     private final CookieStore cookieStore;
 
-    public CachingRestClient() {
-        this(DEFAULT_TIMEOUT_MS, DEFAULT_CONNECTION_TTL_SEC);
+    public CachingRestClient(String callerId) {
+        this(callerId, DEFAULT_TIMEOUT_MS, DEFAULT_CONNECTION_TTL_SEC);
     }
 
-    public CachingRestClient(int timeoutMs) {
-        this(timeoutMs, DEFAULT_CONNECTION_TTL_SEC);
+    public CachingRestClient(String callerId, int timeoutMs) {
+        this(callerId, timeoutMs, DEFAULT_CONNECTION_TTL_SEC);
     }
 
-    public CachingRestClient(int timeoutMs, long connectionTimeToLiveSec) {
-        this(timeoutMs, connectionTimeToLiveSec, true);
+    public CachingRestClient(String callerId, int timeoutMs, long connectionTimeToLiveSec) {
+        this(callerId, timeoutMs, connectionTimeToLiveSec, true);
     }
 
-    public CachingRestClient(int timeoutMs, long connectionTimeToLiveSec, boolean allowUrlLogging) {
+    public CachingRestClient(String callerId, int timeoutMs, long connectionTimeToLiveSec, boolean allowUrlLogging) {
+        this.callerId = callerId;
         this.timeoutMs = timeoutMs;
         this.allowUrlLogging = allowUrlLogging;
         final DefaultHttpClient actualClient = createDefaultHttpClient(timeoutMs, connectionTimeToLiveSec);
@@ -393,8 +394,8 @@ public class CachingRestClient implements HealthChecker {
         if (contentType != null) {
             req.setHeader("Content-Type", contentType);
         }
-        if(this.clientSubSystemCode != null) {
-            req.setHeader("clientSubSystemCode", this.clientSubSystemCode);
+        if(this.callerId != null) {
+            req.setHeader("Caller-Id", this.callerId);
         }
         req.setHeader("CSRF",CSRF);
         ensureCSRFCookie(req);
@@ -755,16 +756,6 @@ public class CachingRestClient implements HealthChecker {
         public String getErrorContent() {
             return errorContent;
         }
-    }
-
-    @Deprecated
-    public void setCallerId(String callerId) {
-        this.clientSubSystemCode = callerId;
-    }
-
-    public CachingRestClient setClientSubSystemCode(String clientSubSystemCode) {
-        this.clientSubSystemCode = clientSubSystemCode;
-        return this;
     }
 
     public CachingRestClient setAllowUrlLogging(boolean allowUrlLogging) {

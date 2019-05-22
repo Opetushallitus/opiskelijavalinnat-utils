@@ -62,7 +62,7 @@ public class CachingRestClientTest extends RestWithCasTestSupport {
     @Test
     public void testCSRFHeaders() throws Exception {
         // lue resurssi, jossa cache 1 sek
-        assertContains(get("/mirror/headers"), "CSRF: CachingRestClient", "Cookie: CSRF=CachingRestClient", "clientSubSystemCode: RestWithCasTestSupport");
+        assertContains(get("/mirror/headers"), "CSRF: CachingRestClient", "Cookie: CSRF=CachingRestClient", "Caller-Id: RestWithCasTestSupport");
     }
 
     @Test
