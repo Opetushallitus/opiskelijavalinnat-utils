@@ -8,7 +8,7 @@
     <relativePath>..</relativePath>
   </parent>
   <artifactId>spring-aware-health-check-servlet</artifactId>
-  <version>0.1.1-SNAPSHOT</version>
+  <version>0.2.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <properties>
     <spring.version>5.1.5.RELEASE</spring.version>
@@ -75,7 +75,7 @@
       <dependency>
         <groupId>fi.vm.sade.java-utils</groupId>
         <artifactId>legacy-caching-rest-client</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.2.0-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>fi.vm.sade.java-utils</groupId>
