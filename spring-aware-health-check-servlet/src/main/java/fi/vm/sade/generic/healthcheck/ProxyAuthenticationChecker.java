@@ -26,7 +26,7 @@ public class ProxyAuthenticationChecker implements HealthChecker {
         String currentUser = auth.getName();
 
         String currentAppId = servletContext.getContextPath().replaceAll("/", "");
-        CachingRestClient restClient = new CachingRestClient(currentAppId + ".ProxyAuthenticationChecker");
+        CachingRestClient restClient = new CachingRestClient().setClientSubSystemCode(currentAppId + ".ProxyAuthenticationChecker");
         restClient.setUseProxyAuthentication(true);
         restClient.setWebCasUrl(getProperty("web.url.cas"));
         String appurl = getProperty("cas.service." + currentAppId);
