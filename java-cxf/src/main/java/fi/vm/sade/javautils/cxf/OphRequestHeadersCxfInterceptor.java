@@ -1,13 +1,16 @@
 package fi.vm.sade.javautils.cxf;
 
-import java.net.HttpURLConnection;
-
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
-import org.apache.cxf.transport.http.HTTPConduit;
-import org.springframework.util.Assert;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Interceptor for adding Caller-Id header to all requests. Interceptor must be registered for all 
@@ -35,7 +38,9 @@ public class OphRequestHeadersCxfInterceptor<T extends Message> extends Abstract
     public OphRequestHeadersCxfInterceptor(String callerId) {
         // Intercept before sending
         super(Phase.PRE_PROTOCOL);
-        Assert.notNull(callerId, "Missing callerId. Set callerId for OphRequestHeadersCxfInterceptor.");
+        if (callerId == null) {
+            throw new IllegalArgumentException("Missing callerId. Set callerId for OphRequestHeadersCxfInterceptor.");
+        }
         this.callerId = callerId;
     }
 
@@ -52,22 +57,38 @@ public class OphRequestHeadersCxfInterceptor<T extends Message> extends Abstract
      * @throws Fault
      */
     public void handleOutbound(Message message) throws Fault {
-        HttpURLConnection conn = resolveConnection(message);
-        conn.setRequestProperty("Caller-Id", callerId);
-        conn.setRequestProperty("CSRF", "CSRF");
-        String cookieString  = conn.getRequestProperty("Cookie");
-        if(cookieString != null) {
-            conn.setRequestProperty("Cookie", cookieString + ";CSRF=CSRF");
-        } else {
-            conn.setRequestProperty("Cookie", "CSRF=CSRF");
-        }
+        addHeader(message, "Caller-Id", callerId);
+        addHeader(message, "CSRF", "CSRF");
+        appendToHeader(message, "Cookie", "CSRF=CSRF", "; ");
     }
 
-    /**
-     * Resolve connection from message.
-     */
-    private static HttpURLConnection resolveConnection(Message message) {
-        return (HttpURLConnection)message.getExchange().getOutMessage().get(HTTPConduit.KEY_HTTP_CONNECTION);
+    private void addHeader(Message message, String name, String value) {
+        resolveHeaders(message).put(name, Collections.singletonList(value));
+    }
+
+    private void appendToHeader(Message message, String headerName, String valueToAppend, String separator) {
+        Map<String, List<String>> headers = resolveHeaders(message);
+        List<String> originalValues = headers.getOrDefault(headerName, new LinkedList<>());
+        if (originalValues.isEmpty()) {
+            headers.put(headerName, Collections.singletonList(valueToAppend));
+            return;
+        }
+        headers.put(headerName, originalValues.stream().map(original -> {
+            if (original == null) {
+                return valueToAppend;
+            } else {
+                return original + separator + valueToAppend;
+            }
+        }).collect(Collectors.toList()));
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, List<String>> resolveHeaders(Message message) {
+        Map<String, List<String>> outHeaders = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
+        if (outHeaders == null) {
+            outHeaders = new HashMap<>();
+        }
+        return outHeaders;
     }
 
     public String getCallerId() {
