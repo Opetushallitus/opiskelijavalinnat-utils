@@ -5,13 +5,6 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 /**
  * Interceptor for adding Caller-Id header to all requests. Interceptor must be registered for all 
  * services, in xml like following:
@@ -57,38 +50,9 @@ public class OphRequestHeadersCxfInterceptor<T extends Message> extends Abstract
      * @throws Fault
      */
     public void handleOutbound(Message message) throws Fault {
-        addHeader(message, "Caller-Id", callerId);
-        addHeader(message, "CSRF", "CSRF");
-        appendToHeader(message, "Cookie", "CSRF=CSRF", "; ");
-    }
-
-    private void addHeader(Message message, String name, String value) {
-        resolveHeaders(message).put(name, Collections.singletonList(value));
-    }
-
-    private void appendToHeader(Message message, String headerName, String valueToAppend, String separator) {
-        Map<String, List<String>> headers = resolveHeaders(message);
-        List<String> originalValues = headers.getOrDefault(headerName, new LinkedList<>());
-        if (originalValues.isEmpty()) {
-            headers.put(headerName, Collections.singletonList(valueToAppend));
-            return;
-        }
-        headers.put(headerName, originalValues.stream().map(original -> {
-            if (original == null) {
-                return valueToAppend;
-            } else {
-                return original + separator + valueToAppend;
-            }
-        }).collect(Collectors.toList()));
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, List<String>> resolveHeaders(Message message) {
-        Map<String, List<String>> outHeaders = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
-        if (outHeaders == null) {
-            outHeaders = new HashMap<>();
-        }
-        return outHeaders;
+        OphCxfMessageUtil.addHeader(message, "Caller-Id", callerId);
+        OphCxfMessageUtil.addHeader(message, "CSRF", "CSRF");
+        OphCxfMessageUtil.appendToHeader(message, "Cookie", "CSRF=CSRF", "; ");
     }
 
     public String getCallerId() {
