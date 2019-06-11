@@ -1,0 +1,4 @@
+{
+  "result": "DISALLOWED",
+  "unknown": "deserialization should work with unknown properties"
+}

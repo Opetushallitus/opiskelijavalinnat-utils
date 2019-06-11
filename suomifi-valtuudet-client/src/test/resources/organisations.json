@@ -1,0 +1,11 @@
+[
+  {
+    "name": "Asunto Oy Tampereen Ratinanpuisto",
+    "identifier": "2305162-8",
+    "complete": true,
+    "roles": [
+      "IS"
+    ],
+    "unknown": "deserialization should work with unknown properties"
+  }
+]
