@@ -35,6 +35,7 @@ public class OphCxfMessageUtil {
         Map<String, List<String>> outHeaders = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
         if (outHeaders == null) {
             outHeaders = new HashMap<>();
+            message.put(Message.PROTOCOL_HEADERS, outHeaders);
         }
         return outHeaders;
     }
