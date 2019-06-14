@@ -41,6 +41,15 @@ public class OphRequestHeadersCxfInterceptorTest {
         assertContains(response, "Caller-Id: " + CALLER_ID, "CSRF: CSRF", "Cookie: X-Foo=baar; X-Wing=Destroyer; CSRF=CSRF");
     }
 
+    @Test
+    public void clientWithNoHeadersInitiallyWorks() throws IOException {
+        WebClient client = WebClient.create(getUrl(this.unprotectedTargetUrl));
+        client.removeAllHeaders();
+        WebClient.getConfig(client).getOutInterceptors().add(interceptor);
+        String response = IOUtils.toString((InputStream) client.get().getEntity());
+        assertContains(response, "Caller-Id: " + CALLER_ID, "CSRF: CSRF", "Cookie: CSRF=CSRF");
+    }
+
     private static void assertContains(String from, String... args) {
         for(String arg: args) {
             Assert.assertTrue("String "+arg+" not found from: "+ from, from.contains(arg));
