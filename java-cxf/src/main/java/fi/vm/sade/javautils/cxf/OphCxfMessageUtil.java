@@ -10,6 +10,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class OphCxfMessageUtil {
+    public static List<String> getHeader(Message message, String name) {
+        Map<String, List<String>> headers = getHeadersThatMayBeNull(message);
+        return headers == null ? Collections.emptyList() : headers.get(name);
+    }
+
     public static void addHeader(Message message, String name, String value) {
         resolveHeaders(message).put(name, Collections.singletonList(value));
     }
@@ -32,7 +37,7 @@ public class OphCxfMessageUtil {
 
     @SuppressWarnings("unchecked")
     private static Map<String, List<String>> resolveHeaders(Message message) {
-        Map<String, List<String>> outHeaders = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
+        Map<String, List<String>> outHeaders = getHeadersThatMayBeNull(message);
         if (outHeaders == null) {
             outHeaders = new HashMap<>();
             message.put(Message.PROTOCOL_HEADERS, outHeaders);
@@ -40,5 +45,7 @@ public class OphCxfMessageUtil {
         return outHeaders;
     }
 
-
+    private static Map<String, List<String>> getHeadersThatMayBeNull(Message message) {
+        return (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
+    }
 }
