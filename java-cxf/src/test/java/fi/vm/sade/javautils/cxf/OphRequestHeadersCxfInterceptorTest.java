@@ -55,7 +55,7 @@ public class OphRequestHeadersCxfInterceptorTest {
     }
     
     private OphRequestHeadersCxfInterceptor<Message> createInterceptor() {
-        return new OphRequestHeadersCxfInterceptor<Message>(CALLER_ID);
+        return new OphRequestHeadersCxfInterceptor<>(CALLER_ID);
     }
     
     public static String getUrl(String url) {
