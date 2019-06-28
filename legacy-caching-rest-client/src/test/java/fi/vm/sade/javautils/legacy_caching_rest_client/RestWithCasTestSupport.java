@@ -13,7 +13,7 @@ public class RestWithCasTestSupport {
 
     @BeforeClass
     public static void start() throws Exception {
-        JettyJersey.startServer("fi.vm.sade.generic.rest", null);
+        JettyJersey.startServer("fi.vm.sade.javautils.legacy_caching_rest_client", null);
     }
 
     @Before

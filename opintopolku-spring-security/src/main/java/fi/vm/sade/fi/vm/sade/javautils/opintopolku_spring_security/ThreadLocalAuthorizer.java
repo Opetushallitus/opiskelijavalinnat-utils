@@ -1,6 +1,5 @@
-package fi.vm.sade.security;
+package fi.vm.sade.fi.vm.sade.javautils.opintopolku_spring_security;
 
-import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.authorization.NotAuthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

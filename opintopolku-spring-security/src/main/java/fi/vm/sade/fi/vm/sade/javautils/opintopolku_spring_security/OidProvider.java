@@ -1,4 +1,4 @@
-package fi.vm.sade.security;
+package fi.vm.sade.fi.vm.sade.javautils.opintopolku_spring_security;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
