@@ -1,4 +1,4 @@
-package fi.vm.sade.fi.vm.sade.javautils.opintopolku_spring_security;
+package fi.vm.sade.javautils.opintopolku_spring_security;
 
 import fi.vm.sade.authorization.NotAuthorizedException;
 import fi.vm.sade.security.SimpleCache;

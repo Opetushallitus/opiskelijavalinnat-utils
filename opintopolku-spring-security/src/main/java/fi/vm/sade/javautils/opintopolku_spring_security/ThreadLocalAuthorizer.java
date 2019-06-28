@@ -1,4 +1,4 @@
-package fi.vm.sade.fi.vm.sade.javautils.opintopolku_spring_security;
+package fi.vm.sade.javautils.opintopolku_spring_security;
 
 import fi.vm.sade.authorization.NotAuthorizedException;
 import org.slf4j.Logger;
@@ -9,14 +9,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ThreadLocalAuthorizer implements Authorizer {
+public class ThreadLocalAuthorizer implements fi.vm.sade.javautils.opintopolku_spring_security.Authorizer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadLocalAuthorizer.class);
 
     //    @Autowired
 //    private OidProvider oidProvider;
     @Autowired
-    private OrganisationHierarchyAuthorizer authorizer;
+    private fi.vm.sade.javautils.opintopolku_spring_security.OrganisationHierarchyAuthorizer authorizer;
 
     @Override
     public void checkOrganisationAccess(String targetOrganisationOid, String... roles) throws NotAuthorizedException {
@@ -47,7 +47,7 @@ public class ThreadLocalAuthorizer implements Authorizer {
         LOGGER.info("Authorized!");
     }
 
-    public void setAuthorizer(OrganisationHierarchyAuthorizer authorizer) {
+    public void setAuthorizer(fi.vm.sade.javautils.opintopolku_spring_security.OrganisationHierarchyAuthorizer authorizer) {
         this.authorizer = authorizer;
     }
 }

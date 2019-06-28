@@ -1,4 +1,4 @@
-package fi.vm.sade.fi.vm.sade.javautils.opintopolku_spring_security;
+package fi.vm.sade.javautils.opintopolku_spring_security;
 
 public abstract class SadeBusinessException extends RuntimeException {
 
