@@ -1,4 +1,4 @@
-package fi.vm.sade.authentication.cas;
+package fi.vm.sade.javautils.legacy_cxf_cas.authentication.cas;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

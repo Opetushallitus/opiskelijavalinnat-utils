@@ -1,8 +1,8 @@
-package fi.vm.sade.generic.ui.portlet.security;
+package fi.vm.sade.javautils.legacy_cxf_cas.ui.portlet.security;
 
-import fi.vm.sade.authentication.cas.DefaultTicketCachePolicy;
-import fi.vm.sade.authentication.cas.TicketCachePolicy;
-import fi.vm.sade.generic.PERA;
+import fi.vm.sade.javautils.legacy_cxf_cas.PERA;
+import fi.vm.sade.javautils.legacy_cxf_cas.authentication.cas.DefaultTicketCachePolicy;
+import fi.vm.sade.javautils.legacy_cxf_cas.authentication.cas.TicketCachePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;

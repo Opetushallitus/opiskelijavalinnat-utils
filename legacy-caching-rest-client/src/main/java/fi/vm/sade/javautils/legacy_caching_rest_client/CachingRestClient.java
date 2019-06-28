@@ -1,4 +1,4 @@
-package fi.vm.sade.generic.rest;
+package fi.vm.sade.javautils.legacy_caching_rest_client;
 
 import static org.apache.commons.httpclient.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.commons.httpclient.HttpStatus.SC_FORBIDDEN;
@@ -15,9 +15,9 @@ import com.google.gson.JsonSyntaxException;
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 
 import fi.vm.sade.authentication.cas.CasClient;
-import fi.vm.sade.generic.PERA;
+import fi.vm.sade.javautils.legacy_cxf_cas.PERA;
 import fi.vm.sade.generic.healthcheck.HealthChecker;
-import fi.vm.sade.generic.ui.portlet.security.ProxyAuthenticator;
+import fi.vm.sade.javautils.legacy_cxf_cas.ui.portlet.security.ProxyAuthenticator;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;

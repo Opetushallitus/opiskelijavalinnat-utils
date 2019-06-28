@@ -1,4 +1,4 @@
-package fi.vm.sade.generic.rest;
+package fi.vm.sade.javautils.legacy_caching_rest_client;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;

@@ -1,8 +1,8 @@
-package fi.vm.sade.generic.rest;
+package fi.vm.sade.javautils.legacy_caching_rest_client;
 
-import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
-import fi.vm.sade.authentication.cas.DefaultTicketCachePolicy;
-import fi.vm.sade.authentication.cas.TicketCachePolicy;
+import fi.vm.sade.javautils.legacy_cxf_cas.authentication.cas.CasApplicationAsAUserInterceptor;
+import fi.vm.sade.javautils.legacy_cxf_cas.authentication.cas.DefaultTicketCachePolicy;
+import fi.vm.sade.javautils.legacy_cxf_cas.authentication.cas.TicketCachePolicy;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Assert;

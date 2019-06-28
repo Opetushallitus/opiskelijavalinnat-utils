@@ -25,7 +25,6 @@
         <module>java-tracing</module>
         <module>java-cache</module>
         <module>opintopolku-spring-security</module>
-        <module>java-ldap</module>
         <module>legacy-cxf-cas</module>
         <module>legacy-caching-rest-client</module>
         <module>spring-aware-health-check-servlet</module>

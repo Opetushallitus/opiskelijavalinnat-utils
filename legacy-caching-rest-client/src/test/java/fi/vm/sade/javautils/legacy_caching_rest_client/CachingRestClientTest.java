@@ -1,6 +1,6 @@
-package fi.vm.sade.generic.rest;
+package fi.vm.sade.javautils.legacy_caching_rest_client;
 
-import fi.vm.sade.generic.ui.portlet.security.ProxyAuthenticator;
+import fi.vm.sade.javautils.legacy_cxf_cas.ui.portlet.security.ProxyAuthenticator;
 import junit.framework.Assert;
 import org.apache.commons.lang.StringUtils;
 import org.apache.cxf.helpers.IOUtils;

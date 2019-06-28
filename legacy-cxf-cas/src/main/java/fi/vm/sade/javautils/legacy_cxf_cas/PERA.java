@@ -1,6 +1,6 @@
-package fi.vm.sade.generic;
+package fi.vm.sade.javautils.legacy_cxf_cas;
 
-import fi.vm.sade.generic.ui.portlet.security.ProxyAuthenticator;
+import fi.vm.sade.javautils.legacy_cxf_cas.ui.portlet.security.ProxyAuthenticator;
 import org.apache.http.client.methods.HttpRequestBase;
 
 /**

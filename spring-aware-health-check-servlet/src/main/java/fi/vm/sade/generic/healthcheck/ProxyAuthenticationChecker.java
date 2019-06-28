@@ -1,6 +1,6 @@
 package fi.vm.sade.generic.healthcheck;
 
-import fi.vm.sade.generic.rest.CachingRestClient;
+import fi.vm.sade.javautils.legacy_caching_rest_client.CachingRestClient;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
