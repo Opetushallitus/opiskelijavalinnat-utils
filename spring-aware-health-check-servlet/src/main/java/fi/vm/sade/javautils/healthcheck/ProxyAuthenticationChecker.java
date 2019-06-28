@@ -1,5 +1,6 @@
-package fi.vm.sade.generic.healthcheck;
+package fi.vm.sade.javautils.healthcheck;
 
+import fi.vm.sade.generic.healthcheck.HealthChecker;
 import fi.vm.sade.javautils.legacy_caching_rest_client.CachingRestClient;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.context.ApplicationContext;
