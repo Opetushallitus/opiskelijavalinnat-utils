@@ -16,7 +16,7 @@ import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl
 
 import fi.vm.sade.authentication.cas.CasClient;
 import fi.vm.sade.javautils.legacy_cxf_cas.PERA;
-import fi.vm.sade.generic.healthcheck.HealthChecker;
+import fi.vm.sade.javautils.healthcheck.HealthChecker;
 import fi.vm.sade.javautils.legacy_cxf_cas.ui.portlet.security.ProxyAuthenticator;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;

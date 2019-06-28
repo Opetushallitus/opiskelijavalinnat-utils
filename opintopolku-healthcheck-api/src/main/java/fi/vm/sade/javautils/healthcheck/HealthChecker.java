@@ -1,4 +1,4 @@
-package fi.vm.sade.generic.healthcheck;
+package fi.vm.sade.javautils.healthcheck;
 
 /**
  * Healthcheckiin kuuluva tarkastaja, jonka roolina on tarkastaa yksi kohde healthcheckin yhteydessä.

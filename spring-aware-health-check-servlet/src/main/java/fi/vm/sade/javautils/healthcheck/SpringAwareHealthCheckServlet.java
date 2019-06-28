@@ -2,7 +2,7 @@ package fi.vm.sade.javautils.healthcheck;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import fi.vm.sade.generic.healthcheck.HealthChecker;
+import fi.vm.sade.javautils.healthcheck.HealthChecker;
 import fi.vm.sade.security.SimpleCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

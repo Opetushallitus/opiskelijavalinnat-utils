@@ -1,6 +1,6 @@
 package fi.vm.sade.javautils.healthcheck;
 
-import fi.vm.sade.generic.healthcheck.HealthChecker;
+import fi.vm.sade.javautils.healthcheck.HealthChecker;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
