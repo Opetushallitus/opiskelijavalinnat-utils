@@ -9,9 +9,9 @@
   <groupId>fi.vm.sade</groupId>
   <artifactId>embedded-tomcat</artifactId>
   <name>Embedded Tomcat runner for integration testing</name>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.2-SNAPSHOT</version>
   <properties>
-    <tomcat.version>7.0.39</tomcat.version>
+    <tomcat.version>7.0.94</tomcat.version>
   </properties>
   <dependencies>
     <dependency>
