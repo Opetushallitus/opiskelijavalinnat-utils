@@ -5,17 +5,17 @@
     <parent>
         <artifactId>java-utils</artifactId>
         <groupId>fi.vm.sade.java-utils</groupId>
-        <version>0.5.0-SNAPSHOT</version>
+        <version>0.3.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>legacy-cxf-cas</artifactId>
-    <version>0.5.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
 
     <properties>
         <apache.httpclient.version>4.5.2</apache.httpclient.version>
         <spring.version>5.1.5.RELEASE</spring.version>
-        <spring.security.version>5.1.4.RELEASE</spring.security.version>
+        <spring.security.version>4.2.11.RELEASE</spring.security.version>
     </properties>
 
     <dependencyManagement>
@@ -29,7 +29,7 @@
             <dependency>
                 <groupId>fi.vm.sade.java-utils</groupId>
                 <artifactId>java-cas</artifactId>
-                <version>0.5.0-SNAPSHOT</version>
+                <version>0.4.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
