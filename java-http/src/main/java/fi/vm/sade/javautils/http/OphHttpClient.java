@@ -50,7 +50,7 @@ public class OphHttpClient {
     private static final String CSRF = "CachingRestClient";
 
     private static class Headers {
-        private static final String CALLER_ID = "callerId";
+        private static final String CALLER_ID = "Caller-Id";
         private static final String CSRF = "CSRF";
     }
 
