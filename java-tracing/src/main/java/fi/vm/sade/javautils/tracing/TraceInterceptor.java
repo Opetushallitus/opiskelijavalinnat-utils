@@ -1,4 +1,4 @@
-package fi.vm.sade.security;
+package fi.vm.sade.javautils.tracing;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
