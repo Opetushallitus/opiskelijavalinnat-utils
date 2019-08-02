@@ -1,4 +1,4 @@
-package fi.vm.sade.authentication.cas;
+package fi.vm.sade.javautils.cas;
 
 import static fi.vm.sade.javautils.httpclient.OphHttpClient.FORM_URLENCODED;
 import static fi.vm.sade.javautils.httpclient.OphHttpClient.UTF8;
