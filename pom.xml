@@ -22,7 +22,6 @@
         <module>java-http</module>
         <module>java-poi</module>
         <module>opintopolku-user-details-service</module>
-        <module>java-tracing</module>
         <module>java-cache</module>
         <module>opintopolku-spring-security</module>
         <module>legacy-cxf-cas</module>
