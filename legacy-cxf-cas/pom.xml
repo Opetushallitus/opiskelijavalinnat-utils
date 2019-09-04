@@ -5,12 +5,12 @@
     <parent>
         <artifactId>java-utils</artifactId>
         <groupId>fi.vm.sade.java-utils</groupId>
-        <version>0.2.2-SNAPSHOT</version>
+        <version>0.3.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>legacy-cxf-cas</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.5.0-SNAPSHOT</version>
 
     <properties>
         <apache.httpclient.version>4.5.2</apache.httpclient.version>
@@ -24,12 +24,12 @@
             <dependency>
                 <groupId>fi.vm.sade.java-utils</groupId>
                 <artifactId>opintopolku-healthcheck-api</artifactId>
-                <version>0.1.0-SNAPSHOT</version>
+                <version>0.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>fi.vm.sade.java-utils</groupId>
                 <artifactId>java-cas</artifactId>
-                <version>0.4.0-SNAPSHOT</version>
+                <version>0.5.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>

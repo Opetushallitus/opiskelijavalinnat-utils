@@ -82,9 +82,7 @@ public class EmbeddedTomcat {
                         System.out.println("EmbeddedTomcat: started " + app.contextPath + " from " + app.webappDirLocation);
                     }
                 }
-            } catch (LifecycleException e) {
-                throw new RuntimeException(e);
-            } catch (ServletException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }

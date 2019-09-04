@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fi.vm.sade.java-utils</groupId>
     <artifactId>java-utils</artifactId>
-    <version>0.2.2-SNAPSHOT</version>
+    <version>0.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>opintopolku-healthcheck-api</module>
@@ -22,10 +22,8 @@
         <module>java-http</module>
         <module>java-poi</module>
         <module>opintopolku-user-details-service</module>
-        <module>java-tracing</module>
         <module>java-cache</module>
         <module>opintopolku-spring-security</module>
-        <module>java-ldap</module>
         <module>legacy-cxf-cas</module>
         <module>legacy-caching-rest-client</module>
         <module>spring-aware-health-check-servlet</module>
