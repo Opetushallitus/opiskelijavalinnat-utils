@@ -1,9 +1,5 @@
 package fi.vm.sade.javautils;
 
-import static org.apache.poi.ss.usermodel.HorizontalAlignment.GENERAL;
-import static org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT;
-import static org.apache.poi.ss.usermodel.HorizontalAlignment.RIGHT;
-
 import fi.vm.sade.javautils.poi.OphCellStyles;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -13,9 +9,11 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.apache.poi.ss.usermodel.HorizontalAlignment.*;
+
 public class OphCellStylesTest {
     private HSSFWorkbook workbook = new HSSFWorkbook();
-    private OphCellStyles.OphHssfCellStyles cellStyles = new OphCellStyles.OphHssfCellStyles(workbook);
+    private OphCellStyles cellStyles = new OphCellStyles(workbook);
     private HSSFSheet sheet = workbook.createSheet();
     private HSSFRow row = sheet.createRow(1);
 
@@ -106,7 +104,7 @@ public class OphCellStylesTest {
         HSSFCell cell = row.createCell(2);
         cellStyles.apply(cell);
 
-        OphCellStyles.OphHssfCellStyles rowStyles = new OphCellStyles.OphHssfCellStyles(workbook);
+        OphCellStyles rowStyles = new OphCellStyles(workbook);
         rowStyles.visit(rs -> rs.setAlignment(RIGHT));
         rowStyles.apply(row);
 

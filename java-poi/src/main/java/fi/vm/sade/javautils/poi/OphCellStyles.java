@@ -1,38 +1,30 @@
 package fi.vm.sade.javautils.poi;
 
-import static org.apache.poi.ss.usermodel.CellType.BOOLEAN;
-import static org.apache.poi.ss.usermodel.CellType.ERROR;
-import static org.apache.poi.ss.usermodel.CellType.FORMULA;
-import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
-
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-public abstract class OphCellStyles<S extends CellStyle, C extends Cell> {
-    private static final List<CellType> cellTypesWithoutDangerousContent = Arrays.asList(NUMERIC, BOOLEAN, ERROR);
-    private final S quotePrefixStyle;
-    private final S unsafeStyle;
+import static org.apache.poi.ss.usermodel.CellType.*;
 
-    protected OphCellStyles(S quotePrefixStyle, S unsafeStyle) {
+public class OphCellStyles {
+    private static final List<CellType> cellTypesWithoutDangerousContent = Arrays.asList(NUMERIC, BOOLEAN, ERROR);
+    private final CellStyle quotePrefixStyle;
+    private final CellStyle unsafeStyle;
+
+    public OphCellStyles(Workbook workbook) {
+        this(workbook.createCellStyle(), workbook.createCellStyle());
+    }
+
+    protected OphCellStyles(CellStyle quotePrefixStyle, CellStyle unsafeStyle) {
         this.quotePrefixStyle = quotePrefixStyle;
         quotePrefixStyle.setQuotePrefixed(true);
         this.unsafeStyle = unsafeStyle;
     }
 
-    public C apply(C cell) {
+    public Cell apply(Cell cell) {
         if (FORMULA.equals(cell.getCellTypeEnum())) {
             throw new IllegalArgumentException("Are you sure you want to create a " + FORMULA + " cell? " + cell);
         }
@@ -54,28 +46,16 @@ public abstract class OphCellStyles<S extends CellStyle, C extends Cell> {
         return row;
     }
 
-    public void visit(Consumer<S> visitor) {
+    public void visit(Consumer<CellStyle> visitor) {
         visitor.accept(quotePrefixStyle);
         visitor.accept(unsafeStyle);
     }
 
-    public S getQuotePrefixStyle() {
+    public CellStyle getQuotePrefixStyle() {
         return quotePrefixStyle;
     }
 
-    public S getUnsafeStyle() {
+    public CellStyle getUnsafeStyle() {
         return unsafeStyle;
-    }
-
-    public static class OphHssfCellStyles extends OphCellStyles<HSSFCellStyle, HSSFCell> {
-        public OphHssfCellStyles(HSSFWorkbook workbook) {
-            super(workbook.createCellStyle(), workbook.createCellStyle());
-        }
-    }
-
-    public static class OphXssfCellStyles extends OphCellStyles<XSSFCellStyle, XSSFCell> {
-        public OphXssfCellStyles(XSSFWorkbook workbook) {
-            super(workbook.createCellStyle(), workbook.createCellStyle());
-        }
     }
 }
