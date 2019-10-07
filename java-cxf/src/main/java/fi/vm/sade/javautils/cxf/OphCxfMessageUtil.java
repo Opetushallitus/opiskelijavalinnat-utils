@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class OphCxfMessageUtil {
     public static List<String> getHeader(Message message, String name) {
         Map<String, List<String>> headers = getHeadersThatMayBeNull(message);
-        return headers == null ? Collections.emptyList() : headers.get(name);
+        return headers == null ? Collections.emptyList() : headers.getOrDefault(name, Collections.emptyList());
     }
 
     public static void addHeader(Message message, String name, String value) {
