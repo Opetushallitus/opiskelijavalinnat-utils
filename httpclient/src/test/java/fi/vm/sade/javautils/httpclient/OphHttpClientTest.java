@@ -321,7 +321,6 @@ public class OphHttpClientTest {
             throw new RuntimeException("For some reason class cast exception was not thrown!");
         } catch (Exception e) {
             assertEquals(ClassCastException.class, e.getClass());
-            assertEquals("java.lang.Integer cannot be cast to java.lang.String", e.getMessage());
         }
 
         // onError can throw exception
