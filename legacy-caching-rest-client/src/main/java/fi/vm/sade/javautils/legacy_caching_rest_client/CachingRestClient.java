@@ -12,7 +12,6 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
-import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 
 import fi.vm.sade.javautils.cas.CasClient;
 import fi.vm.sade.javautils.legacy_cxf_cas.PERA;
@@ -56,6 +55,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.IOException;
 import java.io.InputStream;
@@ -591,15 +591,15 @@ public class CachingRestClient implements HealthChecker {
             if (hasSemicolon) {
                 GregorianCalendar cal = new GregorianCalendar();
                 cal.setTime(df1.get().parse(string));
-                return new XMLGregorianCalendarImpl(cal);
+                return DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
             } else if (hasDash) {
                 GregorianCalendar cal = new GregorianCalendar();
                 cal.setTime(df2.get().parse(string));
-                return new XMLGregorianCalendarImpl(cal);
+                return DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
             } else {
                 GregorianCalendar cal = new GregorianCalendar();
                 cal.setTime(new Date(Long.parseLong(string)));
-                return new XMLGregorianCalendarImpl(cal);
+                return DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
 
             }
         } catch (Throwable th) {

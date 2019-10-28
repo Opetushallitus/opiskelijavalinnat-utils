@@ -1,8 +1,22 @@
 package fi.vm.sade.javautils.httpclient;
 
+import static fi.vm.sade.javautils.httpclient.OphHttpClient.Header.ACCEPT;
+import static fi.vm.sade.javautils.httpclient.OphHttpClient.JSON;
+import static fi.vm.sade.javautils.httpclient.OphHttpClient.TEXT;
+import static fi.vm.sade.javautils.httpclient.OphHttpClient.UTF8;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+
 import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
 import fi.vm.sade.properties.OphProperties;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
@@ -12,21 +26,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static fi.vm.sade.javautils.httpclient.OphHttpClient.*;
-import static fi.vm.sade.javautils.httpclient.OphHttpClient.Header.ACCEPT;
-import static org.junit.Assert.assertEquals;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
-
 public class OphHttpClientTest {
 
     @Rule
     public MockServerRule mockServerRule = new MockServerRule(this);
 
-    OphProperties properties = new OphProperties();
+    private OphProperties properties = new OphProperties();
     private OphHttpClient client;
-    private OphHttpResponseHandler<String> responseAsText = response -> response.asText();
-    OphHttpClient clientPlainUrls;
+    private OphHttpResponseHandler<String> responseAsText = OphHttpResponse::asText;
+    private OphHttpClient clientPlainUrls;
 
     @Before
     public void setUp() throws Exception {
@@ -190,9 +198,9 @@ public class OphHttpClientTest {
                 .withHeader("Content-Type", TEXT)
                 .withBody("NOT OK!")
         );
-        assertEquals(new Integer(404), client.get("local.test")
+        assertEquals(Integer.valueOf(404), client.get("local.test")
                 .skipResponseAssertions().accept(JSON)
-                .execute(response -> response.getStatusCode()));
+                .execute(OphHttpResponse::getStatusCode));
     }
 
     @Test
@@ -209,11 +217,8 @@ public class OphHttpClientTest {
 
         // handler exception
         try {
-            client.get("local.test").retryOnError(2,1).execute(new OphHttpResponseHandler<Void>() {
-                @Override
-                public Void handleResponse(OphHttpResponse response) throws IOException {
-                    throw new RuntimeException("Thrown for testing");
-                }
+            client.get("local.test").retryOnError(2,1).execute((OphHttpResponseHandler<Void>) response -> {
+                throw new RuntimeException("Thrown for testing");
             });
             throw new RuntimeException("should not get here");
         } catch (RuntimeException retryException) {
@@ -320,8 +325,7 @@ public class OphHttpClientTest {
                     .execute(responseAsText);
             throw new RuntimeException("For some reason class cast exception was not thrown!");
         } catch (Exception e) {
-            assertEquals(ClassCastException.class, e.getClass());
-            assertEquals("java.lang.Integer cannot be cast to java.lang.String", e.getMessage());
+            assertThat(e, is(instanceOf(ClassCastException.class)));
         }
 
         // onError can throw exception
@@ -333,7 +337,7 @@ public class OphHttpClientTest {
             throw new RuntimeException("For some reason there was no exception");
         } catch (Exception e) {
             assertEquals("POW!", arr[0]);
-            assertEquals(RuntimeException.class, e.getClass());
+            assertThat(e, is(instanceOf(RuntimeException.class)));
             assertEquals("Unexpected response status: 404 Expected: any 2xx code Url: http://localhost:"+mockServerRule.getPort()+"/test", e.getMessage());
         }
 
@@ -343,7 +347,8 @@ public class OphHttpClientTest {
             assertEquals("Exception: Unexpected response status: 404 Expected: any 2xx code Url: http://localhost:"+mockServerRule.getPort()+"/test",
                     client.get("local.test")
                             .onError((requestParameters, response, e) -> arr[0]="POW!")
-                            .handleManually());
+                            .handleManually()
+                            .asText());
             throw new RuntimeException("For some reason there was no exception");
         } catch (IOException e) {
             throw new RuntimeException("There should have not been an IOException");
