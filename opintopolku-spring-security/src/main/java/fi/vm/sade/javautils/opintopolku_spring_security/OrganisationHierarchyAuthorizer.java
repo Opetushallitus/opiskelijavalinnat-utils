@@ -144,21 +144,6 @@ public class OrganisationHierarchyAuthorizer { // TODO: cas todo rename?
         return authority.endsWith(oid);
     }
 
-    public static OrganisationHierarchyAuthorizer createMockAuthorizer(final String parentOrg, final String[] childOrgs) {
-        return new OrganisationHierarchyAuthorizer(new OidProvider(){
-            @Override
-            public List<String> getSelfAndParentOids(String organisaatioOid) {
-                if (parentOrg.equals(organisaatioOid)) {
-                    return Arrays.asList(organisaatioOid);
-                }
-                if (Arrays.asList(childOrgs).contains(organisaatioOid)) {
-                    return Arrays.asList(organisaatioOid, parentOrg);
-                }
-                return new ArrayList<String>();
-            }
-        });
-    }
-
     /**
      * Filtteröidään käyttäjän rooleista ne, joihin käyttäjällä on haluttu oikeus, ja palautetaan kohdeorganisaatiot
      * Esim:

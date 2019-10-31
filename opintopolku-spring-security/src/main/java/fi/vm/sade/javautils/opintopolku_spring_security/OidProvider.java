@@ -4,28 +4,22 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
 
-@Component
 public class OidProvider {
-
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Value("${cas.service.organisaatio-service}")
-    private String organisaatioServiceUrl;
+    private final String organisaatioServiceUrl;
 
-    @Value("${root.organisaatio.oid}")
-    private String rootOrganisaatioOid;
+    private final String rootOrganisaatioOid;
+    private final String callerId;
 
-    public OidProvider() {
-    }
-
-    public OidProvider(String organisaatioServiceUrl) {
+    public OidProvider(String organisaatioServiceUrl, String rootOrganisaatioOid, String callerId) {
         this.organisaatioServiceUrl = organisaatioServiceUrl;
+        this.rootOrganisaatioOid = rootOrganisaatioOid;
+        this.callerId = callerId;
     }
 
     public List<String> getSelfAndParentOids(String organisaatioOid) {
@@ -42,6 +36,7 @@ public class OidProvider {
     private String httpGet(String url, int expectedStatus) {
         HttpClient client = new HttpClient();
         GetMethod get = new GetMethod(url);
+        get.addRequestHeader("Caller-Id", callerId);
         try {
             client.executeMethod(get);
             final String response = get.getResponseBodyAsString();
@@ -55,9 +50,5 @@ public class OidProvider {
         } finally {
             get.releaseConnection();
         }
-    }
-
-    public void setOrganisaatioServiceUrl(String organisaatioServiceUrl) {
-        this.organisaatioServiceUrl = organisaatioServiceUrl;
     }
 }
