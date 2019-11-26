@@ -14,6 +14,7 @@ public class OrganizationOidProvider {
 
     private String organisaatioServiceUrl;
     private String rootOrganisaatioOid;
+    private String callerId;
 
     private static Map<String,List<String>> cache = Collections.synchronizedMap(
             new LinkedHashMap<String, List<String>>(MAX_CACHE_SIZE + 1, .75F, true) {
@@ -24,9 +25,10 @@ public class OrganizationOidProvider {
 
     protected OrganizationOidProvider() {}
 
-    public OrganizationOidProvider(String rootOrganisaatioOid, String organisaatioServiceUrl) {
+    public OrganizationOidProvider(String rootOrganisaatioOid, String organisaatioServiceUrl, String callerId) {
         this.organisaatioServiceUrl = organisaatioServiceUrl;
         this.rootOrganisaatioOid = rootOrganisaatioOid;
+        this.callerId = callerId;
     }
 
     public List<String> getSelfAndParentOidsCached(String targetOrganisationOid) {
@@ -54,6 +56,7 @@ public class OrganizationOidProvider {
         OphHttpClient client = new OphHttpClient(ApacheOphHttpClient.createCustomBuilder().
                 createClosableClient().
                 setDefaultConfiguration(10000, 60).build(), "OrganisaatioOidProvider");
+        client.setCallerId(callerId);
         return client.get(url).execute((OphHttpResponse response) -> {
             if(expectedStatus != response.getStatusCode()) {
                 throw new RuntimeException("Failed to call '" + url + "', invalid status: " + response.getStatusCode());
