@@ -84,9 +84,10 @@ public class ApplicationSession {
                 .filter(cookie -> loginUrl.getPath().startsWith(cookie.getPath()) && this.cookieName.equals(cookie.getName()))
                 .findAny()
                 .orElseThrow(() -> new IllegalStateException(String.format(
-                        "%s %d: Failed to establish session. No cookie %s set",
+                        "%s %d: Failed to establish session. No cookie %s set. Headers: %s",
                         response.uri().toString(),
                         response.statusCode(),
+                        response.headers(),
                         this.cookieName
                 )));
     }
