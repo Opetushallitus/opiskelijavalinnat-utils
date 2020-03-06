@@ -87,8 +87,8 @@ public class ApplicationSession {
                         "%s %d: Failed to establish session. No cookie %s set. Headers: %s",
                         response.uri().toString(),
                         response.statusCode(),
-                        response.headers(),
-                        this.cookieName
-                )));
+                        this.cookieName,
+                        response.headers()
+                    )));
     }
 }
