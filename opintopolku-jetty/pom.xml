@@ -9,13 +9,13 @@
     <relativePath>..</relativePath>
   </parent>
   <artifactId>opintopolku-jetty</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.2.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <dependencies>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-webapp</artifactId>
-      <version>9.4.15.v20190215</version>
+      <version>9.4.27.v20200227</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
