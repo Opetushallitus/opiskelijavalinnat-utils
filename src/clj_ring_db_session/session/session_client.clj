@@ -3,7 +3,7 @@
 (defn wrap-session-client-headers [handler]
   [handler]
   (fn [{:keys [headers] :as req}]
-      (let [user-agent (:user-agent headers)
+      (let [user-agent (get headers "user-agent")
             client-ip  (or (get headers "x-real-ip")
                            (get headers "x-forwarded-for")
                            (:remote-addr req))]
