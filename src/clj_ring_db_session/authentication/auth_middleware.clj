@@ -12,9 +12,9 @@
 
 (defn any-access [_] true)
 
-(defn- create-authenticated-access [datasource]
+(defn- create-authenticated-access []
   (fn [request]
-    (if (logged-in? request datasource)
+    (if (logged-in? request)
       true
       (error "Authentication required"))))
 
@@ -31,7 +31,7 @@
      :session {:original-url (request-url request)}
      :body    (str "Access to " (:uri request) " is not authorized, redirecting to login")}))
 
-(defn- create-rules [login-url datasource]
+(defn- create-rules [login-url]
   [{:pattern #".*/auth/.*"
                          :handler any-access}
                         {:pattern #".*/js/.*"
@@ -45,13 +45,13 @@
                         {:pattern #".*/api/checkpermission"
                          :handler any-access}
                         {:pattern #".*/api/.*"
-                         :handler (create-authenticated-access datasource)
+                         :handler (create-authenticated-access)
                          :on-error send-not-authenticated-api-response}
                         {:pattern #".*"
-                         :handler (create-authenticated-access datasource)
+                         :handler (create-authenticated-access)
                          :on-error (create-redirect-to-login login-url)}])
 
-(defn with-authentication [site login-url datasource]
+(defn with-authentication [site login-url]
   (-> site
       (wrap-authentication backend)
-      (wrap-access-rules {:rules (create-rules login-url datasource)})))
+      (wrap-access-rules {:rules (create-rules login-url)})))

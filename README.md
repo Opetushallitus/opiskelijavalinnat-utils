@@ -5,7 +5,7 @@ tallentamiseen tietokantaan.
 
 Käyttää buddy-authia ja yesql:ää.
 
-`cas_ticketstore`- ja `sessions`-tietokantataulut tarvitaan. Mallia voi katsoa Atarun tietokannasta.
+Uudenmallinen `sessions`-tietokantataulu tarvitaan. Mallia voi katsoa Hakemuspalvelun tietokannasta.
 
 ## License
 

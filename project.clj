@@ -1,4 +1,4 @@
-(defproject oph/clj-ring-db-cas-session "0.2.0-SNAPSHOT"
+(defproject oph/clj-ring-db-cas-session "0.3.0-SNAPSHOT"
   :description "Clojure-kirjasto Opintoplun CAS-kirjautumiseen ja session tallentamiseen tietokantaan."
   :url "http://example.com/FIXME"
   :license {:name "EUPL, Version 1.1 or - as soon as they will be approved by the European Commission - subsequent versions of the EUPL (the \"Licence\")"
