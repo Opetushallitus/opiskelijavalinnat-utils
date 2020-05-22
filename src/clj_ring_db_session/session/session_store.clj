@@ -12,7 +12,8 @@
   (read-data [this key])
   (add-data [this key data])
   (save-data [this key data])
-  (delete-data [this key]))
+  (delete-data [this key])
+  (logout-by-ticket! [this ticket]))
 
 (defrecord DatabaseStore [datasource]
 
@@ -42,6 +43,9 @@
 
   (delete-data [_ key]
     (exec datasource yesql-delete-session-query! {:key key})
-    key))
+    key)
+
+  (logout-by-ticket! [_ ticket]
+    (exec datasource yesql-logout-by-ticket-query! {:ticket ticket})))
 
 (defn create-session-store [datasource] (->DatabaseStore datasource))

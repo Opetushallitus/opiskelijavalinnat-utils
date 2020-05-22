@@ -1,5 +1,6 @@
 (ns clj-ring-db-session.authentication.login
-  (:require [ring.util.response :as resp]))
+  (:require [ring.util.response :as resp]
+            [clj-ring-db-session.session.session-store :as session-store]))
 
 (defn login [params]
   (let [{:keys [username
@@ -21,6 +22,9 @@
   (-> (resp/redirect logout-url)
       (assoc :session {:identity  nil
                        :logged-in false})))
+
+(defn cas-initiated-logout [ticket oph-session-store]
+  (session-store/logout-by-ticket! oph-session-store ticket))
 
 (defn logged-in? [request]
   (-> request :session :logged-in))

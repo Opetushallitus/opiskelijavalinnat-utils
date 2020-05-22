@@ -18,3 +18,8 @@ WHERE key = :key;
 -- Deletes session
 DELETE FROM sessions
 WHERE key = :key;
+
+-- name: yesql-logout-by-ticket-query!
+UPDATE sessions
+SET data = jsonb_set(data, '{logged-in}', 'false')
+WHERE sessions.data -> 'identity' ->> 'ticket' = :ticket;
