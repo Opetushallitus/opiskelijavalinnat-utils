@@ -29,8 +29,3 @@ deploy:
   skip_cleanup: true
   on:
     branch: master
-- provider: script
-  script: "mvn deploy -DskipTests --settings ci-tools/common/maven-settings.xml"
-  skip_cleanup: true
-  on:
-    branch: jetty-connection-idle-timeout
