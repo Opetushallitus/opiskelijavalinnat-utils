@@ -20,21 +20,22 @@ public class OpintopolkuJetty {
     protected static final Logger LOG = LoggerFactory.getLogger(OpintopolkuJetty.class);
 
     public void start(String contextPath) {
-        start(contextPath, SERVICE_PORT_IN_ECS_CONFIGURATION, 5, 10, Duration.ofMinutes(1));
+        start(contextPath, SERVICE_PORT_IN_ECS_CONFIGURATION, 5, 10, Duration.ofMinutes(1), Duration.ofSeconds(4000));
     }
 
-    public void start(String contextPath, int port, int minThreads, int maxThreads, Duration idleThreadTimeout) {
+    public void start(String contextPath, int port, int minThreads, int maxThreads, Duration idleThreadTimeout, Duration connectionIdleTimeout) {
         WebAppContext webAppContext = new WebAppContext();
         webAppContext.setBaseResource(Resource.newClassPathResource("/webapp"));
-        start(webAppContext, createServer(port, minThreads, maxThreads, idleThreadTimeout), contextPath);
+        start(webAppContext, createServer(port, minThreads, maxThreads, idleThreadTimeout, connectionIdleTimeout), contextPath);
     }
 
-    private Server createServer(int port, int minThreads, int maxThreads, Duration idleThreadTimeout) {
+    private Server createServer(int port, int minThreads, int maxThreads, Duration idleThreadTimeout, Duration connectionIdleTimeout) {
         int idleThreadTimeoutMs = (int) idleThreadTimeout.toMillis();
         ThreadPool threadPool = createThreadpool(minThreads, maxThreads, idleThreadTimeoutMs);
         Server server = new Server(threadPool);
         ServerConnector serverConnector = new ServerConnector(server);
         serverConnector.setPort(port);
+        serverConnector.setIdleTimeout(connectionIdleTimeout.toMillis());
         server.setConnectors(new Connector[]{ serverConnector });
         return server;
     }

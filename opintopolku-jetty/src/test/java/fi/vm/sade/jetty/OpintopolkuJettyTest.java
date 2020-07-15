@@ -18,7 +18,7 @@ public class OpintopolkuJettyTest {
     public void opintopolkuJettyServesContentFromGivenClasspathLocation() throws Exception {
         int port = PortChecker.findFreeLocalPort();
         String webappPath = "/testing";
-        jetty.start(webappPath, port, 1, 5, Duration.ofSeconds(10));
+        jetty.start(webappPath, port, 1, 5, Duration.ofSeconds(10), Duration.ofSeconds(4000));
 
         URL url = new URL(String.format("http://localhost:%d%s/hello.html", port, webappPath));
 
