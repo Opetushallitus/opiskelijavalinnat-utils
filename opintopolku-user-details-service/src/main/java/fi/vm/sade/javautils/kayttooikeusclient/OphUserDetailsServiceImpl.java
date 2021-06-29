@@ -1,25 +1,27 @@
 package fi.vm.sade.javautils.kayttooikeusclient;
 
 import com.google.gson.Gson;
-import fi.vm.sade.javautils.httpclient.OphHttpClient;
-import fi.vm.sade.javautils.httpclient.OphHttpResponse;
-import fi.vm.sade.javautils.httpclient.OphHttpResponseHandler;
-import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
+import fi.vm.sade.javautils.http.OphHttpClient;
+import fi.vm.sade.javautils.http.OphHttpRequest;
+import fi.vm.sade.javautils.http.auth.Authenticator;
 import fi.vm.sade.properties.OphProperties;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import java.io.InputStreamReader;
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * {@link UserDetailsService}-toteutus joka hakee käyttäjän roolit käyttöoikeuspalvelusta.
  */
 public class OphUserDetailsServiceImpl implements UserDetailsService {
 
+    static final String USERDETAILS_URL_KEY = "kayttooikeus-service.userDetails.byUsername";
+    private final Gson gson = new Gson();
     private final OphHttpClient httpClient;
+    private final OphProperties properties;
 
     /**
      * Rakentaja.
@@ -28,25 +30,28 @@ public class OphUserDetailsServiceImpl implements UserDetailsService {
      * @param callerId kutsuvan palvelun tunniste, esim. "1.2.246.562.10.00000000001.oppijanumerorekisteri"
      *                 (ks. https://confluence.csc.fi/pages/viewpage.action?pageId=50858064 )
      */
-    public OphUserDetailsServiceImpl(String urlVirkailija, String callerId) {
-        this.httpClient = ApacheOphHttpClient.createDefaultOphClient(callerId,
+    public OphUserDetailsServiceImpl(String urlVirkailija, String callerId, Authenticator authenticator) {
+        this(
+                new OphHttpClient.Builder(callerId).authenticator(authenticator).build(),
                 new OphProperties("/kayttooikeusclient-oph.properties")
-                        .addOverride("url-virkailija", urlVirkailija));
+                        .addOverride("url-virkailija", urlVirkailija)
+        );
+    }
+
+    OphUserDetailsServiceImpl(OphHttpClient httpClient, OphProperties properties) {
+        this.httpClient = httpClient;
+        this.properties = properties;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return httpClient.get("kayttooikeus-service.userDetails.byUsername", username)
-                .expectStatus(200, 404)
-                .execute(new OphHttpResponseHandler<UserDetailsImpl>() {
-                     @Override
-                     public UserDetailsImpl handleResponse(OphHttpResponse response) {
-                         if (response.getStatusCode() == 404) {
-                             throw new UsernameNotFoundException(String.format("Käyttäjää ei löytynyt käyttäjätunnuksella '%s'", username));
-                         }
-                         return new Gson().fromJson(new InputStreamReader(response.asInputStream()), UserDetailsImpl.class);
-                     }
-                 });
+        String url = properties.url(USERDETAILS_URL_KEY, username);
+        OphHttpRequest request = OphHttpRequest.Builder.get(url).build();
+        Optional<UserDetails> userDetails = httpClient.<UserDetails>execute(request)
+                .expectedStatus(200)
+                .mapWith(json -> gson.fromJson(json, UserDetailsImpl.class));
+        return userDetails.orElseThrow(() ->  new UsernameNotFoundException(
+                String.format("Käyttäjää ei löytynyt käyttäjätunnuksella '%s'", username)));
     }
 
     private static final class UserDetailsImpl implements UserDetails {
