@@ -54,13 +54,13 @@ public class OphHttpClient {
         private static final String CSRF = "CSRF";
     }
 
-    private LogUtil logUtil;
-    private CloseableHttpClient cachingClient;
-    private CookieStore cookieStore;
-    private Authenticator authenticator;
-    private String callerId;
+    private final LogUtil logUtil;
+    private final CloseableHttpClient cachingClient;
+    private final CookieStore cookieStore;
+    private final Authenticator authenticator;
+    private final String callerId;
 
-    private ThreadLocal<HttpContext> localContext = ThreadLocal.withInitial(BasicHttpContext::new);
+    private final ThreadLocal<HttpContext> localContext = ThreadLocal.withInitial(BasicHttpContext::new);
     private HashMap<String, Boolean> csrfCookiesCreateForHost = new HashMap<>();
 
     private OphHttpClient(Builder builder) {
@@ -182,7 +182,7 @@ public class OphHttpClient {
         try {
             return cachingClient.execute(request, localContext.get());
         } catch (IOException e) {
-            log.error("Failed to execute request: {}", e);
+            log.error("Failed to execute request: {}", request, e);
             throw new RuntimeException("Internal error calling " + request.getMethod() + "/" + request.getURI() + " (check logs): " + e.getMessage());
         }
     }
