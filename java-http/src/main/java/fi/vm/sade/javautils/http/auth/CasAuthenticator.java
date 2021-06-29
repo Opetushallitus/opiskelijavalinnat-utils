@@ -39,6 +39,17 @@ public class CasAuthenticator implements Authenticator {
         addSpringSecSuffix = builder.addSpringSecSuffix;
     }
 
+    public CasAuthenticator(String webCasUrl, String username, String password, String casServiceUrl,
+                            String casServiceSessionInitUrl, boolean addSpringSecSuffix, String sessionCookieName) {
+        this.webCasUrl = webCasUrl;
+        this.username = username;
+        this.password = password;
+        this.casServiceUrl = casServiceUrl;
+        this.casServiceSessionInitUrl = casServiceSessionInitUrl;
+        this.addSpringSecSuffix = addSpringSecSuffix;
+        this.sessionCookieName = sessionCookieName;
+    }
+
     @Override
     public void clearSession() {
         serviceAsAUserTicket = null;
@@ -93,7 +104,7 @@ public class CasAuthenticator implements Authenticator {
         req.setHeader(X_PALVELUKUTSU_LAHETTAJA_KAYTTAJA_TUNNUS, callAsUser);
     }
 
-    public static class Builder{
+    public static class Builder {
         String webCasUrl;
         String username;
         String password;
