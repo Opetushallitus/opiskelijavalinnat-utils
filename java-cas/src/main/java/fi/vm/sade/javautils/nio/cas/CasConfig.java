@@ -15,7 +15,7 @@ public class CasConfig {
   private CasConfig() {
   }
 
-  static class CasConfigBuilder {
+  public static class CasConfigBuilder {
     private final String username;
     private final String password;
     private final String casUrl;
