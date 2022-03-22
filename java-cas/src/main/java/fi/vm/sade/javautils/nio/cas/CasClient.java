@@ -223,7 +223,7 @@ public class CasClient {
             }
         }
         logger.error("Cas session Response failed: " + casResponse.toString());
-        throw new RuntimeException(String.format("%s cookie not found in CAS authentication response!", config.getjSessionName()));
+        throw new RuntimeException(String.format("%s cookie not found in CAS authentication response using CAS URL %s and service %s", config.getjSessionName(), config.getCasUrl(), config.getServiceUrl()));
     }
 
     private CompletableFuture<Response> createSessionResponsePromise(CasTicketGrantingTicketFetchProcess currentTicketGrantingTicket, boolean forceUpdate) {
