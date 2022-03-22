@@ -222,7 +222,7 @@ public class CasClient {
                 return session;
             }
         }
-        logger.error("Cas session Response failed: " + casResponse.toString());
+        logger.error(String.format("Cas session Response failed in URI=%s: %s", casResponse.getUri(), casResponse));
         throw new RuntimeException(String.format("%s cookie not found in CAS authentication response using CAS URL %s and service %s", config.getjSessionName(), config.getCasUrl(), config.getServiceUrl()));
     }
 
