@@ -156,7 +156,7 @@ public class CasClient {
                                 newSessionFromToken(session.getSessionCookie()))))) {
                     logger.info("Updated current session with more time");
                 } else {
-                    logger.info("Tried to update more time to current session but some other thread was faster");
+                    logger.debug("Tried to update more time to current session but some other thread was faster");
                 }
             }
             return response;
@@ -180,7 +180,8 @@ public class CasClient {
     }
 
     private CompletableFuture<Response> executeRequestWithReusedSession(CasSessionFetchProcess currentSessionProcess, CasSession session, Request request, boolean forceUpdate) {
-        return executeRequestWithSession(session, request, forceUpdate).thenApply(onSuccessIncreaseSessionTime(currentSessionProcess, session));
+        return executeRequestWithSession(session, request, forceUpdate)
+                .thenApply(onSuccessIncreaseSessionTime(currentSessionProcess, session));
     }
 
     public CompletableFuture<Response> execute(Request request) {
