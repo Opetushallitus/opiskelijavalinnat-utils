@@ -18,7 +18,7 @@ public class CasSession {
 
   public boolean isValid() {
     final boolean valid = new Date().before(validUntil);
-    logger.info("Checking if cookie " + sessionCookie + " is valid? Valid = " + valid);
+    logger.debug("Checking if cookie " + sessionCookie + " is valid? Valid = " + valid);
     return valid;
   }
 
