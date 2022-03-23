@@ -255,6 +255,7 @@ public class CasClient {
                     return CompletableFuture.completedFuture(sessionFromResponse(response));
                 } catch (RuntimeException cookieException) {
                     logger.warn(String.format("No %s cookie found from response, retrying once...", config.getjSessionName()));
+                    this.asyncHttpClient.getConfig().getCookieStore().clear();
                     CompletableFuture<CasSession> retrySessionResponse =
                       createSessionResponsePromise(currentTicketGrantingTicket, true).thenApply(r -> sessionFromResponse(r));
                     try {
