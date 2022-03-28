@@ -17,7 +17,7 @@ public class CasLogout {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(new InputSource(new StringReader(logoutRequest)));
-            return Optional.of(document.getElementsByTagName("saml:NameID").item(0).getTextContent());
+            return Optional.ofNullable(document.getElementsByTagName("saml:NameID").item(0).getTextContent());
         } catch (Exception e) {
             logger.error("CAS Logout request parsing failed: ", e);
             return Optional.empty();

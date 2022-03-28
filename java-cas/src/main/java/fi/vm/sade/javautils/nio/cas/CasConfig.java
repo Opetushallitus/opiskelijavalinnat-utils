@@ -1,5 +1,8 @@
 package fi.vm.sade.javautils.nio.cas;
 
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 public class CasConfig {
   private String username;
   private String password;
@@ -11,6 +14,9 @@ public class CasConfig {
   private String serviceUrlSuffix;
   private String sessionUrl;
   private String serviceTicketHeaderName;
+  private long sessionTicketValidMs;
+  private long ticketGrantingTicketValidMs;
+  private int numberOfRetries;
 
   private CasConfig() {
   }
@@ -26,6 +32,9 @@ public class CasConfig {
     private final String serviceUrlSuffix;
     private String sessionUrl;
     private String serviceTicketHeaderName;
+    private Optional<Long> sessionTicketValidMs = Optional.empty();
+    private Optional<Long> ticketGrantingTicketValidMs = Optional.empty();
+    private Optional<Integer> numberOfRetries = Optional.empty();
 
     public CasConfigBuilder(String username, String password, String casUrl, String serviceUrl, String csrf, String callerId, String serviceUrlSuffix) {
       this.username = username;
@@ -41,12 +50,22 @@ public class CasConfig {
       this.sessionUrl = sessionUrl;
       return this;
     }
-
+    public CasConfigBuilder setNumberOfRetries(int numberOfRetries) {
+      this.numberOfRetries = Optional.of(numberOfRetries);
+      return this;
+    }
     public CasConfigBuilder setServiceTicketHeaderName(String serviceTicketHeaderName) {
       this.serviceTicketHeaderName = serviceTicketHeaderName;
       return this;
     }
-
+    public CasConfigBuilder sessionTicketValid(TimeUnit unit, long duration) {
+      this.sessionTicketValidMs = Optional.of(unit.toMillis(duration));
+      return this;
+    }
+    public CasConfigBuilder ticketGrantingTicketValidMs(TimeUnit unit, long duration) {
+      this.ticketGrantingTicketValidMs = Optional.of(unit.toMillis(duration));
+      return this;
+    }
     public CasConfigBuilder setJsessionName(String jSessionName) {
       this.jSessionName = jSessionName;
       return this;
@@ -65,6 +84,9 @@ public class CasConfig {
       casConfig.serviceUrlSuffix = this.serviceUrlSuffix;
       casConfig.sessionUrl = this.sessionUrl;
       casConfig.serviceTicketHeaderName = this.serviceTicketHeaderName;
+      casConfig.ticketGrantingTicketValidMs = this.ticketGrantingTicketValidMs.orElseGet(() -> TimeUnit.HOURS.toMillis(7));
+      casConfig.sessionTicketValidMs = this.sessionTicketValidMs.orElseGet(() -> TimeUnit.MINUTES.toMillis(15));
+      casConfig.numberOfRetries = this.numberOfRetries.orElse(1);
       return casConfig;
     }
   }
@@ -117,5 +139,17 @@ public class CasConfig {
 
   public String getServiceTicketHeaderName() {
     return serviceTicketHeaderName == null ? null : serviceTicketHeaderName;
+  }
+
+  public long getSessionTicketValidMs() {
+    return sessionTicketValidMs;
+  }
+
+  public long getTicketGrantingTicketValidMs() {
+    return ticketGrantingTicketValidMs;
+  }
+
+  public int getNumberOfRetries() {
+    return numberOfRetries;
   }
 }
