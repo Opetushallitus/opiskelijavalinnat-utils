@@ -1,9 +1,10 @@
 module fi.vm.sade.javautils.cas {
-    requires java.net.http;
+    exports fi.vm.sade.javautils.nio.cas;
     requires async.http.client;
+    requires com.google.gson;
     requires io.netty.codec.http;
-    requires slf4j.api;
+    requires java.net.http;
     requires java.xml;
     requires org.apache.commons.lang3;
-    exports fi.vm.sade.javautils.nio.cas;
+    requires slf4j.api;
 }
