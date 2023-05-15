@@ -33,7 +33,7 @@ jobs:
         run: mvn clean package
 
       - name: Deploy
-        if: github.ref == 'refs/heads/$default-branch'
+        if: ${{ always() && format('refs/heads/{0}', github.event.repository.default_branch) == github.ref }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPOSITORY: ${{ github.repository }}
