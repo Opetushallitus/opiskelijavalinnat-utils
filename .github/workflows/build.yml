@@ -37,4 +37,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPOSITORY: ${{ github.repository }}
-        run: mvn deploy -DskipTests -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/$REPOSITORY
+        run: mvn deploy -e -DskipTests -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/$REPOSITORY
