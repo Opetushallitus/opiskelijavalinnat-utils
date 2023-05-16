@@ -21,14 +21,6 @@ jobs:
           distribution: 'corretto'
           cache: 'maven'
 
-      - name: Cache local Maven repository
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
       - name: Build
         run: mvn clean package
 
@@ -36,5 +28,4 @@ jobs:
         if: ${{ always() && format('refs/heads/{0}', github.event.repository.default_branch) == github.ref }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPOSITORY: ${{ github.repository }}
         run: mvn deploy --batch-mode -DskipTests
