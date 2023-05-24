@@ -5,7 +5,7 @@ import org.springframework.security.cas.web.authentication.ServiceAuthentication
 import org.springframework.security.cas.web.authentication.ServiceAuthenticationDetailsSource;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class OpintopolkuServiceAuthenticationDetailsSource extends ServiceAuthenticationDetailsSource {
     private final ServiceProperties serviceProperties;

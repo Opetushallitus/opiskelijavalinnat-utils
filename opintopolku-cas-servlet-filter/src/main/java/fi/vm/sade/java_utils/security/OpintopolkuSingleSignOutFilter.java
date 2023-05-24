@@ -1,11 +1,15 @@
 package fi.vm.sade.java_utils.security;
 
 import fi.vm.sade.properties.OphProperties;
-import org.jasig.cas.client.Protocol;
-import org.jasig.cas.client.configuration.ConfigurationKeys;
-import org.jasig.cas.client.session.SingleSignOutFilter;
+import org.apereo.cas.client.Protocol;
+import org.apereo.cas.client.session.SingleSignOutFilter;
 
-import javax.servlet.*;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import java.io.IOException;
 import java.nio.file.Paths;
 
@@ -14,7 +18,7 @@ public class OpintopolkuSingleSignOutFilter implements Filter {
     private SingleSignOutFilter singleSignOutFilter;
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(final FilterConfig filterConfig) throws ServletException {
         final String userHome = System.getProperty("user.home");
         final OphProperties ophProperties = new OphProperties()
                 .addFiles(Paths.get(userHome, "/oph-configuration/common.properties").toString());

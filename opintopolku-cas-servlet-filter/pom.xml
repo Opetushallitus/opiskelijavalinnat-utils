@@ -8,14 +8,20 @@
     <relativePath>..</relativePath>
   </parent>
   <artifactId>opintopolku-cas-servlet-filter</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
+
+    <properties>
+        <java.release.version>17</java.release.version>
+        <maven.compiler.release>17</maven.compiler.release>
+    </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcprov-jdk15on</artifactId>
-        <version>1.67</version>
+        <version>1.70</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -23,12 +29,12 @@
     <dependency>
       <groupId>fi.vm.sade.java-utils</groupId>
       <artifactId>java-properties</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-cas</artifactId>
-      <version>5.4.5</version>
+      <version>6.1.0</version>
     </dependency>
     <dependency>
       <groupId>commons-logging</groupId>
@@ -36,9 +42,9 @@
       <version>1.2</version>
     </dependency>
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>4.0.1</version>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.0.0</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
