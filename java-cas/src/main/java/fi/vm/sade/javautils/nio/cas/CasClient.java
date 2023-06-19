@@ -4,12 +4,15 @@ import org.asynchttpclient.Request;
 import org.asynchttpclient.Response;
 
 import java.util.HashMap;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public interface CasClient {
 
     CompletableFuture<Response> execute(Request request);
+
+    CompletableFuture<Response> executeAndRetryWithCleanSessionOnStatusCodes(Request request, Set<Integer> statusCodesToRetry);
 
     CompletableFuture<String> validateServiceTicketWithVirkailijaUsername(String service, String ticket);
 

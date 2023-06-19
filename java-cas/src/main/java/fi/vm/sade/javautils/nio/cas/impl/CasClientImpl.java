@@ -15,6 +15,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public class CasClientImpl implements CasClient {
@@ -45,19 +46,19 @@ public class CasClientImpl implements CasClient {
                 });
     }
 
-    private CompletableFuture<Response> retryConditionally(Request request, Response response, int numberOfRetries) {
-        if(401 == response.getStatusCode()) {
+    private CompletableFuture<Response> retryConditionally(Request request, Response response, int numberOfRetries, Set<Integer> statusCodesToRetry) {
+        if(statusCodesToRetry.contains(response.getStatusCode())) {
             LOGGER.warn(String.format("Retrying request %s (response status code = %s)", request.getUrl(), response.getStatusCode()));
             this.casSessionFetcher.clearSessionStore();
             this.casSessionFetcher.clearTgtStore();
-            return executeWithRetries(request, numberOfRetries - 1);
+            return executeWithRetries(request, numberOfRetries - 1, statusCodesToRetry);
         } else {
             return CompletableFuture.completedFuture(response);
         }
     }
-    private CompletableFuture<Response> retryConditionally(Request request, Throwable exception, int numberOfRetries) {
+    private CompletableFuture<Response> retryConditionally(Request request, Throwable exception, int numberOfRetries, Set<Integer> statusCodesToRetry) {
         LOGGER.warn(String.format("Retrying request %s on exception!", request.getUrl()), exception);
-        return executeWithRetries(request, numberOfRetries - 1);
+        return executeWithRetries(request, numberOfRetries - 1, statusCodesToRetry);
     }
     private static class Either {
         public final Response response;
@@ -68,16 +69,16 @@ public class CasClientImpl implements CasClient {
         }
     }
 
-    private CompletableFuture<Response> executeWithRetries(Request request, int numberOfRetries) {
+    private CompletableFuture<Response> executeWithRetries(Request request, int numberOfRetries, Set<Integer> statusCodesToRetry) {
         CompletableFuture<Response> execution = executeWithSession(request);
         if(numberOfRetries < 1) {
             return execution;
         } else {
             return execution.handle(Either::new).thenCompose(entry -> {
                     if(entry.throwable != null) {
-                        return retryConditionally(request, entry.throwable, numberOfRetries);
+                        return retryConditionally(request, entry.throwable, numberOfRetries, statusCodesToRetry);
                     } else {
-                        return retryConditionally(request, entry.response, numberOfRetries);
+                        return retryConditionally(request, entry.response, numberOfRetries, statusCodesToRetry);
                     }
             });
         }
@@ -85,8 +86,14 @@ public class CasClientImpl implements CasClient {
 
     @Override
     public CompletableFuture<Response> execute(Request request) {
-        return executeWithRetries(request, config.getNumberOfRetries());
+        return executeWithRetries(request, config.getNumberOfRetries(), Set.of(401));
     }
+
+    @Override
+    public CompletableFuture<Response> executeAndRetryWithCleanSessionOnStatusCodes(Request request, Set<Integer> statusCodesToRetry) {
+        return executeWithRetries(request, config.getNumberOfRetries(), statusCodesToRetry);
+    }
+
     private String getUsernameFromResponse(Response response) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
