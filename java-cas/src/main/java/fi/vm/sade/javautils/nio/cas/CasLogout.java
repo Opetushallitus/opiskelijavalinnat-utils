@@ -12,12 +12,24 @@ import org.xml.sax.InputSource;
 public class CasLogout {
     private static final Logger logger = LoggerFactory.getLogger(CasLogout.class);
 
-    public Optional<String> parseTicketFromLogoutRequest(String logoutRequest) {
+    public Optional<String> parseUserFromLogoutRequest(String logoutRequest) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(new InputSource(new StringReader(logoutRequest)));
             return Optional.ofNullable(document.getElementsByTagName("saml:NameID").item(0).getTextContent());
+        } catch (Exception e) {
+            logger.error("CAS Logout request parsing failed: ", e);
+            return Optional.empty();
+        }
+    }
+
+    public Optional<String> parseTicketFromLogoutRequest(String logoutRequest) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new InputSource(new StringReader(logoutRequest)));
+            return Optional.ofNullable(document.getElementsByTagName("samlp:SessionIndex").item(0).getTextContent());
         } catch (Exception e) {
             logger.error("CAS Logout request parsing failed: ", e);
             return Optional.empty();
