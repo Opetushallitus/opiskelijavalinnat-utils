@@ -26,6 +26,10 @@ public interface CasClient {
         return execute(request).get();
     }
 
+    default Response executeAndRetryWithCleanSessionOnStatusCodesBlocking(Request request, Set<Integer> statusCodesToRetry) throws ExecutionException, InterruptedException {
+        return executeAndRetryWithCleanSessionOnStatusCodes(request, statusCodesToRetry).get();
+    }
+
     default String validateServiceTicketWithVirkailijaUsernameBlocking(String service, String ticket) throws ExecutionException, InterruptedException {
         return validateServiceTicketWithVirkailijaUsername(service, ticket).get();
     }
