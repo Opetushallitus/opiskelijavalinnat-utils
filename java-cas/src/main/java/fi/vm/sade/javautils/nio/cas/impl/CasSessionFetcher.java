@@ -37,18 +37,27 @@ public class CasSessionFetcher {
     }
 
     private CompletableFuture<String> tgtFromResponse(Response tgtResponse) {
-        try {
-            if (201 == tgtResponse.getStatusCode()) {
-                String location = tgtResponse.getHeader("Location");
-                String path = new URI(location).getPath();
-                String tgt = path.substring(path.lastIndexOf('/') + 1);
-                return completedFuture(tgt);
-            } else {
-                return failedFuture(new TicketGrantingTicketException(new RuntimeException("Couldn't get TGT ticket from CAS!")));
-            }
-        } catch (URISyntaxException e) {
-            return failedFuture(new TicketGrantingTicketException(new RuntimeException("Could not create CasTicketGrantingTicket from CAS tgt response.", e)));
-        }
+	if (201 == tgtResponse.getStatusCode()) {
+	    try {
+		String location = tgtResponse.getHeader("Location");
+		String path = new URI(location).getPath();
+		String tgt = path.substring(path.lastIndexOf('/') + 1);
+		return completedFuture(tgt);
+	    } catch (URISyntaxException e) {
+		return failedFuture(
+		    new TicketGrantingTicketException(
+			new RuntimeException(
+			    String.format("Could not parse CasTicketGrantingTicket from CAS tgt response. URL = %s, location = %s, body = %s",
+				tgtResponse.getUri(), tgtResponse.getHeader("Location"), tgtResponse.getResponseBody()),
+			    e)));
+	    }
+	} else {
+	    return failedFuture(
+		new TicketGrantingTicketException(
+		    new RuntimeException(
+			String.format("Couldn't get TGT ticket from CAS! URL = %s, status = %s, body = %s",
+			    tgtResponse.getUri(), tgtResponse.getStatusCode(), tgtResponse.getResponseBody()))));
+	}
     }
 
     private CompletableFuture<String> fetchTicketGrantingTicketForReal() {
@@ -63,9 +72,11 @@ public class CasSessionFetcher {
         return this.asyncHttpClient.executeRequest(tgtRequest).toCompletableFuture()
                 .thenCompose(this::tgtFromResponse);
     }
+
     private CompletableFuture<String> fetchTicketGrantingTicket() {
         return tgtStore.getOrSet(this::fetchTicketGrantingTicketForReal);
     }
+
     private CompletableFuture<Response> fetchServiceTicketWithTgt(String ticketGrantingTicket) {
         final String serviceUrl = String.format("%s%s",
                 config.getServiceUrl(),
@@ -90,7 +101,11 @@ public class CasSessionFetcher {
                     .build();
             return this.asyncHttpClient.executeRequest(sessionRequest).toCompletableFuture();
         } else {
-            return failedFuture(new ServiceTicketException(new RuntimeException(String.format("Couldn't get service ticket from CAS! Status code = %s and URL = %s", response.getStatusCode(), response.getUri()))));
+            return failedFuture(
+		new ServiceTicketException(
+		    new RuntimeException(
+			String.format("Couldn't get service ticket from CAS! URL = %s, status = %s, body = %s",
+			    response.getUri(), response.getStatusCode(), response.getResponseBody()))));
         }
     }
 
