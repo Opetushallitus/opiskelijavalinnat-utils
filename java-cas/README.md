@@ -78,3 +78,8 @@ Here, the bits of information are:
 
 The created client can be used for making any API calls (but if they are not inside the serviceBaseUrl, they will likely fail authentication).  You build a AsyncHttpClient Request object and give it to client.execute().  For details on how AHC requests work, consult [its documentation](https://github.com/AsyncHttpClient/async-http-client/blob/main/README.md#sending-requests).
 
+Building and testing
+--------------------
+
+To run the tests: `mvn test`
+To build: `mvn package`
