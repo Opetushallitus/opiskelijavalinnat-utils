@@ -2,7 +2,7 @@ package fi.vm.sade.javautils.nio.cas.impl;
 
 import fi.vm.sade.javautils.nio.cas.CasConfig;
 import fi.vm.sade.javautils.nio.cas.exceptions.MissingSessionCookieException;
-import fi.vm.sade.javautils.nio.cas.exceptions.SessionTicketException;
+import fi.vm.sade.javautils.nio.cas.exceptions.ServiceTicketException;
 import fi.vm.sade.javautils.nio.cas.exceptions.TicketGrantingTicketException;
 import io.netty.handler.codec.http.cookie.Cookie;
 import org.asynchttpclient.AsyncHttpClient;
@@ -66,21 +66,21 @@ public class CasSessionFetcher {
     private CompletableFuture<String> fetchTicketGrantingTicket() {
         return tgtStore.getOrSet(this::fetchTicketGrantingTicketForReal);
     }
-    private CompletableFuture<Response> fetchSessionTicketWithTgt(String ticketGrantingTicket) {
+    private CompletableFuture<Response> fetchServiceTicketWithTgt(String ticketGrantingTicket) {
         final String serviceUrl = String.format("%s%s",
                 config.getServiceUrl(),
                 config.getServiceUrlSuffix()
         );
-        Request sessionRequest = utils.withCallerIdAndCsrfHeader()
+        Request serviceTicketRequest = utils.withCallerIdAndCsrfHeader()
                 .setUrl(String.format("%s/v1/tickets/%s", config.getCasUrl(), ticketGrantingTicket))
                 .setMethod("POST")
                 .addFormParam("service", serviceUrl)
                 .build();
         this.asyncHttpClient.getConfig().getCookieStore().clear();
-        return this.asyncHttpClient.executeRequest(sessionRequest).toCompletableFuture();
+        return this.asyncHttpClient.executeRequest(serviceTicketRequest).toCompletableFuture();
     }
 
-    private CompletableFuture<Response> sessionFromResponse(Response response) {
+    private CompletableFuture<Response> sessionFromSTResponse(Response response) {
         if (200 == response.getStatusCode()) {
             String ticket = response.getResponseBody().trim();
             Request sessionRequest = utils.withCallerIdAndCsrfHeader()
@@ -90,7 +90,7 @@ public class CasSessionFetcher {
                     .build();
             return this.asyncHttpClient.executeRequest(sessionRequest).toCompletableFuture();
         } else {
-            return failedFuture(new SessionTicketException(new RuntimeException(String.format("Couldn't get session ticket from CAS! Status code = %s and URL = %s", response.getStatusCode(), response.getUri()))));
+            return failedFuture(new ServiceTicketException(new RuntimeException(String.format("Couldn't get service ticket from CAS! Status code = %s and URL = %s", response.getStatusCode(), response.getUri()))));
         }
     }
 
@@ -106,8 +106,8 @@ public class CasSessionFetcher {
     private CompletableFuture<String> fetchSessionForReal() {
         LOGGER.info(String.format("Fetching CAS session (service = %s, session name = %s)", config.getSessionUrl(), config.getjSessionName()));
         return fetchTicketGrantingTicket()
-                .thenCompose(this::fetchSessionTicketWithTgt)
-                .thenCompose(this::sessionFromResponse)
+                .thenCompose(this::fetchServiceTicketWithTgt)
+                .thenCompose(this::sessionFromSTResponse)
                 .thenCompose(this::responseAsToken);
     }
 
