@@ -18,8 +18,8 @@ public class CasClientBuilder {
         new CasSessionFetcher(
                 config,
                 asyncHttpClient,
-                new CompletableFutureStore<>(config.getTicketGrantingTicketValidMs()),
-                new CompletableFutureStore<>(config.getSessionTicketValidMs()));
+                new CompletableFutureStore<>(config.getSessionTicketValidMs()),
+                new CompletableFutureStore<>(config.getTicketGrantingTicketValidMs()));
         return new CasClientImpl(config, asyncHttpClient, casSessionFetcher);
     }
 
