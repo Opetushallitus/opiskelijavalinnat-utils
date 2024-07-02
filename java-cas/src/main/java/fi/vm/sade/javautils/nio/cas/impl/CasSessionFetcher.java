@@ -28,29 +28,31 @@ public class CasSessionFetcher {
     private final CachedSupplier<String> sessionTicketSupplier;
     private final CachedSupplier<String> tgtSupplier;
 
-    private final FutureSupplier<String> sessionTicketFutureSupplier;
-
-    private final CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
-        .failureRateThreshold(50)
-        .slowCallRateThreshold(50)
-        .waitDurationInOpenState(Duration.ofMillis(30000))
-        .slowCallDurationThreshold(Duration.ofSeconds(10))
-        .permittedNumberOfCallsInHalfOpenState(4)
-        .minimumNumberOfCalls(6)
-        .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.TIME_BASED)
-        .slidingWindowSize(10)
-        .build();
-
     public CasSessionFetcher(CasConfig config,
                              AsyncHttpClient asyncHttpClient,
                              long sessionTicketTTL,
                              long tgtTTL) {
+        this(config, asyncHttpClient, sessionTicketTTL, tgtTTL, CircuitBreakerConfig.custom()
+            .failureRateThreshold(50)
+            .slowCallRateThreshold(50)
+            .waitDurationInOpenState(Duration.ofMillis(30000))
+            .slowCallDurationThreshold(Duration.ofSeconds(10))
+            .permittedNumberOfCallsInHalfOpenState(4)
+            .minimumNumberOfCalls(6)
+            .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.TIME_BASED)
+            .slidingWindowSize(10)
+            .build());
+    }
+
+    public CasSessionFetcher(CasConfig config,
+                             AsyncHttpClient asyncHttpClient,
+                             long sessionTicketTTL,
+                             long tgtTTL,
+                             CircuitBreakerConfig circuitBreakerConfig) {
         this.config = config;
         this.utils = new CasUtils(this.config);
         this.asyncHttpClient = asyncHttpClient;
         this.sessionTicketSupplier = new CachedSupplier<>(sessionTicketTTL, new CircuitBreakerSupplier<>("sessionTicket", circuitBreakerConfig, this::fetchSessionForReal));
-        this.sessionTicketFutureSupplier = new FutureSupplier<>(this.sessionTicketSupplier);
-
         this.tgtSupplier = new CachedSupplier<>(tgtTTL, new CircuitBreakerSupplier<>("tgt", circuitBreakerConfig, this::fetchTicketGrantingTicketForReal));
     }
 
