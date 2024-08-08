@@ -1,6 +1,6 @@
 # UserDetailsService
 
-Spring Securityn UserDetailsService-rajapinnan toteutus, joka hakee käyttäjän tiedot käyttöoikeuspalvelusta.
+Spring Securityn UserDetailsService-rajapinnan toteutus, joka hakee käyttäjän tiedot CASin palauttamista sessioattribuuteista.
 
 ## Konfigurointi
 
