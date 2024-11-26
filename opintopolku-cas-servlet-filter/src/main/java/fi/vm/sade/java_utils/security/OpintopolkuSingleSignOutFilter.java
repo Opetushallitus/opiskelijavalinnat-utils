@@ -22,12 +22,12 @@ public class OpintopolkuSingleSignOutFilter implements Filter {
         final String userHome = System.getProperty("user.home");
         final OphProperties ophProperties = new OphProperties()
                 .addFiles(Paths.get(userHome, "/oph-configuration/common.properties").toString());
-        final String webUrlCas = ophProperties.require(WEB_URL_CAS);
+        ophProperties.require(WEB_URL_CAS);
         this.singleSignOutFilter = new SingleSignOutFilter();
         this.singleSignOutFilter.setIgnoreInitConfiguration(true);
-        this.singleSignOutFilter.setArtifactParameterName(Protocol.CAS2.getArtifactParameterName());
-        this.singleSignOutFilter.setLogoutParameterName("logoutRequest");
-        this.singleSignOutFilter.setRelayStateParameterName("RelayState");
+        SingleSignOutFilter.setArtifactParameterName(Protocol.CAS2.getArtifactParameterName());
+        SingleSignOutFilter.setLogoutParameterName("logoutRequest");
+        SingleSignOutFilter.setRelayStateParameterName("RelayState");
         this.singleSignOutFilter.init(filterConfig);
     }
 
