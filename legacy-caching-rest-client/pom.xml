@@ -93,11 +93,6 @@
         <!-- Internal -->
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
-            <artifactId>opintopolku-healthcheck-api</artifactId>
-            <version>0.3.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>java-legacy-cas</artifactId>
             <version>0.5.1-SNAPSHOT</version>
         </dependency>

@@ -15,7 +15,6 @@ import com.google.gson.JsonSyntaxException;
 
 import fi.vm.sade.javautils.cas.CasClient;
 import fi.vm.sade.javautils.legacy_cxf_cas.PERA;
-import fi.vm.sade.javautils.healthcheck.HealthChecker;
 import fi.vm.sade.javautils.legacy_cxf_cas.ui.portlet.security.ProxyAuthenticator;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
