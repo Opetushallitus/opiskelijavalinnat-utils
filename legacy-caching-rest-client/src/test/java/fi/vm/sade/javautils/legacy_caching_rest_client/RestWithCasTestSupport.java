@@ -1,6 +1,5 @@
 package fi.vm.sade.javautils.legacy_caching_rest_client;
 
-import fi.vm.sade.jetty.JettyJersey;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;

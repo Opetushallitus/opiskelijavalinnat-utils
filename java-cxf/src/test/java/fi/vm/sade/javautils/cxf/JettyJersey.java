@@ -1,4 +1,4 @@
-package fi.vm.sade.jetty;
+package fi.vm.sade.javautils.cxf;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 import fi.vm.sade.tcp.PortChecker;

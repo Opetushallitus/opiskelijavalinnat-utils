@@ -1,6 +1,5 @@
 package fi.vm.sade.javautils.cxf;
 
-import fi.vm.sade.jetty.JettyJersey;
 import org.apache.cxf.helpers.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.message.Message;
@@ -62,11 +61,11 @@ public class OphRequestHeadersCxfInterceptorTest {
         WebClient.getConfig(c).getOutInterceptors().add(interceptor);
         return c;
     }
-    
+
     private OphRequestHeadersCxfInterceptor<Message> createInterceptor() {
         return new OphRequestHeadersCxfInterceptor<>(CALLER_ID);
     }
-    
+
     public static String getUrl(String url) {
         return JettyJersey.getUrl(url);
     }
