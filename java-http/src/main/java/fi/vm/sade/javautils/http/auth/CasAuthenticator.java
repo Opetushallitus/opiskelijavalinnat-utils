@@ -1,6 +1,5 @@
 package fi.vm.sade.javautils.http.auth;
 
-import fi.vm.sade.javautils.cas.CasClient;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

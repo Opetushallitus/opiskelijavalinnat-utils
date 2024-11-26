@@ -38,13 +38,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Internal -->
-        <dependency>
-            <groupId>fi.vm.sade.java-utils</groupId>
-            <artifactId>java-legacy-cas</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
-        </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -102,6 +95,12 @@
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>3.26.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock</artifactId>
+            <version>3.9.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -1,6 +1,5 @@
 package fi.vm.sade.javautils.http;
 
-import static fi.vm.sade.javautils.httpclient.OphHttpClient.Header.CONTENT_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
@@ -229,8 +228,8 @@ public class OphHttpResponseImplTest {
             given(httpResponse.getStatusLine()).willReturn(statusLine);
             given(statusLine.getStatusCode()).willReturn(returnStatus);
 
-            Header[] headers = {new BasicHeader(CONTENT_TYPE, contentType)};
-            given(httpResponse.getHeaders(eq(CONTENT_TYPE))).willReturn(headers);
+            Header[] headers = {new BasicHeader("Content-Type", contentType)};
+            given(httpResponse.getHeaders(eq("Content-Type"))).willReturn(headers);
 
             return httpResponse;
         } catch (Exception e) {
