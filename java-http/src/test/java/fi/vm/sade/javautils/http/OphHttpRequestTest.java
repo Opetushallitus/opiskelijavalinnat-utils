@@ -1,23 +1,26 @@
 package fi.vm.sade.javautils.http;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.junit.Test;
 
+import com.google.gson.Gson;
+
 import static org.junit.Assert.assertEquals;
+
+import java.io.InputStreamReader;
 
 public class OphHttpRequestTest {
     @Test
     public void responseJsonMappingTest() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
         TestObject testObject = new TestObject();
+        Gson gson = new Gson();
         // To make sure encodings don't break anything
         testObject.setTestField("test value with special characters öäå-~?!ÖÄÅ");
 
-        String jsonContent = objectMapper.writerFor(TestObject.class).writeValueAsString(testObject);
+        String jsonContent = gson.toJson(testObject);
         OphHttpEntity entity = new OphHttpEntity.Builder()
                 .content(jsonContent)
                 .contentType("application/json", "UTF-8")
@@ -28,8 +31,9 @@ public class OphHttpRequestTest {
                 .addHeader("Header1", "Header1_value")
                 .build();
         HttpUriRequest uriRequest = request.getHttpUriRequest();
-        TestObject handledObject = objectMapper.readerFor(TestObject.class)
-                .readValue(((HttpEntityEnclosingRequestBase)uriRequest).getEntity().getContent());
+        TestObject handledObject = gson.fromJson(
+            new InputStreamReader(((HttpEntityEnclosingRequestBase)uriRequest).getEntity().getContent()),
+            TestObject.class);
 
         assertEquals("Object content didn't change on handling", handledObject.getTestField(), testObject.getTestField());
     }
