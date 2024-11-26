@@ -9,7 +9,6 @@
     <modules>
         <module>java-properties</module>
         <module>oid-generator</module>
-        <module>tcp-utils</module>
         <module>java-cas</module>
         <module>java-legacy-cas</module>
         <module>java-cxf</module>

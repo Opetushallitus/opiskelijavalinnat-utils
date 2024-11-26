@@ -1,7 +1,11 @@
 package fi.vm.sade.javautils.legacy_caching_rest_client;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
-import fi.vm.sade.tcp.PortChecker;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.util.Random;
+
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -17,7 +21,7 @@ public class JettyJersey {
 
     public static void startServer(String packageContainingJerseyRestResources, String jerseyFilterClasses) throws Exception {
 
-        port = PortChecker.findFreeLocalPort();
+        port = findFreeLocalPort();
 
         System.setProperty("cas_key", getUrl("testing"));
         System.setProperty("cas_service", getUrl("/httptest"));
@@ -52,5 +56,25 @@ public class JettyJersey {
 
     public static String getUrl(String url) {
         return "http://localhost:"+ getPort()+url;
+    }
+
+    public final static boolean isFreeLocalPort(int port) {
+        Socket socket = null;
+        try {
+            socket = new Socket("127.0.0.1", port);
+            socket.close();
+        } catch (IOException e) {
+            return true;
+        }
+        return false;
+    }
+
+    public final static int findFreeLocalPort() {
+        int port = new Random().nextInt(60000) + 1000;
+        if (isFreeLocalPort(port)) {
+            return port;
+        } else {
+            return findFreeLocalPort();
+        }
     }
 }
