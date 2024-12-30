@@ -10,21 +10,10 @@
         <module>java-properties</module>
         <module>oid-generator</module>
         <module>java-cas</module>
-        <module>java-legacy-cas</module>
-        <module>java-cxf</module>
         <module>httpclient</module>
-        <module>embedded-tomcat</module>
         <module>opintopolku-cas-servlet-filter</module>
-        <module>java-auth</module>
         <module>java-http</module>
-        <module>java-poi</module>
         <module>opintopolku-user-details-service</module>
-        <module>java-cache</module>
-        <module>opintopolku-spring-security</module>
-        <module>legacy-cxf-cas</module>
-        <module>legacy-caching-rest-client</module>
-        <module>spring-aware-health-check-servlet</module>
-        <module>opintopolku-jetty</module>
         <module>suomifi-valtuudet-client</module>
     </modules>
     <properties>
