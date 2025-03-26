@@ -20,7 +20,7 @@ public class OphUserDetailsServiceImpl implements AuthenticationUserDetailsServi
         return new UserDetailsImpl((String) attributes.get("oidHenkilo"), roles);
     }
 
-    private static final class UserDetailsImpl implements UserDetails {
+    public static final class UserDetailsImpl implements UserDetails {
         private static final long serialVersionUID = 845522107275827768L;
 
         private final String oidHenkilo;
