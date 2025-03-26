@@ -21,6 +21,8 @@ public class OphUserDetailsServiceImpl implements AuthenticationUserDetailsServi
     }
 
     private static final class UserDetailsImpl implements UserDetails {
+        private static final long serialVersionUID = 845522107275827768L;
+
         private final String oidHenkilo;
         private final Collection<SimpleGrantedAuthority> authorities;
 
