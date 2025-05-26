@@ -131,7 +131,7 @@ public class CasClientImpl implements CasClient {
 
     private CompletableFuture<Response> fetchValidationResponse(String service, String ticket) {
         Request req = utils.withCallerIdAndCsrfHeader()
-                .setUrl(config.getCasUrl() + "/serviceValidate?ticket=" + ticket + "&service=" + service)
+                .setUrl(config.getCasUrl() + "/serviceValidate")
                 .addQueryParam("ticket", ticket)
                 .addQueryParam("service", service)
                 .setMethod("GET").build();
