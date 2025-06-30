@@ -13,7 +13,7 @@
     <version>0.5.3-SNAPSHOT</version>
 
     <properties>
-        <spring.security.version>6.3.5</spring.security.version>
+        <spring.security.version>6.3.10</spring.security.version>
     </properties>
 
     <dependencies>
