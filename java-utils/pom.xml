@@ -81,7 +81,7 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/Opetushallitus/java-utils</url>
+            <url>https://maven.pkg.github.com/Opetushallitus/opiskelijavalinnat-utils</url>
         </repository>
     </distributionManagement>
 
