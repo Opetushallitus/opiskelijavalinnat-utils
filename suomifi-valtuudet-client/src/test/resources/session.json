@@ -1,5 +1,0 @@
-{
-  "sessionId": "sessionId123",
-  "userId": "userId123",
-  "unknown": "deserialization should work with unknown properties"
-}
