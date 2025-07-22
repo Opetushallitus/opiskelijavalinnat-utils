@@ -1,6 +1,11 @@
 name: Deploy viestinvalityspalvelu client library
 on:
   workflow_dispatch:
+  release:
+    types: [ created ]
+  push:
+    paths-ignore:
+      - '**.md'
 
 jobs:
   build-and-test:
@@ -21,6 +26,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./mvnw --no-transfer-progress clean package
+        working-directory: viestinvalityspalvelu
 
   deploy-client-library:
     needs: [ build-and-test ]
@@ -42,3 +48,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./mvnw deploy --batch-mode -DskipTests --projects kirjasto --also-make
+        working-directory: viestinvalityspalvelu
