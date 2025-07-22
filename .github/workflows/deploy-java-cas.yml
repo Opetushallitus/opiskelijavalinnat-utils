@@ -1,4 +1,4 @@
-name: java-utils
+name: Deploy java-cas
 on:
   workflow_dispatch:
   release:
