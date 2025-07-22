@@ -465,7 +465,7 @@
     <repository>
       <id>github</id>
       <name>GitHub Packages</name>
-      <url>https://maven.pkg.github.com/Opetushallitus/viestinvalityspalvelu</url>
+      <url>https://maven.pkg.github.com/Opetushallitus/opiskelijavalinnat-utils</url>
     </repository>
   </distributionManagement>
 
