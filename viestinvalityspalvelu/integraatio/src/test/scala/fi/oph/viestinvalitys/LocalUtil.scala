@@ -6,9 +6,6 @@ import fi.oph.viestinvalitys.util.{AwsUtil, ConfigurationUtil, DbUtil}
 import org.apache.commons.io.IOUtils
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.{CreateBucketRequest, ListObjectsRequest, PutObjectRequest}
-import software.amazon.awssdk.services.ses.model.{ConfigurationSet, CreateConfigurationSetEventDestinationRequest, CreateConfigurationSetRequest, EventDestination, EventType, SNSDestination, VerifyDomainIdentityRequest}
-import software.amazon.awssdk.services.sns.model.{CreateTopicRequest, SubscribeRequest}
-import software.amazon.awssdk.services.sqs.model.{CreateQueueRequest, ListQueuesRequest}
 import com.amazonaws.services.lambda.runtime.{ClientContext, CognitoIdentity, Context, LambdaLogger}
 import fi.oph.viestinvalitys.business.{KantaOperaatiot, Kayttooikeus, Kieli, Kontakti, Prioriteetti, SisallonTyyppi, VastaanottajanTila}
 import fi.oph.viestinvalitys.security.AuditLog
@@ -75,70 +72,6 @@ object LocalUtil {
       catch
         case e: Exception => throw new RuntimeException(e)
 
-  def getQueueUrl(queueName: String): Option[String] =
-    val sqsClient = AwsUtil.sqsClient;
-    val existingQueueUrls = sqsClient.listQueues(ListQueuesRequest.builder()
-      .queueNamePrefix(queueName)
-      .build()).queueUrls()
-    if (!existingQueueUrls.isEmpty)
-      Option.apply(existingQueueUrls.get(0))
-    else
-      Option.empty
-
-  def setupSkannaus(): Unit =
-  // luodaan skannauseventtien jono jos ei jo luotu
-    if (!getQueueUrl(LOCAL_SKANNAUS_QUEUE_NAME).isDefined)
-      val createQueueResponse = AwsUtil.sqsClient.createQueue(CreateQueueRequest.builder()
-        .queueName(LOCAL_SKANNAUS_QUEUE_NAME)
-        .build())
-
-  def setupLahetys(): Unit =
-    // luodaan lähetyksen ajastuseventtien jono jos ei jo luotu
-    if (!getQueueUrl(LOCAL_AJASTUS_QUEUE_NAME).isDefined)
-      val createQueueResponse = AwsUtil.sqsClient.createQueue(CreateQueueRequest.builder()
-        .queueName(LOCAL_AJASTUS_QUEUE_NAME)
-        .build())
-
-  def setupSesMonitoring(): Unit =
-    // katsotaan onko SES-konfigurointi jo tehty
-    if (!getQueueUrl(LOCAL_SES_MONITOROINTI_QUEUE_NAME).isDefined)
-
-      // luodaan sns-topic ja routataan se sqs-jonoon
-      val createQueueResponse = AwsUtil.sqsClient.createQueue(CreateQueueRequest.builder()
-        .queueName(LOCAL_SES_MONITOROINTI_QUEUE_NAME)
-        .build())
-      val createTopicResponse = AwsUtil.snsClient.createTopic(CreateTopicRequest.builder()
-        .name("viestinvalitys-monitor")
-        .build())
-      AwsUtil.snsClient.subscribe(SubscribeRequest.builder()
-        .topicArn(createTopicResponse.topicArn())
-        .protocol("sqs")
-        .endpoint("arn:aws:sqs:us-east-1:000000000000:" + LOCAL_SES_MONITOROINTI_QUEUE_NAME)
-        .build())
-
-      // verifioidaan ses-identiteetti ja konfiguroidaan eventit
-      val sesClient = AwsUtil.sesClient
-      sesClient.verifyDomainIdentity(VerifyDomainIdentityRequest.builder()
-        .domain("localopintopolku.fi")
-        .build())
-      sesClient.createConfigurationSet(CreateConfigurationSetRequest.builder()
-        .configurationSet(ConfigurationSet.builder()
-          .name(LOCAL_SES_CONFIGURATION_SET_NAME)
-          .build())
-        .build())
-      sesClient.createConfigurationSetEventDestination(CreateConfigurationSetEventDestinationRequest.builder()
-        .configurationSetName(LOCAL_SES_CONFIGURATION_SET_NAME)
-        .eventDestination(EventDestination.builder()
-          .matchingEventTypes(EventType.BOUNCE, EventType.OPEN, EventType.COMPLAINT, EventType.CLICK, EventType.SEND, EventType.DELIVERY, EventType.REJECT)
-          .name("ViestinvalitysMonitor")
-          .enabled(true)
-          .snsDestination(SNSDestination.builder()
-            .topicARN(createTopicResponse.topicArn())
-            .build())
-          .build())
-        .build())
-      createQueueResponse.queueUrl()
-
   def setupAuditLog(): Unit =
     // luodaan auditlokien log group jos ei jo luotu
     val response = AwsUtil.cloudWatchLogsClient.describeLogGroups(DescribeLogGroupsRequest.builder()
@@ -158,16 +91,9 @@ object LocalUtil {
     System.setProperty("aws.secretAccessKey", "localstack")
 
     LocalUtil.setupS3()
-    LocalUtil.setupSkannaus()
-    LocalUtil.setupLahetys()
-    LocalUtil.setupSesMonitoring()
     LocalUtil.setupAuditLog()
 
     System.setProperty("ATTACHMENTS_BUCKET_NAME", LocalUtil.LOCAL_ATTACHMENTS_BUCKET_NAME)
-    System.setProperty(ConfigurationUtil.AJASTUS_QUEUE_URL_KEY, LocalUtil.getQueueUrl(LocalUtil.LOCAL_AJASTUS_QUEUE_NAME).get)
-    System.setProperty(ConfigurationUtil.SKANNAUS_QUEUE_URL_KEY, LocalUtil.getQueueUrl(LocalUtil.LOCAL_SKANNAUS_QUEUE_NAME).get)
-    System.setProperty(ConfigurationUtil.SESMONITOROINTI_QUEUE_URL_KEY, LocalUtil.getQueueUrl(LocalUtil.LOCAL_SES_MONITOROINTI_QUEUE_NAME).get)
-    System.setProperty("CONFIGURATION_SET_NAME", LocalUtil.LOCAL_SES_CONFIGURATION_SET_NAME)
 
     // ajetaan migraatiolambdan koodi
     new LambdaHandler().handleRequest(null, new TestAwsContext("migraatio"))

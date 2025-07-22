@@ -37,32 +37,7 @@
         </dependency>
         <dependency>
             <groupId>fi.oph.viestinvalitys</groupId>
-            <artifactId>raportointi</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>fi.oph.viestinvalitys</groupId>
             <artifactId>migraatio</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>fi.oph.viestinvalitys</groupId>
-            <artifactId>lahetys</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>fi.oph.viestinvalitys</groupId>
-            <artifactId>skannaus</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>fi.oph.viestinvalitys</groupId>
-            <artifactId>siivous</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>fi.oph.viestinvalitys</groupId>
-            <artifactId>tilapaivitys</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
