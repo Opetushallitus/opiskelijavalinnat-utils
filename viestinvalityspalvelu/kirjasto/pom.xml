@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>fi.oph.viestinvalitys</groupId>
+        <groupId>opiskelijavalinnat-utils.viestinvalitys</groupId>
         <artifactId>viestinvalityspalvelu</artifactId>
         <version>${revision}</version>
     </parent>
@@ -16,7 +16,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>fi.oph.viestinvalitys</groupId>
+            <groupId>opiskelijavalinnat-utils.viestinvalitys</groupId>
             <artifactId>lahetysrajapinta</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -82,7 +82,7 @@
                             <useBaseVersion>true</useBaseVersion>
                             <artifactSet>
                                 <includes>
-                                    <include>fi.oph.viestinvalitys:*</include>
+                                    <include>opiskelijavalinnat-utils.viestinvalitys:*</include>
                                     <include>org.scala-lang:*</include>
                                     <include>com.fasterxml.jackson.module:jackson-module-scala_3</include>
                                 </includes>

@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>fi.oph.viestinvalitys</groupId>
+        <groupId>opiskelijavalinnat-utils.viestinvalitys</groupId>
         <artifactId>viestinvalityspalvelu</artifactId>
         <version>${revision}</version>
         <relativePath>../../pom.xml</relativePath>
@@ -31,12 +31,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>fi.oph.viestinvalitys</groupId>
+            <groupId>opiskelijavalinnat-utils.viestinvalitys</groupId>
             <artifactId>lahetysrajapinta</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>fi.oph.viestinvalitys</groupId>
+            <groupId>opiskelijavalinnat-utils.viestinvalitys</groupId>
             <artifactId>shared</artifactId>
             <version>${project.version}</version>
             <exclusions>
