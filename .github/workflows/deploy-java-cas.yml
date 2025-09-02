@@ -25,11 +25,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn clean package
-        working-directory: java-utils
+        working-directory: java-cas
 
       - name: Deploy
         if: ${{ success() && format('refs/heads/{0}', github.event.repository.default_branch) == github.ref }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn deploy --batch-mode -DskipTests
-        working-directory: java-utils
+        working-directory: java-cas
