@@ -6,16 +6,12 @@
   <packaging>pom</packaging>
   <name>viestinvalityspalvelu</name>
   <modules>
-    <module>shared</module>
-    <module>integraatio</module>
     <module>lahetysrajapinta</module>
     <module>kirjasto</module>
-    <module>lambdat/vastaanotto</module>
-    <module>lambdat/migraatio</module>
   </modules>
 
   <properties>
-    <revision>1.2.1-SNAPSHOT</revision>
+    <revision>1.2.2-SNAPSHOT</revision>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <encoding>UTF-8</encoding>
@@ -137,7 +133,7 @@
       <dependency>
         <groupId>commons-validator</groupId>
         <artifactId>commons-validator</artifactId>
-        <version>1.9.0</version>
+        <version>1.10.0</version>
       </dependency>
       <dependency>
         <groupId>com.sun.mail</groupId>
