@@ -1,8 +1,7 @@
 (ns clj-ring-db-session.authentication.auth-middleware
   (:require
-    [buddy.auth :refer [authenticated?]]
     [buddy.auth.middleware :refer [wrap-authentication]]
-    [buddy.auth.accessrules :refer [wrap-access-rules success error]]
+    [buddy.auth.accessrules :refer [wrap-access-rules error]]
     [buddy.auth.backends.session :refer [session-backend]]
     [clojure.data.json :as json]
     [ring.util.request :refer [request-url]]

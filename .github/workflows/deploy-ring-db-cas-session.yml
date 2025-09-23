@@ -1,0 +1,29 @@
+name: Deploy clj-ring-db-cas-session
+
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - '**.md'
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@4.0
+        with:
+          lein: 2.9.1
+      - name: Deploy
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: clj-ring-db-cas-session
+        run: lein deploy
