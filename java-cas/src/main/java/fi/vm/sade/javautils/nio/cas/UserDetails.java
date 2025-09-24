@@ -18,22 +18,27 @@ public class UserDetails {
         this.roles = roles;
     }
 
+    /** Never null. */
     public String getUser() {
         return user;
     }
 
+    /** Never null. */
     public String getHenkiloOid() {
         return henkiloOid;
     }
 
+    /** Can be null. */
     public String getKayttajaTyyppi() {
         return kayttajaTyyppi;
     }
 
+    /** Can be null. */
     public String getIdpEntityId() {
         return idpEntityId;
     }
 
+    /** Never null, but can be empty. */
     public Set<String> getRoles() {
         return roles;
     }
