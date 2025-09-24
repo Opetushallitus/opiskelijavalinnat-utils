@@ -14,7 +14,7 @@ public interface CasClient {
 
     CompletableFuture<Response> executeAndRetryWithCleanSessionOnStatusCodes(Request request, Set<Integer> statusCodesToRetry);
 
-    CompletableFuture<String> validateServiceTicketWithVirkailijaUsername(String service, String ticket);
+    CompletableFuture<UserDetails> validateServiceTicketWithVirkailijaUserDetails(String service, String ticket);
 
     CompletableFuture<HashMap<String, String>> validateServiceTicketWithOppijaAttributes(String service, String ticket);
 
@@ -30,8 +30,8 @@ public interface CasClient {
         return executeAndRetryWithCleanSessionOnStatusCodes(request, statusCodesToRetry).get();
     }
 
-    default String validateServiceTicketWithVirkailijaUsernameBlocking(String service, String ticket) throws ExecutionException, InterruptedException {
-        return validateServiceTicketWithVirkailijaUsername(service, ticket).get();
+    default UserDetails validateServiceTicketWithVirkailijaUserDetailsBlocking(String service, String ticket) throws ExecutionException, InterruptedException {
+        return validateServiceTicketWithVirkailijaUserDetails(service, ticket).get();
     }
 
 }
