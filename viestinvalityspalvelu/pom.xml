@@ -11,7 +11,7 @@
   </modules>
 
   <properties>
-    <revision>1.2.2-SNAPSHOT</revision>
+    <revision>1.2.3-SNAPSHOT</revision>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <encoding>UTF-8</encoding>
@@ -19,7 +19,7 @@
     <spring.boot.version>3.3.11</spring.boot.version>
     <awssdk.version>2.21.17</awssdk.version>
     <jackson.version>2.18.1</jackson.version>
-    <java.cas.version>1.2.3-SNAPSHOT</java.cas.version>
+    <java.cas.version>2.0.0-SNAPSHOT</java.cas.version>
   </properties>
 
   <dependencyManagement>
@@ -30,7 +30,7 @@
         <version>10.20.1</version>
       </dependency>
       <dependency>
-        <groupId>fi.vm.sade.java-utils</groupId>
+        <groupId>opiskelijavalinnat-utils</groupId>
         <artifactId>java-cas</artifactId>
         <version>${java.cas.version}</version>
         <exclusions>
