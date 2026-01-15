@@ -109,12 +109,12 @@
     <dependency>
       <groupId>clj-http</groupId>
       <artifactId>clj-http</artifactId>
-      <version>3.12.1</version>
+      <version>3.13.1</version>
     </dependency>
     <dependency>
       <groupId>cheshire</groupId>
       <artifactId>cheshire</artifactId>
-      <version>5.10.0</version>
+      <version>5.13.0</version>
     </dependency>
     <dependency>
       <groupId>nrepl</groupId>

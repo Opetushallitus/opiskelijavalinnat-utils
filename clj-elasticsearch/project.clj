@@ -4,8 +4,8 @@
             :license {:name "EUPL"
                       :url "http://www.osor.eu/eupl/"}
             :plugins [[lein-modules "0.3.11"]]
-            :dependencies [[clj-http "3.12.1"]
-                           [cheshire "5.10.0"]]
+            :dependencies [[clj-http "3.13.1"]
+                           [cheshire "5.13.0"]]
             :repositories [["github" {:url "https://maven.pkg.github.com/Opetushallitus/packages"
                                       :username "private-token"
                                       :password :env/GITHUB_TOKEN}]

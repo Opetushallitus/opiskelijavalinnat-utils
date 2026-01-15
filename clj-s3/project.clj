@@ -4,7 +4,8 @@
             :license {:name "EUPL"
                       :url "http://www.osor.eu/eupl/"}
             :plugins [[lein-modules "0.3.11"]]
-            :dependencies [[com.amazonaws/aws-java-sdk-s3 "1.11.978"]]
+            :managed-dependencies [[com.fasterxml.jackson.core/jackson-databind "2.15.0"]]
+            :dependencies [[com.amazonaws/aws-java-sdk-s3 "1.12.797"]]
             :profiles { :test { :dependencies [[opiskelijavalinnat-utils/clj-test-utils "0.5.7-SNAPSHOT"]
                                                [base64-clj "0.1.1"]]}}
             :repositories [["github" {:url "https://maven.pkg.github.com/Opetushallitus/packages"
