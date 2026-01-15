@@ -8,6 +8,16 @@
                            [clj-time "0.15.2"]
                            [cheshire "5.10.0"]
                            [slingshot "0.12.2"]]
+            :repositories [["github" {:url "https://maven.pkg.github.com/Opetushallitus/packages"
+                                      :username "private-token"
+                                      :password :env/GITHUB_TOKEN}]
+                           ["releases" {:url           "https://artifactory.opintopolku.fi/artifactory/oph-sade-release-local"
+                                        :sign-releases false
+                                        :snapshots     false}]
+                           ["snapshots" {:url      "https://artifactory.opintopolku.fi/artifactory/oph-sade-snapshot-local"
+                                         :releases {:update :never}}]
+                           ["ext-snapshots" {:url      "https://artifactory.opintopolku.fi/artifactory/ext-snapshot-local"
+                                             :releases {:update :never}}]]
             :deploy-repositories [["snapshots" {:url           "https://maven.pkg.github.com/Opetushallitus/opiskelijavalinnat-utils"
                                                 :username      "private-token"
                                                 :password      :env/GITHUB_TOKEN
