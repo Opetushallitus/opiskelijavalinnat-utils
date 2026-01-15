@@ -11,4 +11,18 @@
                            [base64-clj "0.1.1"]
                            [org.testcontainers/testcontainers "1.17.6"]
                            [org.testcontainers/elasticsearch "1.17.6"]
-                           [robert/hooke "1.3.0"]])
+                           [robert/hooke "1.3.0"]]
+            :deploy-repositories [["snapshots" {:url           "https://maven.pkg.github.com/Opetushallitus/opiskelijavalinnat-utils"
+                                                :username      "private-token"
+                                                :password      :env/GITHUB_TOKEN
+                                                :sign-releases false
+                                                :checksum      :ignore
+                                                :releases      false
+                                                :snapshots     true}]
+                                  ["releases" {:url           "https://maven.pkg.github.com/Opetushallitus/opiskelijavalinnat-utils"
+                                               :username      "private-token"
+                                               :password      :env/GITHUB_TOKEN
+                                               :sign-releases false
+                                               :checksum      :ignore
+                                               :releases      true
+                                               :snapshots     false}]])
