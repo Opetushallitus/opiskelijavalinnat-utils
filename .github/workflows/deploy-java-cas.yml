@@ -4,8 +4,11 @@ on:
   release:
     types: [ created ]
   push:
-    paths-ignore:
-      - '**.md'
+    paths:
+      - .github/workflows/deploy-java-cas.yml
+      - pom.xml
+      - settings.xml
+      - java-cas/**
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest

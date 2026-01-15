@@ -3,8 +3,9 @@ name: Deploy clj-ring-db-cas-session
 on:
   workflow_dispatch:
   push:
-    paths-ignore:
-      - '**.md'
+    paths:
+      - .github/workflows/deploy-clj-ring-db-cas-session.yml
+      - clj-ring-db-cas-session/**
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
