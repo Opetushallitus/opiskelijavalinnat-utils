@@ -27,7 +27,9 @@ jobs:
       - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn clean package
+        run: |
+          mvn clean install -B --settings ../settings.xml
+          #mvn clean install -B --settings ../settings.xml
         working-directory: java-cas
 
       - name: Deploy

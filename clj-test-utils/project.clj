@@ -4,8 +4,8 @@
             :license {:name "EUPL"
                       :url "http://www.osor.eu/eupl/"}
             :plugins [[lein-modules "0.3.11"]]
-            :dependencies [[opiskelijavalinnat-utils/clj-s3 "0.2.5-SNAPSHOT"]
-                           [opiskelijavalinnat-utils/clj-log "0.3.1-SNAPSHOT"]
+            :dependencies [[opiskelijavalinnat-utils/clj-s3 "0.2.6-SNAPSHOT"]
+                           [opiskelijavalinnat-utils/clj-log "0.3.2-SNAPSHOT"]
                            [com.amazonaws/aws-java-sdk-s3 "1.11.978"]
                            [io.findify/s3mock_2.12 "0.2.6"]
                            [base64-clj "0.1.1"]
@@ -22,14 +22,14 @@
                                          :releases {:update :never}}]
                            ["ext-snapshots" {:url      "https://artifactory.opintopolku.fi/artifactory/ext-snapshot-local"
                                              :releases {:update :never}}]]
-            :deploy-repositories [["snapshots" {:url           "https://maven.pkg.github.com/Opetushallitus/packages"
+            :deploy-repositories [["snapshots" {:url           "https://maven.pkg.github.com/Opetushallitus/opiskelijavalinnat-utils"
                                                 :username      "private-token"
                                                 :password      :env/GITHUB_TOKEN
                                                 :sign-releases false
                                                 :checksum      :ignore
                                                 :releases      false
                                                 :snapshots     true}]
-                                  ["releases" {:url           "https://maven.pkg.github.com/Opetushallitus/packages"
+                                  ["releases" {:url           "https://maven.pkg.github.com/Opetushallitus/opiskelijavalinnat-utils"
                                                :username      "private-token"
                                                :password      :env/GITHUB_TOKEN
                                                :sign-releases false

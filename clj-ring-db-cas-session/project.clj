@@ -30,14 +30,14 @@
                  ["ext-snapshots" {:url      "https://artifactory.opintopolku.fi/artifactory/ext-snapshot-local"
                                    :releases {:update :never}}]]
 
-  :deploy-repositories [["snapshots" {:url           "https://maven.pkg.github.com/Opetushallitus/packages"
+  :deploy-repositories [["snapshots" {:url           "https://maven.pkg.github.com/Opetushallitus/opiskelijavalinnat-utils"
                                       :username      "private-token"
                                       :password      :env/GITHUB_TOKEN
                                       :sign-releases false
                                       :checksum      :ignore
                                       :releases      false
                                       :snapshots     true}]
-                        ["releases" {:url           "https://maven.pkg.github.com/Opetushallitus/packages"
+                        ["releases" {:url           "https://maven.pkg.github.com/Opetushallitus/opiskelijavalinnat-utils"
                                       :username      "private-token"
                                       :password      :env/GITHUB_TOKEN
                                       :sign-releases false
