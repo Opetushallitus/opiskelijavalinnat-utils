@@ -9,8 +9,9 @@
                            [com.amazonaws/aws-java-sdk-s3 "1.11.978"]
                            [io.findify/s3mock_2.12 "0.2.6"]
                            [base64-clj "0.1.1"]
-                           [org.testcontainers/testcontainers "2.0.1"]
-                           [org.testcontainers/testcontainers-elasticsearch "2.0.1"]
+                           [org.testcontainers/testcontainers "2.0.3"]
+                           [org.testcontainers/testcontainers-elasticsearch "2.0.3"]
+                           [pl.allegro.tech/embedded-elasticsearch "2.10.0"]
                            [robert/hooke "1.3.0"]]
             :repositories [["github" {:url "https://maven.pkg.github.com/Opetushallitus/packages"
                                       :username "private-token"
