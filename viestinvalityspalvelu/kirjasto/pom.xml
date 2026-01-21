@@ -85,6 +85,11 @@
                                     <include>opiskelijavalinnat-utils.viestinvalitys:*</include>
                                     <include>org.scala-lang:*</include>
                                     <include>com.fasterxml.jackson.module:jackson-module-scala_3</include>
+                                    <include>com.fasterxml.jackson.core:jackson-databind</include>
+                                    <include>com.fasterxml.jackson.core:jackson-core</include>
+                                    <include>com.fasterxml.jackson.core:jackson-annotations</include>
+                                    <include>com.fasterxml.jackson.datatype:jackson-datatype-jdk8</include>
+                                    <include>com.thoughtworks.paranamer:paranamer</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
@@ -96,6 +101,11 @@
                                 <relocation>
                                     <pattern>com.fasterxml.jackson.module.scala</pattern>
                                     <shadedPattern>viestinvalitys.com.fasterxml.jackson.module.scala</shadedPattern>
+                                </relocation>
+                                <!-- Lisätään muutkin Jackson-riippuvuudet, ettei palveluiden Jackson-versiot aiheuta konfliktia Scala Modulen kanssa. -->
+                                <relocation>
+                                    <pattern>com.fasterxml.jackson</pattern>
+                                    <shadedPattern>viestinvalitys.com.fasterxml.jackson</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

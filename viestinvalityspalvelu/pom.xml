@@ -11,14 +11,14 @@
   </modules>
 
   <properties>
-    <revision>1.2.3-SNAPSHOT</revision>
+    <revision>1.2.5-SNAPSHOT</revision>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <encoding>UTF-8</encoding>
     <scala.version>3.3.3</scala.version>
     <spring.boot.version>3.3.11</spring.boot.version>
     <awssdk.version>2.21.17</awssdk.version>
-    <jackson.version>2.18.1</jackson.version>
+    <jackson.version>2.20.1</jackson.version>
     <java.cas.version>2.0.0-SNAPSHOT</java.cas.version>
   </properties>
 
@@ -251,6 +251,7 @@
         <artifactId>jackson-module-scala_3</artifactId>
         <version>${jackson.version}</version>
       </dependency>
+      <!-- Shadetetun Scala-modulen dependency dependency ei asennu kirjaston mukana ilman suoraa dependencyä. -->
       <dependency>
         <groupId>com.sun.activation</groupId>
         <artifactId>jakarta.activation</artifactId>
