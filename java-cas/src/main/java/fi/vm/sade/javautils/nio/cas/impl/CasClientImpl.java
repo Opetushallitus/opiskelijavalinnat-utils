@@ -56,6 +56,9 @@ public class CasClientImpl implements CasClient {
                         this.casSessionFetcher.clearTgtStore();
                         this.casSessionFetcher.clearSessionStore();
                         return executeWithSession(request, false);
+                    } else if (t != null) {
+                        LOGGER.error("Failed to fetch a session token", t);
+                        throw new RuntimeException("Failed to fetch a session token", t);
                     }
                     this.asyncHttpClient.getConfig().getCookieStore().clear();
                     Request requestWithSession =
