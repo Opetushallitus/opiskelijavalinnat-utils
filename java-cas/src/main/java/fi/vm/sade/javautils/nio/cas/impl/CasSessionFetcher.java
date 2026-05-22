@@ -16,6 +16,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import static java.util.concurrent.CompletableFuture.*;
 
@@ -61,8 +62,7 @@ public class CasSessionFetcher {
           try {
             String location = tgtResponse.getHeader("Location");
             String path = new URI(location).getPath();
-            String tgt = path.substring(path.lastIndexOf('/') + 1);
-            return tgt;
+            return path.substring(path.lastIndexOf('/') + 1);
           } catch (URISyntaxException e) {
             throw new TicketGrantingTicketException(
                 String.format("Could not parse CasTicketGrantingTicket from CAS tgt response. URL = %s, location = %s, body = %s",
@@ -75,7 +75,7 @@ public class CasSessionFetcher {
           }
     }
 
-    private String fetchTicketGrantingTicketForReal() {
+    private CompletableFuture<String> fetchTicketGrantingTicketForReal() {
         LOGGER.info(String.format("Fetching CAS ticket granting ticket (service = %s, session name = %s)", config.getSessionUrl(), config.getjSessionName()));
         Request tgtRequest = utils.withCallerIdAndCsrfHeader()
                 .setUrl(String.format("%s/v1/tickets", config.getCasUrl()))
@@ -84,21 +84,26 @@ public class CasSessionFetcher {
                 .addFormParam("password", config.getPassword())
                 .build();
         this.asyncHttpClient.getConfig().getCookieStore().clear();
-        Response response;
-        try {
-          response = this.asyncHttpClient.executeRequest(tgtRequest).get();
-        } catch(Exception e) {
-          throw new TicketGrantingTicketException("Unable to retrieve TGT", e);
-        }
-        return this.tgtFromResponse(response);
+        return this.asyncHttpClient.executeRequest(tgtRequest).toCompletableFuture()
+                .thenApply(this::tgtFromResponse)
+                .handle((value, throwable) -> {
+                    if (throwable == null) {
+                        return CompletableFuture.completedFuture(value);
+                    }
+                    Throwable cause = unwrap(throwable);
+                    if (cause instanceof TicketGrantingTicketException) {
+                        return CompletableFuture.<String>failedFuture(cause);
+                    }
+                    return CompletableFuture.<String>failedFuture(new TicketGrantingTicketException("Unable to retrieve TGT", cause));
+                })
+                .thenCompose(f -> f);
     }
 
     private CompletableFuture<String> fetchTicketGrantingTicket() {
         try {
-            String tgt = this.tgtSupplier.get();
-            return CompletableFuture.completedFuture(tgt);
-        } catch (Exception e) {
-            return failedFuture(e);
+            return this.tgtSupplier.get();
+        } catch (Throwable t) {
+            return failedFuture(t);
         }
     }
 
@@ -142,31 +147,19 @@ public class CasSessionFetcher {
         return failedFuture(new MissingSessionCookieException(config.getjSessionName(), response));
     }
 
-    private static class WrappedException extends RuntimeException {
-        public WrappedException(Exception cause) {
-            super(cause);
-        }
-    }
-
-    private String fetchSessionForReal() throws WrappedException {
+    private CompletableFuture<String> fetchSessionForReal() {
         LOGGER.info(String.format("Fetching CAS session (service = %s, session name = %s)", config.getSessionUrl(), config.getjSessionName()));
-        try {
-            return this.fetchTicketGrantingTicket()
-                .thenCompose(this::fetchServiceTicketWithTgt)
-                .thenCompose(this::sessionFromSTResponse)
-                .thenCompose(this::responseAsToken)
-                .get();
-        } catch (Exception e) {
-            throw new WrappedException(e);
-        }
+        return this.fetchTicketGrantingTicket()
+            .thenCompose(this::fetchServiceTicketWithTgt)
+            .thenCompose(this::sessionFromSTResponse)
+            .thenCompose(this::responseAsToken);
     }
 
     public CompletableFuture<String> fetchSessionToken() {
         try {
-            String sessionToken = sessionTicketSupplier.get();
-            return CompletableFuture.completedFuture(sessionToken);
-        } catch (WrappedException e) {
-            return failedFuture(e.getCause());
+            return sessionTicketSupplier.get();
+        } catch (Throwable t) {
+            return failedFuture(t);
         }
     }
 
@@ -177,5 +170,12 @@ public class CasSessionFetcher {
     public void clearTgtStore() {
         this.tgtSupplier.clear();
         this.asyncHttpClient.getConfig().getCookieStore().clear();
+    }
+
+    static Throwable unwrap(Throwable t) {
+        while (t instanceof CompletionException && t.getCause() != null && t.getCause() != t) {
+            t = t.getCause();
+        }
+        return t;
     }
 }
