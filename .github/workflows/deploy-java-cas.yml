@@ -1,4 +1,11 @@
 name: Deploy java-cas
+
+# Empty in main. Set to a ticket id (e.g. "OY-1234") on a dev branch
+# to deploy under version <base-version>-<TICKET>-SNAPSHOT.
+# MUST be empty before merging to main.
+env:
+  DEV_BRANCH_DEPLOY: ''
+
 on:
   workflow_dispatch:
   release:
@@ -16,6 +23,12 @@ jobs:
       contents: read
       packages: write
     steps:
+      - name: Refuse dev-only configuration on main
+        if: env.DEV_BRANCH_DEPLOY != '' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        run: |
+          echo "::error::DEV_BRANCH_DEPLOY is set to '${DEV_BRANCH_DEPLOY}' on main. Clear it before merging."
+          exit 1
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-java@v4
@@ -24,16 +37,23 @@ jobs:
           distribution: 'corretto'
           cache: 'maven'
 
+      - name: Rewrite artifact version with ticket id
+        if: env.DEV_BRANCH_DEPLOY != ''
+        run: |
+          CURRENT=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+          NEW="${CURRENT%-SNAPSHOT}-${DEV_BRANCH_DEPLOY}-SNAPSHOT"
+          echo "Rewriting artefact version: $CURRENT -> $NEW"
+          mvn -B versions:set -DnewVersion="$NEW" -DgenerateBackupPoms=false
+        working-directory: java-cas
+
       - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mvn clean install -B --settings ../settings.xml
-          #mvn clean install -B --settings ../settings.xml
+        run: mvn clean install -B --settings ../settings.xml
         working-directory: java-cas
 
       - name: Deploy
-        if: ${{ success() && format('refs/heads/{0}', github.event.repository.default_branch) == github.ref }}
+        if: env.DEV_BRANCH_DEPLOY != '' || (success() && format('refs/heads/{0}', github.event.repository.default_branch) == github.ref)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn deploy --batch-mode -DskipTests
