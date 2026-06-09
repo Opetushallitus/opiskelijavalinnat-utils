@@ -23,9 +23,11 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.concurrent.ExecutionException;
 
 public class CasClientImpl implements CasClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(CasClientImpl.class);
@@ -47,15 +49,16 @@ public class CasClientImpl implements CasClient {
         return this.casSessionFetcher.fetchSessionToken()
                 .handle(Either<String>::new)
                 .thenCompose(session -> {
-                    final Throwable t = session.throwable;
+                    final Throwable cause = unwrap(session.throwable);
                     if (retrySessionFetch
-                            && t instanceof ExecutionException
-                            && t.getCause() != null
-                            && (t.getCause() instanceof ServiceTicketException || t.getCause() instanceof TicketGrantingTicketException)) {
+                            && (cause instanceof ServiceTicketException || cause instanceof TicketGrantingTicketException)) {
                         LOGGER.warn("Clearing stores and retrying executeWithSession, retrySessionFetch {}", retrySessionFetch, session.throwable);
                         this.casSessionFetcher.clearTgtStore();
                         this.casSessionFetcher.clearSessionStore();
                         return executeWithSession(request, false);
+                    }
+                    if (cause != null) {
+                        return CompletableFuture.failedFuture(cause);
                     }
                     this.asyncHttpClient.getConfig().getCookieStore().clear();
                     Request requestWithSession =
@@ -64,6 +67,14 @@ public class CasClientImpl implements CasClient {
                                     .build();
                     return this.asyncHttpClient.executeRequest(requestWithSession).toCompletableFuture();
                 });
+    }
+
+    private static Throwable unwrap(Throwable t) {
+        while ((t instanceof CompletionException || t instanceof ExecutionException)
+                && t.getCause() != null && t.getCause() != t) {
+            t = t.getCause();
+        }
+        return t;
     }
 
     private CompletableFuture<Response> retryConditionally(Request request, Response response, int numberOfRetries, Set<Integer> statusCodesToRetry) {
@@ -109,12 +120,20 @@ public class CasClientImpl implements CasClient {
 
     @Override
     public CompletableFuture<Response> execute(Request request) {
-        return executeWithRetries(request, config.getNumberOfRetries(), Set.of(401));
+        return withRequestTimeout(executeWithRetries(request, config.getNumberOfRetries(), Set.of(401)));
     }
 
     @Override
     public CompletableFuture<Response> executeAndRetryWithCleanSessionOnStatusCodes(Request request, Set<Integer> statusCodesToRetry) {
-        return executeWithRetries(request, config.getNumberOfRetries(), statusCodesToRetry);
+        return withRequestTimeout(executeWithRetries(request, config.getNumberOfRetries(), statusCodesToRetry));
+    }
+
+    private <T> CompletableFuture<T> withRequestTimeout(CompletableFuture<T> future) {
+        Long timeoutMs = config.getRequestTimeoutMs();
+        if (timeoutMs == null) {
+            return future;
+        }
+        return future.orTimeout(timeoutMs, TimeUnit.MILLISECONDS);
     }
 
     private UserDetails getUserDetailsFromResponse(Response response) {
@@ -175,13 +194,14 @@ public class CasClientImpl implements CasClient {
 
     @Override
     public CompletableFuture<UserDetails> validateServiceTicketWithVirkailijaUserDetails(String service, String ticket) {
-        return fetchValidationResponse(service, ticket).toCompletableFuture()
-                .thenApply(this::getUserDetailsFromResponse);
+        return withRequestTimeout(fetchValidationResponse(service, ticket)
+                .thenApply(this::getUserDetailsFromResponse));
     }
 
     @Override
     public CompletableFuture<HashMap<String, String>> validateServiceTicketWithOppijaAttributes(String service, String ticket) {
-        return fetchValidationResponse(service, ticket).toCompletableFuture().thenApply(this::getOppijaAttributesFromResponse);
+        return withRequestTimeout(fetchValidationResponse(service, ticket)
+                .thenApply(this::getOppijaAttributesFromResponse));
     }
 
 }

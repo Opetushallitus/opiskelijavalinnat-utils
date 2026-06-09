@@ -83,3 +83,9 @@ Building and testing
 
 To run the tests: `mvn test`
 To build: `mvn package`
+
+Installing artefacts for development branches
+--------------------
+
+To have a version installed to Github Packages for testing purposes, set DEV_BRANCH_DEPLOY environment variable in deploy-java-cas.yml to ticket number. This will a) install a version name <version>-<ticket-number>-SNAPSHOT
+and b) prevent install in case this change gets accidentally merged to master.

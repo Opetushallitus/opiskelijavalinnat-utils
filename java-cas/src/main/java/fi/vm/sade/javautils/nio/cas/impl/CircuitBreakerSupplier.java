@@ -3,18 +3,21 @@ package fi.vm.sade.javautils.nio.cas.impl;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
 
-public class CircuitBreakerSupplier<T> implements Supplier<T> {
+public class CircuitBreakerSupplier<T> implements Supplier<CompletableFuture<T>> {
 
-  Supplier<T> supplier;
+  private final Supplier<CompletionStage<T>> decorated;
 
-  public CircuitBreakerSupplier(String name, CircuitBreakerConfig circuitBreakerConfig, Supplier<T> supplier) {
-    this.supplier = CircuitBreaker.decorateSupplier(CircuitBreaker.of(name, circuitBreakerConfig), supplier);
+  public CircuitBreakerSupplier(String name, CircuitBreakerConfig circuitBreakerConfig, Supplier<CompletableFuture<T>> supplier) {
+    CircuitBreaker breaker = CircuitBreaker.of(name, circuitBreakerConfig);
+    this.decorated = CircuitBreaker.decorateCompletionStage(breaker, supplier::get);
   }
 
   @Override
-  public T get() {
-    return this.supplier.get();
+  public CompletableFuture<T> get() {
+    return decorated.get().toCompletableFuture();
   }
 }

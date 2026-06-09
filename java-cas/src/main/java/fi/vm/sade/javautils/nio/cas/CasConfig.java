@@ -17,6 +17,7 @@ public class CasConfig {
   private long sessionTicketValidMs;
   private long ticketGrantingTicketValidMs;
   private int numberOfRetries;
+  private Long requestTimeoutMs;
 
   private CasConfig() {
   }
@@ -35,6 +36,7 @@ public class CasConfig {
     private Optional<Long> sessionTicketValidMs = Optional.empty();
     private Optional<Long> ticketGrantingTicketValidMs = Optional.empty();
     private Optional<Integer> numberOfRetries = Optional.empty();
+    private Optional<Long> requestTimeoutMs = Optional.empty();
 
     public CasConfigBuilder(String username, String password, String casUrl, String serviceUrl, String csrf, String callerId, String serviceUrlSuffix) {
       this.username = username;
@@ -66,6 +68,10 @@ public class CasConfig {
       this.ticketGrantingTicketValidMs = Optional.of(unit.toMillis(duration));
       return this;
     }
+    public CasConfigBuilder requestTimeout(TimeUnit unit, long duration) {
+      this.requestTimeoutMs = Optional.of(unit.toMillis(duration));
+      return this;
+    }
     public CasConfigBuilder setJsessionName(String jSessionName) {
       this.jSessionName = jSessionName;
       return this;
@@ -87,6 +93,7 @@ public class CasConfig {
       casConfig.ticketGrantingTicketValidMs = this.ticketGrantingTicketValidMs.orElseGet(() -> TimeUnit.HOURS.toMillis(7));
       casConfig.sessionTicketValidMs = this.sessionTicketValidMs.orElseGet(() -> TimeUnit.MINUTES.toMillis(15));
       casConfig.numberOfRetries = this.numberOfRetries.orElse(1);
+      casConfig.requestTimeoutMs = this.requestTimeoutMs.orElse(null);
       return casConfig;
     }
   }
@@ -151,5 +158,9 @@ public class CasConfig {
 
   public int getNumberOfRetries() {
     return numberOfRetries;
+  }
+
+  public Long getRequestTimeoutMs() {
+    return requestTimeoutMs;
   }
 }

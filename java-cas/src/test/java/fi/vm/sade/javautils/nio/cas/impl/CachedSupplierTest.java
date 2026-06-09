@@ -5,34 +5,36 @@ import org.junit.Test;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
 public class CachedSupplierTest {
 
   @Test
-  public void testGet() {
-    Supplier<String> s = new CachedSupplier<>(10000, () -> "test");
-    Assert.assertEquals("test", s.get());
+  public void testGet() throws Exception {
+    CachedSupplier<String> s = new CachedSupplier<>(10000, () -> CompletableFuture.completedFuture("test"));
+    Assert.assertEquals("test", s.get().get());
   }
 
   @Test
-  public void testCachedWithinTTL() {
-    Supplier<String> s = new CachedSupplier<>(10000, new Supplier<>() {
+  public void testCachedWithinTTL() throws Exception {
+    CachedSupplier<String> s = new CachedSupplier<>(10000, new Supplier<>() {
       boolean called = false;
 
       @Override
-      public String get() {
+      public CompletableFuture<String> get() {
         if(called) throw new RuntimeException();
         called = true;
-        return "test";
+        return CompletableFuture.completedFuture("test");
       }
     });
-    Assert.assertEquals("test", s.get());
+    Assert.assertEquals("test", s.get().get());
+    Assert.assertEquals("test", s.get().get());
   }
 
   @Test
   public void testRefreshWhenExpired() throws Exception {
-    Supplier<String> s = new CachedSupplier<>(100, new Supplier<>() {
+    CachedSupplier<String> s = new CachedSupplier<>(100, new Supplier<>() {
       Queue<String> queue = new LinkedList<>();
       {
         queue.add("test");
@@ -40,32 +42,48 @@ public class CachedSupplierTest {
       }
 
       @Override
-      public String get() {
-        return queue.remove();
+      public CompletableFuture<String> get() {
+        return CompletableFuture.completedFuture(queue.remove());
       }
     });
-    Assert.assertEquals("test", s.get());
+    Assert.assertEquals("test", s.get().get());
     Thread.sleep(150);
-    Assert.assertEquals("test2", s.get());
+    Assert.assertEquals("test2", s.get().get());
   }
 
   @Test
-  public void testExceptionPropagated() throws Exception {
-    Supplier<String> s = new CachedSupplier<>(100, () -> {
-      throw new RuntimeException("test");
+  public void testExceptionPropagated() {
+    CachedSupplier<String> s = new CachedSupplier<>(100, () -> CompletableFuture.failedFuture(new RuntimeException("test")));
+
+    try {
+      s.get().get();
+      Assert.fail();
+    } catch (ExecutionException e) {
+      Assert.assertEquals("test", e.getCause().getMessage());
+    } catch (InterruptedException e) {
+      Assert.fail();
+    }
+  }
+
+  @Test
+  public void testSynchronousExceptionWrappedAsFailedFuture() {
+    CachedSupplier<String> s = new CachedSupplier<>(100, () -> {
+      throw new RuntimeException("sync");
     });
 
     try {
-      s.get();
+      s.get().get();
       Assert.fail();
-    } catch (RuntimeException e) {
-      Assert.assertEquals("test", e.getMessage());
+    } catch (ExecutionException e) {
+      Assert.assertEquals("sync", e.getCause().getMessage());
+    } catch (InterruptedException e) {
+      Assert.fail();
     }
   }
 
   @Test
   public void testExceptionNotCached() {
-    Supplier<String> s = new CachedSupplier<>(100000, new Supplier<>() {
+    CachedSupplier<String> s = new CachedSupplier<>(100000, new Supplier<>() {
       Queue<String> queue = new LinkedList<>();
       {
         queue.add("test");
@@ -73,22 +91,26 @@ public class CachedSupplierTest {
       }
 
       @Override
-      public String get() {
-        throw new RuntimeException(queue.remove());
+      public CompletableFuture<String> get() {
+        return CompletableFuture.failedFuture(new RuntimeException(queue.remove()));
       }
     });
 
     try {
-      s.get();
+      s.get().get();
       Assert.fail();
-    } catch (RuntimeException e) {
-      Assert.assertEquals("test", e.getMessage());
+    } catch (ExecutionException e) {
+      Assert.assertEquals("test", e.getCause().getMessage());
+    } catch (InterruptedException e) {
+      Assert.fail();
     }
     try {
-      s.get();
+      s.get().get();
       Assert.fail();
-    } catch (RuntimeException e) {
-      Assert.assertEquals("test2", e.getMessage());
+    } catch (ExecutionException e) {
+      Assert.assertEquals("test2", e.getCause().getMessage());
+    } catch (InterruptedException e) {
+      Assert.fail();
     }
   }
 
@@ -98,12 +120,12 @@ public class CachedSupplierTest {
     final int INVOCATIONS_PER_THREAD = 100;
 
     // supplier contains a non atomic counter
-    Supplier<String> s = new CachedSupplier<>(100000, new Supplier<>() {
+    CachedSupplier<String> s = new CachedSupplier<>(100000, new Supplier<>() {
       int counter = 0;
 
       @Override
-      public String get() {
-        throw new RuntimeException(counter++ + "");
+      public CompletableFuture<String> get() {
+        return CompletableFuture.failedFuture(new RuntimeException(counter++ + ""));
       }
     });
 
@@ -115,7 +137,7 @@ public class CachedSupplierTest {
       new Thread(() -> {
         for(int j = 0; j < INVOCATIONS_PER_THREAD; j++) {
           try {
-            s.get();
+            s.get().get();
           } catch (Exception e) {}
         }
         f.complete(null);
@@ -125,10 +147,33 @@ public class CachedSupplierTest {
     // increments match total number of invocations
     CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
     try {
-      s.get();
+      s.get().get();
       Assert.fail();
-    } catch (RuntimeException e) {
-      Assert.assertEquals(NUMBER_OF_THREADS*INVOCATIONS_PER_THREAD + "", e.getMessage());
+    } catch (ExecutionException e) {
+      Assert.assertEquals(NUMBER_OF_THREADS*INVOCATIONS_PER_THREAD + "", e.getCause().getMessage());
+    } catch (InterruptedException e) {
+      Assert.fail();
     }
+  }
+
+  @Test
+  public void testInFlightSharedAcrossCallers() throws Exception {
+    final CompletableFuture<String> gate = new CompletableFuture<>();
+    final int[] callCount = {0};
+    CachedSupplier<String> s = new CachedSupplier<>(100000, () -> {
+      callCount[0]++;
+      return gate;
+    });
+
+    // First call installs the in-flight future
+    CompletableFuture<String> f1 = s.get();
+    // Concurrent call should share the same in-flight future, not start a second fetch
+    CompletableFuture<String> f2 = s.get();
+    Assert.assertSame(f1, f2);
+    Assert.assertEquals(1, callCount[0]);
+
+    gate.complete("done");
+    Assert.assertEquals("done", f1.get());
+    Assert.assertEquals("done", f2.get());
   }
 }

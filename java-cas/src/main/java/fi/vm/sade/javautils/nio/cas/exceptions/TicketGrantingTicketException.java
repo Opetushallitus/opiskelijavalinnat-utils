@@ -6,7 +6,7 @@ public class TicketGrantingTicketException extends RuntimeException {
         super(msg);
     }
 
-    public TicketGrantingTicketException(String msg, Exception e) {
+    public TicketGrantingTicketException(String msg, Throwable e) {
         super(msg, e);
     }
 }
