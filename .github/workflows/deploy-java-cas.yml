@@ -4,7 +4,7 @@ name: Deploy java-cas
 # to deploy under version <base-version>-<TICKET>-SNAPSHOT.
 # MUST be empty before merging to main.
 env:
-  DEV_BRANCH_DEPLOY: ''
+  DEV_BRANCH_DEPLOY: 'OY-5722'
 
 on:
   workflow_dispatch:
