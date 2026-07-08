@@ -31,7 +31,6 @@ public class CasClientBuilder {
 
         return buildFromConfigAndHttpClient(config, asyncHttpClient(new DefaultAsyncHttpClientConfig.Builder()
                 .setThreadFactory(factory)
-                .setHttp2Enabled(false)
                 .build()));
     }
 
