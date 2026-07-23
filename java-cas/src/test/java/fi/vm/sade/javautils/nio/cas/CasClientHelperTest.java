@@ -3,18 +3,12 @@ package fi.vm.sade.javautils.nio.cas;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.asynchttpclient.Request;
-import org.asynchttpclient.RequestBuilder;
 import org.asynchttpclient.Response;
-import org.hamcrest.core.IsInstanceOf;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -120,4 +114,3 @@ public class CasClientHelperTest {
         }
     }
 }
-
