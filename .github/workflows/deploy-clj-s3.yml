@@ -17,9 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     #if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
       - name: Install clojure tools
-        uses: DeLaGuardo/setup-clojure@4.0
+        uses: DeLaGuardo/setup-clojure@a434c7d415d341c4eff62261c7922f0f4d554266 # 4.0
         with:
           lein: 2.9.1
       - name: Deploy
