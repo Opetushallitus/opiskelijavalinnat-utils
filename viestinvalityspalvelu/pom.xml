@@ -19,7 +19,7 @@
     <spring.boot.version>3.3.11</spring.boot.version>
     <awssdk.version>2.21.17</awssdk.version>
     <jackson.version>2.21.4</jackson.version>
-    <java.cas.version>2.3.0-SNAPSHOT</java.cas.version>
+    <java.cas.version>2.3.0-OY-5723-SNAPSHOT</java.cas.version>
   </properties>
 
   <dependencyManagement>
