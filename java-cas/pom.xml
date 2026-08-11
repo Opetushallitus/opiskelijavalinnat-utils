@@ -12,7 +12,11 @@
     <packaging>jar</packaging>
 
     <properties>
-        <netty.version>4.2.16.Final</netty.version>
+        <!-- Pidä sama versio, jonka async-http-client itse tuo. java-cas ei voi pinnata nettyä consumereille
+          (dependencyManagement ei periydy riippuvuuden käyttäjille), joten jos tämä johtaa AHC:ta, consumer saa
+          netty-codec-http:n java-cas:lta ja loput netty-perheestä AHC:lta eri versiona. -->
+        <netty.version>4.2.17.Final</netty.version>
+        <slf4j.version>2.0.18</slf4j.version>
         <java.release.version>11</java.release.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
@@ -32,25 +36,26 @@
         <dependency>
             <groupId>org.asynchttpclient</groupId>
             <artifactId>async-http-client</artifactId>
-            <version>3.0.11</version>
+            <version>3.0.12</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-codec-http</artifactId>
-            <version>${netty.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.github.resilience4j</groupId>
             <artifactId>resilience4j-circuitbreaker</artifactId>
             <version>2.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
@@ -83,6 +88,7 @@
                                     <version>1.8</version>
                                 </requireJavaVersion>
                                 <dependencyConvergence/>
+                                <requireUpperBoundDeps/>
                             </rules>
                         </configuration>
                     </execution>
@@ -124,66 +130,26 @@
     <dependencyManagement>
         <dependencies>
 
+            <!-- netty-bom pitää koko io.netty-perheen yhdessä versiossa myös java-cas:n omassa buildissa. -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>${netty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <!-- Suorat riippuvuudet -->
 
             <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-codec-http</artifactId>
-                <version>${netty.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.36</version>
+                <version>${slf4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
-                <version>1.7.36</version>
-            </dependency>
-
-            <!-- Versioristiitojen korjaukset -->
-            <dependency>
-                <!-- org.asynchttpclient:async-http-client:jar:3.0.11:compile vs ${netty.version} -->
-                <groupId>io.netty</groupId>
-                <artifactId>netty-handler</artifactId>
-                <version>${netty.version}</version>
-            </dependency>
-            <dependency>
-                <!-- org.asynchttpclient:async-http-client:jar:3.0.11:compile vs ${netty.version} -->
-                <groupId>io.netty</groupId>
-                <artifactId>netty-transport</artifactId>
-                <version>${netty.version}</version>
-            </dependency>
-            <dependency>
-                <!-- org.asynchttpclient:async-http-client:jar:3.0.11:compile vs ${netty.version} -->
-                <groupId>io.netty</groupId>
-                <artifactId>netty-common</artifactId>
-                <version>${netty.version}</version>
-            </dependency>
-            <dependency>
-                <!-- org.asynchttpclient:async-http-client:jar:3.0.11:compile vs ${netty.version} -->
-                <groupId>io.netty</groupId>
-                <artifactId>netty-codec-compression</artifactId>
-                <version>${netty.version}</version>
-            </dependency>
-            <dependency>
-                <!-- org.asynchttpclient:async-http-client:jar:3.0.11:compile vs ${netty.version} -->
-                <groupId>io.netty</groupId>
-                <artifactId>netty-codec-base</artifactId>
-                <version>${netty.version}</version>
-            </dependency>
-            <dependency>
-                <!-- org.asynchttpclient:async-http-client:jar:3.0.11:compile vs ${netty.version} -->
-                <groupId>io.netty</groupId>
-                <artifactId>netty-buffer</artifactId>
-                <version>${netty.version}</version>
-            </dependency>
-            <dependency>
-                <!-- org.asynchttpclient:async-http-client:jar:3.0.11:compile vs ${netty.version} -->
-                <groupId>io.netty</groupId>
-                <artifactId>netty-resolver-dns</artifactId>
-                <version>${netty.version}</version>
+                <version>${slf4j.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
