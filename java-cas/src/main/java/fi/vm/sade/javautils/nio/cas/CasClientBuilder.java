@@ -4,6 +4,7 @@ import fi.vm.sade.javautils.nio.cas.impl.CasClientImpl;
 import fi.vm.sade.javautils.nio.cas.impl.CasSessionFetcher;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.AsyncHttpClientConfig;
 import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 
 import java.util.concurrent.ThreadFactory;
@@ -23,16 +24,21 @@ public class CasClientBuilder {
     }
 
     public static CasClient build(CasConfig config) {
-        ThreadFactory factory = new BasicThreadFactory.Builder()
+        return buildFromConfigAndHttpClient(config, defaultHttpClient());
+    }
+
+    private static AsyncHttpClient defaultHttpClient() {
+        ThreadFactory factory = BasicThreadFactory.builder()
                 .namingPattern("async-cas-client-thread-%d")
                 .daemon(true)
                 .priority(Thread.NORM_PRIORITY)
                 .build();
 
-        return buildFromConfigAndHttpClient(config, asyncHttpClient(new DefaultAsyncHttpClientConfig.Builder()
+        AsyncHttpClientConfig config = new DefaultAsyncHttpClientConfig.Builder()
                 .setThreadFactory(factory)
                 .setHttp2Enabled(false)
-                .build()));
-    }
+                .build();
 
+        return asyncHttpClient(config);
+    }
 }

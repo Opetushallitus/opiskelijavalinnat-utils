@@ -6,6 +6,6 @@ module fi.vm.sade.javautils.cas {
     requires java.net.http;
     requires java.xml;
     requires org.apache.commons.lang3;
-    requires slf4j.api;
+    requires org.slf4j;
     requires io.github.resilience4j.circuitbreaker;
 }
