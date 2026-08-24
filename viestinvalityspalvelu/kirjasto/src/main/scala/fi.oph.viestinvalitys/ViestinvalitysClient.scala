@@ -10,7 +10,7 @@ import fi.oph.viestinvalitys.vastaanotto.resource.{LahetysAPIConstants, LuoLahet
 import fi.vm.sade.javautils.nio.cas.impl.{CasClientImpl, CasSessionFetcher}
 import fi.vm.sade.javautils.nio.cas.{CasClient, CasClientBuilder, CasConfig}
 import org.asynchttpclient.request.body.multipart.ByteArrayPart
-import org.asynchttpclient.{AsyncHttpClient, Dsl, Request, RequestBuilder}
+import org.asynchttpclient.{AsyncHttpClient, Dsl, Request, RequestBuilder, DefaultAsyncHttpClientConfig}
 
 import java.util.concurrent.{CompletableFuture, TimeUnit}
 import java.util.{Optional, UUID}
@@ -153,7 +153,7 @@ class ViestinvalitysClientBuilderImpl(config: ViestinvalitysClientConfig) extend
       if(config.sessionId.isEmpty)
         CasClientBuilder.build(casConfig)
       else
-        new CasClientImpl(casConfig, Dsl.asyncHttpClient(), new CasSessionFetcher(null, null, TimeUnit.HOURS.toMillis(7), TimeUnit.MINUTES.toMillis(15)) {
+      new CasClientImpl(casConfig, Dsl.asyncHttpClient(new DefaultAsyncHttpClientConfig.Builder().setHttp2Enabled(false).build), new CasSessionFetcher(null, null, TimeUnit.HOURS.toMillis(7), TimeUnit.MINUTES.toMillis(15)) {
           override def clearSessionStore(): Unit = {}
           override def clearTgtStore(): Unit = {}
           override def fetchSessionToken(): CompletableFuture[String] =
