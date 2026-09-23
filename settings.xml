@@ -3,6 +3,19 @@
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
                       http://maven.apache.org/xsd/settings-1.0.0.xsd">
 
+    <!-- artifactory.opintopolku.fi on poistettu käytöstä. viestinvalityspalvelun pom ja
+         fi.vm.sade.java-utils -riippuvuuksien pom-tiedostot tuovat sen repot mukanaan, joten
+         ohjataan ne GitHub Packagesiin. Sama id kuin serverillä, jotta autentikointi periytyy
+         peilatulle liikenteelle. -->
+    <mirrors>
+        <mirror>
+            <id>github</id>
+            <name>Artifactory-repot ohjataan GitHub Packagesiin</name>
+            <url>https://maven.pkg.github.com/opetushallitus/*</url>
+            <mirrorOf>oph-sade-artifactory,oph-sade-artifactory-snapshots,oph-sade-artifactory-releases</mirrorOf>
+        </mirror>
+    </mirrors>
+
     <activeProfiles>
         <activeProfile>github</activeProfile>
     </activeProfiles>
