@@ -35,7 +35,7 @@ jobs:
       - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./mvnw --no-transfer-progress -B clean package
+        run: ./mvnw --no-transfer-progress -B clean package --settings ../settings.xml
         working-directory: viestinvalityspalvelu
 
   deploy-client-library:
